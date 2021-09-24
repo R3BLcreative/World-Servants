@@ -1,0 +1,393 @@
+{
+    "key": "group_60afd00d43fda",
+    "title": "Community Info",
+    "fields": [
+        {
+            "key": "field_60b11b6e81409",
+            "label": "Instructions",
+            "name": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "These fields control all the dynamic content of the community pages. Simply fill out the fields with all the information for the specific community, and it will be displayed accordingly.\r\n\r\nPlease complete all required fields below. You will also need to set the \"Featured Image\" option in the right hand side of this page for search engine results, and social media sharing.\r\n\r\nPlease note that there is also a \"Downloads\" tab below. This tab enables to downloadable community info sheet. You can add multiple info sheet downloads for the current year and the next trip year.",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_60b121e42f6ad",
+            "label": "Community Info Sheet",
+            "name": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_60c7844eaa219",
+            "label": "Instructions",
+            "name": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "message": "These fields control all the content for the web based community info sheet and the community info card on the \"Communities\" page.",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_60b11d5c9ec1f",
+            "label": "Hero Banner Image",
+            "name": "community_hero_img",
+            "type": "image",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "preview_size": "medium",
+            "library": "all",
+            "min_width": "",
+            "min_height": "",
+            "min_size": "",
+            "max_width": "",
+            "max_height": "",
+            "max_size": "",
+            "mime_types": ""
+        },
+        {
+            "key": "field_60c8bd00627a8",
+            "label": "Intro Image",
+            "name": "community_intro_image",
+            "type": "image",
+            "instructions": "This image is also used for the community card on the \"Communities\" page.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "preview_size": "fusion-400",
+            "library": "all",
+            "min_width": "",
+            "min_height": "",
+            "min_size": "",
+            "max_width": "",
+            "max_height": "",
+            "max_size": "",
+            "mime_types": ""
+        },
+        {
+            "key": "field_60b1221d40c5a",
+            "label": "Intro Text",
+            "name": "community_intro_text",
+            "type": "wysiwyg",
+            "instructions": "The first 3 sentences of this text is used for the teaser text displayed on the community card that is shown on the \"Communities\" page.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 1
+        },
+        {
+            "key": "field_60c7861e81160",
+            "label": "Ministry",
+            "name": "community_ministry",
+            "type": "wysiwyg",
+            "instructions": "Enter the information for what participants will be doing during their trips to this community.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 1
+        },
+        {
+            "key": "field_6117d050bacff",
+            "label": "Airtable Location ID's",
+            "name": "airtable_location_ids",
+            "type": "repeater",
+            "instructions": "This field controls what trips are shown in the \"Trips to This Community\" block. Please enter the \"LOC_ID\" field from the \"Locations\" table in AirTable for all trip locations represented in this community info sheet.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "collapsed": "field_6143cc30ca27d",
+            "min": 0,
+            "max": 0,
+            "layout": "block",
+            "button_label": "Add Location ID",
+            "sub_fields": [
+                {
+                    "key": "field_6143cc30ca27d",
+                    "label": "Location ID",
+                    "name": "location_id",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "100",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": ""
+                }
+            ]
+        },
+        {
+            "key": "field_60c7b5f699b93",
+            "label": "Location",
+            "name": "community_map",
+            "type": "google_map",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "center_lat": "40.2790196",
+            "center_lng": "-75.421658",
+            "zoom": 1,
+            "height": ""
+        },
+        {
+            "key": "field_60c7867581161",
+            "label": "Logistics",
+            "name": "community_logistics",
+            "type": "wysiwyg",
+            "instructions": "Enter the details for meals, lodging, and travel here.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 1
+        },
+        {
+            "key": "field_60c78710aa57c",
+            "label": "Image Gallery",
+            "name": "community_image_gallery",
+            "type": "gallery",
+            "instructions": "Upload some images to display as a gallery for this community.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "100",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "preview_size": "thumbnail",
+            "insert": "append",
+            "library": "all",
+            "min": "",
+            "max": "",
+            "min_width": "",
+            "min_height": "",
+            "min_size": "",
+            "max_width": "",
+            "max_height": "",
+            "max_size": "",
+            "mime_types": ""
+        },
+        {
+            "key": "field_60c7875a6dc13",
+            "label": "Safety Information",
+            "name": "community_safety_info",
+            "type": "wysiwyg",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Trip safety is extremely important to World Servants and our host community. The community we are working and staying in is considered very safe and we do not anticipate any safety issues.",
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 1
+        },
+        {
+            "key": "field_60c7ad960f581",
+            "label": "Safety Info Image",
+            "name": "community_safety_image",
+            "type": "image",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "preview_size": "fusion-400",
+            "library": "all",
+            "min_width": "",
+            "min_height": "",
+            "min_size": "",
+            "max_width": "",
+            "max_height": "",
+            "max_size": "",
+            "mime_types": ""
+        },
+        {
+            "key": "field_6143aefeee324",
+            "label": "Downloads",
+            "name": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_60c7b43fe5ad4",
+            "label": "Info Sheets",
+            "name": "info_sheets",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "100",
+                "class": "",
+                "id": ""
+            },
+            "collapsed": "field_6143ae4462a6f",
+            "min": 1,
+            "max": 0,
+            "layout": "table",
+            "button_label": "Add Download",
+            "sub_fields": [
+                {
+                    "key": "field_6143ae4462a6f",
+                    "label": "Button Label",
+                    "name": "label",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "60",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": ""
+                },
+                {
+                    "key": "field_6143ae6862a70",
+                    "label": "PDF Download",
+                    "name": "pdf_download",
+                    "type": "file",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "url",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "communities"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "acf_after_title",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [
+        "the_content",
+        "excerpt",
+        "discussion",
+        "comments",
+        "author",
+        "format",
+        "page_attributes",
+        "categories",
+        "tags",
+        "send-trackbacks"
+    ],
+    "active": true,
+    "description": "",
+    "modified": 1631888318
+}

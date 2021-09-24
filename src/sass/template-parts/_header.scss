@@ -1,0 +1,22 @@
+header {
+	@media (max-width: $phone-port) {
+		#menu-secondary-nav {
+			.menu-text {
+				display: none;
+			}
+		}
+	}
+
+	@media (max-width: $phone-land) {
+		.logo {
+			transition: width .5s;
+			width: 156px;
+			margin-bottom: 0 !important;
+		}
+
+		#menu-sticky-nav, #menu-main-nav {
+			max-height: 100vh;
+			height: 100vh;
+		}
+	}
+}

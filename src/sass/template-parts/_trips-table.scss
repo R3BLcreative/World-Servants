@@ -1,0 +1,82 @@
+.trips-table-wrapper {
+	width:  100%;
+}
+
+.trips-table {
+	width: 100%;
+
+	tbody tr:nth-child(odd){
+	  background-color: $light-grey;
+	}
+}
+
+.trip-table-th {
+	font-size: 15px;
+	background-color: $dark-grey;
+	color: white !important;
+	padding: 5px;
+	font-weight: 800;
+	text-transform: uppercase;
+	i {
+		padding-right: 15px;
+	}
+}
+
+.trip-table-td {
+	padding: 7px 15px;
+	border-bottom: $med-grey solid 1px;
+}
+
+.trip-table-group {
+	text-align: left;
+	padding-left: 15px;
+	font-weight: 800;
+}
+
+.trip-table-location {
+	text-align: left;
+	padding-left: 15px;
+	font-weight: 800;
+
+	@media only screen and (max-width: $phone-port) {
+		text-align: center;
+	}
+
+	.trip-dates {
+		font-style: italic;
+		font-weight: 400;
+		color: $navy;
+		
+		@media only screen and (min-width: calc(#{$phone-port} + 1px)) and (max-width: $tablet) {
+			display: inline-block;
+			padding-left: 15px;
+		}
+
+		@media only screen and (max-width: $phone-land) {
+			display: block;
+			padding-top: 10px;
+		}
+	}
+}
+
+.trip-table-dates,
+.trip-table-type,
+.trip-table-price,
+.trip-table-btn-wrapper {
+	text-align: center;
+}
+
+.trip-table-dates {
+	font-weight: 600;
+	color: $navy;
+}
+
+.trip-table-type {
+	font-style: italic;
+	font-size: 14px;
+}
+
+.trip-table-price {
+	color: $orange;
+	font-weight: 800;
+}

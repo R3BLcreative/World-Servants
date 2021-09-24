@@ -1,0 +1,2 @@
+!function(){var e={navToggle:document.querySelector(".avada-menu-mobile-menu-trigger"),nav:document.querySelector(".mobile-menu .fusion-menu"),doToggle:function(e){e.preventDefault(),this.navToggle.classList.toggle("expanded"),this.nav.classList.toggle("expanded")}};e.navToggle.addEventListener("click",(function(n){e.doToggle(n)})),e.nav.addEventListener("click",(function(n){e.doToggle(n)}))}();
+//# sourceMappingURL=mobile-menu-min.js.map
