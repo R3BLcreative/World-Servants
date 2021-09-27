@@ -194,4 +194,40 @@ function sc_download_buttons( $atts, $content = null ) {
 	}
 }
 add_shortcode( 'download-buttons', 'sc_download_buttons' );
+
+
+function get_trip( $atts, $content = null ) {
+	extract( shortcode_atts( array(
+		'c'			=> 100,
+	), $atts ) );
+
+	$jATAPI = new jATAPI();
+
+	$tid = $_GET['rtrip'];
+	$t = get_field( 'tripsTableName', 'option' );
+	
+	$r = '/' . $t . '/' . $tid;
+
+	$response = $jATAPI->request( $r );
+	// var_dump($response);
+
+	if ( !empty( $response->id ) ):
+		ob_start();
+
+		// SET VARS
+		$recID = $response->id;
+		
+		extract( get_object_vars( $response->fields ) );
+
+		include get_stylesheet_directory() . '/template-parts/trips/trip-content.php' ;
+
+		$output = ob_get_contents();
+		ob_end_clean();
+	else:
+		$output = '<div class="trips-none">Something went wrong! Please go back and select a trip to register for.</div>';
+	endif;
+
+	return $output;
+}
+add_shortcode( 'trip-info', 'get_trip' );
 ?>
