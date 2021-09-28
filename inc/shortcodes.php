@@ -196,6 +196,25 @@ function sc_download_buttons( $atts, $content = null ) {
 add_shortcode( 'download-buttons', 'sc_download_buttons' );
 
 
+function get_group( $id ) {
+	$jATAPI = new jATAPI();
+
+	$t = get_field( 'grpTableName', 'option' );
+	
+	$r = '/' . $t . '/' . $id;
+
+	$response = $jATAPI->request( $r );
+	// var_dump($response);
+
+	if ( !empty( $response->id ) ):
+		extract( get_object_vars( $response->fields ) );
+	else:
+		$Group_Name = '';
+	endif;
+
+	return $Group_Name;	
+}
+
 function get_trip( $atts, $content = null ) {
 	extract( shortcode_atts( array(
 		'c'			=> 100,
@@ -210,6 +229,10 @@ function get_trip( $atts, $content = null ) {
 
 	$response = $jATAPI->request( $r );
 	// var_dump($response);
+	
+	if( !empty( $_GET['rgroup'] ) ) {
+		$Group_Name = get_group( $_GET['rgroup'] );
+	}
 
 	if ( !empty( $response->id ) ):
 		ob_start();

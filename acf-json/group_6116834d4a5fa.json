@@ -65,6 +65,40 @@
                 "id": ""
             },
             "return_format": "url"
+        },
+        {
+            "key": "field_61531cacf577f",
+            "label": "",
+            "name": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "<h1>New Groups Form Info<\/h1>\r\n\r\nThese settings control the integration of the Airtable trips with the Gravity Forms new group form.",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
+            "key": "field_61531cd7f5780",
+            "label": "Group Form",
+            "name": "groupFormID",
+            "type": "forms",
+            "instructions": "",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "id",
+            "allow_null": 0,
+            "multiple": 0
         }
     ],
     "location": [
@@ -84,5 +118,5 @@
     "hide_on_screen": "",
     "active": true,
     "description": "",
-    "modified": 1629217190
+    "modified": 1632836847
 }

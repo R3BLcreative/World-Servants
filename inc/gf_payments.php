@@ -7,26 +7,26 @@ function gf_populate_trips( $form ) {
 
 	foreach ( $form['fields'] as &$field ) {
  
-        if ( $field->type != 'select' || strpos( $field->cssClass, $tripSelectField ) === false ) {
-            continue;
-        }
+		if ( $field->type != 'select' || strpos( $field->cssClass, $tripSelectField ) === false ) {
+			continue;
+		}
  
-        $trips = get_trips();
-        asort( $trips );
+		$trips = get_trips();
+		asort( $trips );
  
-        $choices = array();
+		$choices = array();
  
-        foreach ( $trips as $value => $text ) {
-            $choices[] = array( 'text' => $text, 'value' => $value );
-        }
+		foreach ( $trips as $value => $text ) {
+			$choices[] = array( 'text' => $text, 'value' => $value );
+		}
  
-        // update 'Select a Post' to whatever you'd like the instructive option to be
-        $field->placeholder = 'Select your trip';
-        $field->choices = $choices;
+		// update 'Select a Post' to whatever you'd like the instructive option to be
+		$field->placeholder = 'Select your trip';
+		$field->choices = $choices;
  
-    }
+	}
  
-    return $form;
+	return $form;
 }
 
 if( !empty( $payFormID ) ) {

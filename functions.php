@@ -3,6 +3,7 @@
 require_once( 'inc/class_airtable.php' );
 require_once( 'inc/gf_registrations.php' );
 require_once( 'inc/gf_payments.php' );
+require_once( 'inc/gf_groups.php' );
 require_once( 'inc/shortcodes.php' );
 
 /* Load Child Theme Styles */
