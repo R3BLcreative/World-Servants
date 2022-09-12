@@ -27,7 +27,7 @@ class Avada_Settings extends Fusion_Settings {
 	 */
 	public static function get_instance() {
 		if ( null === parent::$instance ) {
-			parent::$instance = new parent();
+			parent::$instance = new parent(); // phpcs:ignore Generic.WhiteSpace.ArbitraryParenthesesSpacing.FoundEmpty
 		}
 		return parent::$instance;
 	}

@@ -765,7 +765,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Quantity Box Background Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the background color of the WooCommerce quantity box.', 'Avada' ),
 						'id'              => 'qty_bg_color',
-						'default'         => '#fbfaf9',
+						'default'         => 'var(--awb-color2)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[
@@ -778,7 +778,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Quantity Box Hover Background Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the hover color of the WooCommerce quantity box.', 'Avada' ),
 						'id'              => 'qty_bg_hover_color',
-						'default'         => '#ffffff',
+						'default'         => 'var(--awb-color1)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[
@@ -791,7 +791,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Order Dropdown Background Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the background color of the WooCommerce order dropdowns.', 'Avada' ),
 						'id'              => 'woo_dropdown_bg_color',
-						'default'         => '#fbfaf9',
+						'default'         => 'var(--awb-color2)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[
@@ -808,7 +808,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Order Dropdown Text Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the color of the text and icons in the WooCommerce order dropdowns.', 'Avada' ),
 						'id'              => 'woo_dropdown_text_color',
-						'default'         => '#333333',
+						'default'         => 'var(--awb-color8)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[
@@ -821,7 +821,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Order Dropdown Border Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the border color in the WooCommerce order dropdowns.', 'Avada' ),
 						'id'              => 'woo_dropdown_border_color',
-						'default'         => '#dbdbdb',
+						'default'         => 'var(--awb-color3)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[
@@ -834,7 +834,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Cart Menu Background Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the bottom section background color of the WooCommerce cart dropdown.', 'Avada' ),
 						'id'              => 'woo_cart_bg_color',
-						'default'         => '#fafafa',
+						'default'         => 'var(--awb-color2)',
 						'type'            => 'color-alpha',
 						'class'           => 'fusion-or-gutter',
 						'required'        => [
@@ -904,7 +904,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Sale Badge Background Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the background color of the WooCommerce sale badge.', 'Avada' ),
 						'id'              => 'woo_sale_badge_bg_color',
-						'default'         => $fusion_settings->get( 'primary_color' ),
+						'default'         => 'var(--awb-color5)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[
@@ -917,7 +917,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Sale Badge Text Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the text color of the WooCommerce sale badge.', 'Avada' ),
 						'id'              => 'woo_sale_badge_text_color',
-						'default'         => '#fff',
+						'default'         => 'var(--awb-color1)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[
@@ -1165,7 +1165,7 @@ function avada_options_section_woocommerce( $sections ) {
 						'label'           => esc_html__( 'WooCommerce Out of Stock Badge Text Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the text color of the WooCommerce out of stock badge.', 'Avada' ),
 						'id'              => 'woo_outofstock_badge_text_color',
-						'default'         => '#fff',
+						'default'         => 'var(--awb-color1)',
 						'type'            => 'color-alpha',
 						'css_vars'        => [
 							[

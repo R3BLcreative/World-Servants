@@ -67,30 +67,37 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 				$link_and_title  = self::get_link_and_title();
 
 				return [
-					'hide_on_mobile'           => fusion_builder_default_visibility( 'string' ),
-					'sticky_display'           => '',
-					'class'                    => '',
-					'id'                       => '',
-					'backgroundcolor'          => strtolower( $fusion_settings->get( 'social_bg_color' ) ),
-					'description'              => isset( $post->post_content ) ? fusion_get_content_stripped_and_excerpted( 55, $post->post_content ) : '',
-					'color_type'               => $fusion_settings->get( 'sharing_social_links_color_type' ),
-					'icon_colors'              => strtolower( $fusion_settings->get( 'sharing_social_links_icon_color' ) ),
-					'box_colors'               => strtolower( $fusion_settings->get( 'sharing_social_links_box_color' ) ),
-					'icon_taglines'            => '',
-					'icon_tagline_color'       => '',
-					'icon_tagline_color_hover' => '',
-					'tagline_text_size'        => '',
-					'icon_size'                => $fusion_settings->get( 'sharing_social_links_font_size' ),
-					'icons_boxed'              => ( 1 == $fusion_settings->get( 'sharing_social_links_boxed' ) ) ? 'yes' : 'no', // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
-					'icons_boxed_radius'       => fusion_library()->sanitize->size( $fusion_settings->get( 'sharing_social_links_boxed_radius' ) ),
-					'link'                     => $link_and_title['link'],
-					'pinterest_image'          => '',
-					'pinterest_image_id'       => '',
-					'tagline'                  => '',
-					'tagline_color'            => strtolower( $fusion_settings->get( 'sharing_box_tagline_text_color' ) ),
-					'title'                    => $link_and_title['title'],
-					'tooltip_placement'        => strtolower( $fusion_settings->get( 'sharing_social_links_tooltip_placement' ) ),
-					'social_share_links'       => implode(
+					'hide_on_mobile'                   => fusion_builder_default_visibility( 'string' ),
+					'sticky_display'                   => '',
+					'class'                            => '',
+					'id'                               => '',
+					'backgroundcolor'                  => strtolower( $fusion_settings->get( 'social_bg_color' ) ),
+					'description'                      => isset( $post->post_content ) ? fusion_get_content_stripped_and_excerpted( 55, $post->post_content ) : '',
+					'color_type'                       => $fusion_settings->get( 'sharing_social_links_color_type' ),
+					'icon_colors'                      => strtolower( $fusion_settings->get( 'sharing_social_links_icon_color' ) ),
+					'box_colors'                       => strtolower( $fusion_settings->get( 'sharing_social_links_box_color' ) ),
+					'icon_taglines'                    => '',
+					'icon_tagline_color'               => '',
+					'icon_tagline_color_hover'         => '',
+					'tagline_text_size'                => '',
+					'icon_size'                        => $fusion_settings->get( 'sharing_social_links_font_size' ),
+					'icons_boxed'                      => ( 1 == $fusion_settings->get( 'sharing_social_links_boxed' ) ) ? 'yes' : 'no', // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
+					'icons_boxed_radius'               => fusion_library()->sanitize->size( $fusion_settings->get( 'sharing_social_links_boxed_radius' ) ),
+					'link'                             => $link_and_title['link'],
+					'pinterest_image'                  => '',
+					'pinterest_image_id'               => '',
+					'tagline_size'                     => '4',
+					'tagline'                          => '',
+					'fusion_font_family_tagline_font'  => '',
+					'fusion_font_variant_tagline_font' => '',
+					'tagline_font_size'                => '',
+					'tagline_letter_spacing'           => '',
+					'tagline_line_height'              => '',
+					'tagline_text_transform'           => '',
+					'tagline_color'                    => strtolower( $fusion_settings->get( 'sharing_box_tagline_text_color' ) ),
+					'title'                            => $link_and_title['title'],
+					'tooltip_placement'                => strtolower( $fusion_settings->get( 'sharing_social_links_tooltip_placement' ) ),
+					'social_share_links'               => implode(
 						',',
 						$fusion_settings->get( 'social_sharing' ) && is_array( $fusion_settings->get( 'social_sharing' ) )
 							? $fusion_settings->get( 'social_sharing' ) : [
@@ -107,40 +114,44 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 								'email',
 							]
 					),
-					'margin_top'               => '60px',
-					'margin_bottom'            => '',
-					'margin_left'              => '',
-					'margin_right'             => '',
-					'tagline_visibility'       => 'show',
-					'animation_type'           => '',
-					'animation_direction'      => 'down',
-					'animation_speed'          => '0.1',
-					'animation_offset'         => $fusion_settings->get( 'animation_offset' ),
-					'alignment'                => 'flex-end',
-					'alignment_medium'         => '',
-					'alignment_small'          => 'space-between',
-					'stacked_align'            => 'flex-start',
-					'stacked_align_medium'     => '',
-					'stacked_align_small'      => '',
-					'padding_bottom'           => '',
-					'padding_left'             => '',
-					'padding_right'            => '',
-					'padding_top'              => '',
-					'wrapper_padding_bottom'   => '',
-					'wrapper_padding_left'     => '',
-					'wrapper_padding_right'    => '',
-					'wrapper_padding_top'      => '',
-					'border_bottom'            => '',
-					'border_left'              => '',
-					'border_right'             => '',
-					'border_top'               => '',
-					'border_color'             => $fusion_settings->get( 'sep_color' ),
-					'tagline_placement'        => 'after',
-					'separator_border_color'   => $fusion_settings->get( 'sep_color' ),
-					'separator_border_sizes'   => '',
-					'layout'                   => 'floated',
-					'layout_medium'            => '',
-					'layout_small'             => '',
+					'margin_top'                       => '60px',
+					'margin_bottom'                    => '',
+					'margin_left'                      => '',
+					'margin_right'                     => '',
+					'tagline_visibility'               => 'show',
+					'animation_type'                   => '',
+					'animation_direction'              => 'down',
+					'animation_speed'                  => '0.1',
+					'animation_offset'                 => $fusion_settings->get( 'animation_offset' ),
+					'alignment'                        => 'flex-end',
+					'alignment_medium'                 => '',
+					'alignment_small'                  => 'space-between',
+					'stacked_align'                    => 'flex-start',
+					'stacked_align_medium'             => '',
+					'stacked_align_small'              => '',
+					'padding_bottom'                   => '',
+					'padding_left'                     => '',
+					'padding_right'                    => '',
+					'padding_top'                      => '',
+					'wrapper_padding_bottom'           => '',
+					'wrapper_padding_left'             => '',
+					'wrapper_padding_right'            => '',
+					'wrapper_padding_top'              => '',
+					'border_bottom'                    => '',
+					'border_left'                      => '',
+					'border_right'                     => '',
+					'border_top'                       => '',
+					'border_radius_top_left'           => '',
+					'border_radius_top_right'          => '',
+					'border_radius_bottom_right'       => '',
+					'border_radius_bottom_left'        => '',
+					'border_color'                     => $fusion_settings->get( 'sep_color' ),
+					'tagline_placement'                => 'after',
+					'separator_border_color'           => $fusion_settings->get( 'sep_color' ),
+					'separator_border_sizes'           => '',
+					'layout'                           => 'floated',
+					'layout_medium'                    => '',
+					'layout_small'                     => '',
 				];
 			}
 
@@ -325,7 +336,8 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 
 				$tagline = '';
 				if ( 'show' === $this->args['tagline_visibility'] && ! empty( $this->args['tagline'] ) ) {
-					$tagline = sprintf( '<h4 %s>%s</h4>', FusionBuilder::attributes( 'sharingbox-shortcode-tagline' ), $this->args['tagline'] );
+					$tagline_tag = $this->get_tagline_tag();
+					$tagline     = sprintf( '<' . $tagline_tag . ' %s>%s</' . $tagline_tag . '>', FusionBuilder::attributes( 'sharingbox-shortcode-tagline' ), $this->args['tagline'] );
 				}
 
 				$html = sprintf(
@@ -406,7 +418,7 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 
 				$selector = [ $this->wrapper_selector ];
 				if ( 'floated' === $this->args['layout'] ) {
-					$this->add_css_property( [ $this->wrapper_selector . ' h4' ], 'margin-bottom', '0', true );
+					$this->add_css_property( [ $this->wrapper_selector . ' .tagline' ], 'margin-bottom', '0', true );
 				} else {
 					$this->add_css_property( $selector, 'align-items', $this->args['stacked_align'], true );
 					$this->add_css_property( $selector, 'justify-content', 'space-around', true );
@@ -436,37 +448,53 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 					$this->add_css_property( $selector, 'padding-right', $this->args['wrapper_padding_right'], true );
 				}
 
-				if ( ! $this->is_default( 'border_bottom' ) ) {
-					$this->add_css_property( $selector, 'border-bottom-width', $this->args['border_bottom'], true );
-				}
-
 				if ( ! $this->is_default( 'border_top' ) ) {
-					$this->add_css_property( $selector, 'border-top-width', $this->args['border_top'], true );
-				}
-
-				if ( ! $this->is_default( 'border_left' ) ) {
-					$this->add_css_property( $selector, 'border-left-width', $this->args['border_left'], true );
+					$this->add_css_property( $selector, 'border-top-width', fusion_library()->sanitize->get_value_with_unit( $this->args['border_top'] ), true );
 				}
 
 				if ( ! $this->is_default( 'border_right' ) ) {
-					$this->add_css_property( $selector, 'border-right-width', $this->args['border_right'], true );
+					$this->add_css_property( $selector, 'border-right-width', fusion_library()->sanitize->get_value_with_unit( $this->args['border_right'] ), true );
+				}
+
+				if ( ! $this->is_default( 'border_bottom' ) ) {
+					$this->add_css_property( $selector, 'border-bottom-width', fusion_library()->sanitize->get_value_with_unit( $this->args['border_bottom'] ), true );
+				}
+
+				if ( ! $this->is_default( 'border_left' ) ) {
+					$this->add_css_property( $selector, 'border-left-width', fusion_library()->sanitize->get_value_with_unit( $this->args['border_left'] ), true );
+				}
+
+				if ( ! $this->is_default( 'border_radius_top_left' ) ) {
+					$this->add_css_property( $selector, 'border-top-left-radius', fusion_library()->sanitize->get_value_with_unit( $this->args['border_radius_top_left'] ), true );
+				}
+
+				if ( ! $this->is_default( 'border_radius_top_right' ) ) {
+					$this->add_css_property( $selector, 'border-top-right-radius', fusion_library()->sanitize->get_value_with_unit( $this->args['border_radius_top_right'] ), true );
+				}
+
+				if ( ! $this->is_default( 'border_radius_bottom_right' ) ) {
+					$this->add_css_property( $selector, 'border-bottom-right-radius', fusion_library()->sanitize->get_value_with_unit( $this->args['border_radius_bottom_right'] ), true );
+				}
+
+				if ( ! $this->is_default( 'border_radius_bottom_left' ) ) {
+					$this->add_css_property( $selector, 'border-bottom-left-radius', fusion_library()->sanitize->get_value_with_unit( $this->args['border_radius_bottom_left'] ), true );
 				}
 
 				$selector = [ $this->base_selector . ' span:not(.sharingbox-shortcode-icon-separator)' ];
 				if ( ! $this->is_default( 'padding_top' ) ) {
-					$this->add_css_property( $selector, 'padding-top', $this->args['padding_top'], true );
+					$this->add_css_property( $selector, 'padding-top', fusion_library()->sanitize->get_value_with_unit( $this->args['padding_top'] ), true );
 				}
 
 				if ( ! $this->is_default( 'padding_bottom' ) ) {
-					$this->add_css_property( $selector, 'padding-bottom', $this->args['padding_bottom'], true );
+					$this->add_css_property( $selector, 'padding-bottom', fusion_library()->sanitize->get_value_with_unit( $this->args['padding_bottom'] ), true );
 				}
 
 				if ( ! $this->is_default( 'padding_left' ) ) {
-					$this->add_css_property( $selector, 'padding-left', $this->args['padding_left'], true );
+					$this->add_css_property( $selector, 'padding-left', fusion_library()->sanitize->get_value_with_unit( $this->args['padding_left'] ), true );
 				}
 
 				if ( ! $this->is_default( 'padding_right' ) ) {
-					$this->add_css_property( $selector, 'padding-right', $this->args['padding_right'], true );
+					$this->add_css_property( $selector, 'padding-right', fusion_library()->sanitize->get_value_with_unit( $this->args['padding_right'] ), true );
 				}
 
 				if ( ! $this->is_default( 'icon_tagline_color' ) ) {
@@ -502,13 +530,13 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 				$selector          = [ $this->wrapper_selector ];
 
 				if ( 'floated' !== $this->args['layout_medium'] ) {
-					$this->add_css_property( [ $this->wrapper_selector . ' h4' ], 'margin-bottom', 'revert', true );
+					$this->add_css_property( [ $this->wrapper_selector . ' .tagline' ], 'margin-bottom', 'revert', true );
 					$this->add_css_property( [ $this->base_selector ], 'width', '100%', true );
 				} else {
-					$this->add_css_property( $this->wrapper_selector . ' h4', 'margin-right', '0.5em', true );
+					$this->add_css_property( $this->wrapper_selector . ' .tagline', 'margin-right', '0.5em', true );
 					$this->add_css_property( [ $this->base_selector ], 'width', 'auto', true );
 					$this->add_css_property( $selector, 'align-items', 'center', true );
-					$this->add_css_property( [ $this->wrapper_selector . ' h4' ], 'margin-bottom', '0', true );
+					$this->add_css_property( [ $this->wrapper_selector . ' .tagline' ], 'margin-bottom', '0', true );
 				}
 				if ( ! empty( $this->args['alignment_medium'] ) ) {
 					$this->add_css_property( [ $this->base_selector ], 'justify-content', $this->args['alignment_medium'], true );
@@ -523,11 +551,11 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 				$this->dynamic_css = [];
 				$this->add_css_property( $selector, 'flex-direction', $layout_small, true );
 				if ( 'floated' !== $this->args['layout_small'] ) {
-					$this->add_css_property( [ $this->wrapper_selector . ' h4' ], 'margin-bottom', 'revert', true );
+					$this->add_css_property( [ $this->wrapper_selector . ' .tagline' ], 'margin-bottom', 'revert', true );
 					$this->add_css_property( [ $this->base_selector ], 'width', '100%', true );
 				} else {
-					$this->add_css_property( $this->wrapper_selector . ' h4', 'margin-right', '0.5em', true );
-					$this->add_css_property( [ $this->wrapper_selector . ' h4' ], 'margin-bottom', '0', true );
+					$this->add_css_property( $this->wrapper_selector . ' .tagline', 'margin-right', '0.5em', true );
+					$this->add_css_property( [ $this->wrapper_selector . ' .tagline' ], 'margin-bottom', '0', true );
 					$this->add_css_property( $selector, 'align-items', 'center', true );
 					$this->add_css_property( [ $this->base_selector ], 'width', 'auto', true );
 				}
@@ -573,7 +601,7 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 				if ( $this->args['backgroundcolor'] ) {
 					$attr['style'] = 'background-color:' . $this->args['backgroundcolor'] . ';';
 
-					if ( fusion_is_color_transparent( $this->args['backgroundcolor'] ) ) {
+					if ( Fusion_Color::new_color( $this->args['backgroundcolor'] )->is_color_transparent() ) {
 						$attr['style'] .= 'padding:0;';
 					}
 				}
@@ -612,6 +640,24 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 
 				if ( $this->args['tagline_color'] ) {
 					$attr['style'] = 'color:' . $this->args['tagline_color'] . ';';
+				}
+
+				$attr['style'] .= Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'tagline_font' );
+
+				if ( $this->args['tagline_font_size'] ) {
+					$attr['style'] .= 'font-size:' . $this->args['tagline_font_size'] . ';';
+				}
+
+				if ( $this->args['tagline_line_height'] ) {
+					$attr['style'] .= 'line-height:' . $this->args['tagline_line_height'] . ';';
+				}
+
+				if ( $this->args['tagline_letter_spacing'] ) {
+					$attr['style'] .= 'letter-spacing:' . fusion_library()->sanitize->get_value_with_unit( $this->args['tagline_letter_spacing'] ) . ';';
+				}
+
+				if ( ! empty( $this->args['tagline_text_transform'] ) ) {
+					$attr['style'] .= 'text-transform:' . $this->args['tagline_text_transform'] . ';';
 				}
 
 				return $attr;
@@ -672,6 +718,24 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 				if ( ! empty( $icon_options['tagline'] ) ) {
 					return sprintf( '<div class="fusion-social-network-icon-tagline">%s</div>', $icon_options['tagline'] );
 				}
+			}
+
+			/**
+			 * Get the tag of the tagline title.
+			 *
+			 * @return string
+			 */
+			public function get_tagline_tag() {
+				$tag_option = $this->args['tagline_size'];
+				if ( ! $tag_option ) {
+					return 'h4';
+				}
+
+				if ( is_numeric( $tag_option ) ) {
+					return 'h' . $tag_option;
+				}
+
+				return $tag_option;
 			}
 
 			/**
@@ -789,7 +853,7 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 						$social_link = 'https://www.linkedin.com/shareArticle?mini=true&url=' . rawurlencode( $link ) . '&title=' . rawurlencode( $title ) . '&summary=' . rawurlencode( $description );
 						break;
 					case 'reddit':
-						$social_link = 'http://.com/submit?url=' . rawurlencode( $link ) . '&amp;title=' . rawurlencode( $title );
+						$social_link = 'https://reddit.com/submit?url=' . rawurlencode( $link ) . '&amp;title=' . rawurlencode( $title );
 						break;
 					case 'whatsapp':
 						$social_link = 'https://api.whatsapp.com/send?text=' . rawurlencode( $link );
@@ -798,13 +862,13 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 						$social_link = 'https://t.me/share/url?url=' . rawurlencode( $link ) . '&text=' . rawurlencode( $title ) . '';
 						break;
 					case 'tumblr':
-						$social_link = 'http://www.tumblr.com/share/link?url=' . rawurlencode( $link ) . '&amp;name=' . rawurlencode( $title ) . '&amp;description=' . rawurlencode( $description );
+						$social_link = 'https://www.tumblr.com/share/link?url=' . rawurlencode( $link ) . '&amp;name=' . rawurlencode( $title ) . '&amp;description=' . rawurlencode( $description );
 						break;
 					case 'pinterest':
-						$social_link = 'http://pinterest.com/pin/create/button/?url=' . rawurlencode( $link ) . '&amp;description=' . rawurlencode( $description ) . '&amp;media=' . $image;
+						$social_link = 'https://pinterest.com/pin/create/button/?url=' . rawurlencode( $link ) . '&amp;description=' . rawurlencode( $description ) . '&amp;media=' . $image;
 						break;
 					case 'vk':
-						$social_link = 'http://vkontakte.ru/share.php?url=' . rawurlencode( $link ) . '&amp;title=' . rawurlencode( $title ) . '&amp;description=' . rawurlencode( $description );
+						$social_link = 'https://vkontakte.ru/share.php?url=' . rawurlencode( $link ) . '&amp;title=' . rawurlencode( $title ) . '&amp;description=' . rawurlencode( $description );
 						break;
 					case 'xing':
 						$social_link = 'https://www.xing.com/social_plugins/share/new?sc_p=xing-share&amp;h=1&amp;url=' . rawurlencode( $link );
@@ -919,14 +983,14 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 								'label'       => esc_html__( 'Sharing Box Tagline Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the tagline text in the social sharing boxes.', 'fusion-builder' ),
 								'id'          => 'sharing_box_tagline_text_color',
-								'default'     => '#333333',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 							],
 							'social_bg_color'            => [
 								'label'       => esc_html__( 'Sharing Box Background Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the background color of the social sharing boxes.', 'fusion-builder' ),
 								'id'          => 'social_bg_color',
-								'default'     => '#f6f6f6',
+								'default'     => 'var(--awb-color2)',
 								'type'        => 'color-alpha',
 							],
 							'social_share_box_icon_info' => [
@@ -978,7 +1042,7 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 								'label'       => esc_html__( 'Sharing Box Icon Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the social icons in the social sharing boxes. This color will be used for all social icons.', 'fusion-builder' ),
 								'id'          => 'sharing_social_links_icon_color',
-								'default'     => '#bebdbd',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'required'    => [
 									[
@@ -999,7 +1063,7 @@ if ( fusion_is_element_enabled( 'fusion_sharing' ) ) {
 								'label'       => esc_html__( 'Sharing Box Icon Box Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the social icon box.', 'fusion-builder' ),
 								'id'          => 'sharing_social_links_box_color',
-								'default'     => '#e8e8e8',
+								'default'     => 'var(--awb-color3)',
 								'type'        => 'color-alpha',
 								'required'    => [
 									[
@@ -1098,7 +1162,7 @@ function fusion_element_sharing_box() {
 				'icon'          => 'fusiona-share2',
 				'preview'       => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-sharingbox-preview.php',
 				'preview_id'    => 'fusion-builder-block-module-sharingbox-preview-template',
-				'help_url'      => 'https://theme-fusion.com/documentation/fusion-builder/elements/sharing-box-element/',
+				'help_url'      => 'https://theme-fusion.com/documentation/avada/elements/sharing-box-element/',
 				'inline_editor' => true,
 				'params'        => [
 					[
@@ -1155,6 +1219,29 @@ function fusion_element_sharing_box() {
 						'value'       => [
 							'show' => esc_html__( 'Show', 'fusion-builder' ),
 							'hide' => esc_html__( 'Hide', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Tagline Heading Size', 'fusion-builder' ),
+						'description' => esc_attr__( 'Choose HTML tag of the tagline heading, either div or the heading tag, h1-h6.', 'fusion-builder' ),
+						'param_name'  => 'tagline_size',
+						'value'       => [
+							'1'   => 'H1',
+							'2'   => 'H2',
+							'3'   => 'H3',
+							'4'   => 'H4',
+							'5'   => 'H5',
+							'6'   => 'H6',
+							'div' => 'DIV',
+						],
+						'default'     => '4',
+						'dependency'  => [
+							[
+								'element'  => 'tagline_visibility',
+								'value'    => 'hide',
+								'operator' => '!=',
+							],
 						],
 					],
 					[
@@ -1230,6 +1317,44 @@ function fusion_element_sharing_box() {
 						'value'       => '#cccccc',
 						'default'     => $fusion_settings->get( 'sep_color' ),
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+					],
+					[
+						'type'             => 'dimension',
+						'remove_from_atts' => true,
+						'heading'          => esc_html__( 'Border Radius', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the border radius. Enter values including any valid CSS unit, ex: 10px.', 'fusion-builder' ),
+						'param_name'       => 'border_radius',
+						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
+						'value'            => [
+							'border_radius_top_left'     => '',
+							'border_radius_top_right'    => '',
+							'border_radius_bottom_right' => '',
+							'border_radius_bottom_left'  => '',
+						],
+					],
+					[
+						'type'             => 'typography',
+						'remove_from_atts' => true,
+						'global'           => true,
+						'heading'          => esc_attr__( 'Tagline Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the tagline typography', 'fusion-builder' ),
+						'param_name'       => 'tagline_typography',
+						'choices'          => [
+							'font-family'    => 'tagline_font',
+							'font-size'      => 'tagline_font_size',
+							'line-height'    => 'tagline_line_height',
+							'letter-spacing' => 'tagline_letter_spacing',
+							'text-transform' => 'tagline_text_transform',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '',
+							'font-size'      => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'text-transform' => '',
+						],
+						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
 						'type'        => 'colorpickeralpha',
@@ -1326,7 +1451,7 @@ function fusion_element_sharing_box() {
 					[
 						'type'         => 'textfield',
 						'heading'      => esc_attr__( 'Sharing Title', 'fusion-builder' ),
-						'description'  => __( 'The post title that will be shared. Leave empty to use title of current post. <strong>Note:</strong> Some of the social networks will ignore this option and will instead auto pull the post title based on the shared link.', 'fusion-builder' ),
+						'description'  => __( 'The post title that will be shared. Leave empty to use title of current post. <strong>NOTE:</strong> Some of the social networks will ignore this option and will instead auto pull the post title based on the shared link.', 'fusion-builder' ),
 						'param_name'   => 'title',
 						'value'        => '',
 						'dynamic_data' => true,
@@ -1342,7 +1467,7 @@ function fusion_element_sharing_box() {
 					[
 						'type'         => 'raw_textarea',
 						'heading'      => esc_attr__( 'Sharing Description', 'fusion-builder' ),
-						'description'  => __( 'The description that will be shared. Leave empty to use excerpt of current post. <strong>Note:</strong> Some of the social networks do not offer description in their sharing options and others might ignore it and will instead auto pull the post excerpt based on the shared link.', 'fusion-builder' ),
+						'description'  => __( 'The description that will be shared. Leave empty to use excerpt of current post. <strong>NOTE:</strong> Some of the social networks do not offer description in their sharing options and others might ignore it and will instead auto pull the post excerpt based on the shared link.', 'fusion-builder' ),
 						'param_name'   => 'description',
 						'value'        => '',
 						'dynamic_data' => true,
@@ -1350,7 +1475,7 @@ function fusion_element_sharing_box() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Boxed Social Icons', 'fusion-builder' ),
-						'description' => esc_attr__( 'Choose the color type of social icons. Brand colors will use the exact brand color of each network for the icons or boxes.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Controls if each social icon is displayed in a small box.', 'fusion-builder' ),
 						'param_name'  => 'icons_boxed',
 						'value'       => [
 							''    => esc_attr__( 'Default', 'fusion-builder' ),
@@ -1378,7 +1503,7 @@ function fusion_element_sharing_box() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Social Icon Size', 'fusion-builder' ),
-						'description' => esc_attr__( 'Controls the size of the icon tagline text. Enter value including any valid CSS unit, ex: 16px.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Controls the size of the icons. Enter value including any valid CSS unit, ex: 16px.', 'fusion-builder' ),
 						'param_name'  => 'icon_size',
 						'value'       => '',
 						'default'     => '',

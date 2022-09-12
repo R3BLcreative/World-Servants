@@ -17,16 +17,17 @@ var fieldId = 'undefined' === typeof param.param_name ? param.id : param.param_n
 	<input type="hidden" id="{{ fieldId }}" name="{{ fieldId }}" value="{{ choice }}" class="button-set-value" />
 	<# _.each( choices, function( name, value ) { #>
 		<#
+		const wrappedName = '<span class="buttonset-item-label">' + name + '</span>';
 		index++;
 		var selected  = ( 1 === index ) ? ' ui-state-active' : '',
 			icon      = ( 'undefined' !== typeof icons[ value ] && '' !== icons ) ? icons[ value ] : '',
-			title     = name,
+			title     = wrappedName,
 			iconClass = '' === icon ? '' : 'has-tooltip';
 
 		if ( -1 !== icon.indexOf( 'svg' ) || -1 !== icon.indexOf( 'span' ) && 'undefined' !== typeof FusionApp  ) {
 			title = icon;
 		} else if ( -1 !== icon.indexOf( 'svg' ) || -1 !== icon.indexOf( 'span' ) && 'undefined' === typeof FusionApp  ) {
-			title = icon + name;
+			title = icon + wrappedName;
 		} else if ( '' !== icon ) {
 			iconClass += ' ' + icon;
 			title      = '';

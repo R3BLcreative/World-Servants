@@ -182,11 +182,17 @@ class Avada_Privacy_Embeds {
 	 * @return  void
 	 */
 	public function set_options() {
+		$privacy_bar = Avada()->settings->get( 'privacy_bar' );
+
+		// Check for app full refresh data.
+		if ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() && ! empty( Fusion_App()->get_data( 'fusion_options' ) ) ) {
+			$privacy_bar = Fusion_App()->get_data( 'fusion_options' )['privacy_bar'];
+		}
 		$this->options = apply_filters(
 			'avada_privacy_options',
 			[
 				'privacy_embeds'                 => Avada()->settings->get( 'privacy_embeds' ),
-				'privacy_bar'                    => Avada()->settings->get( 'privacy_bar' ),
+				'privacy_bar'                    => $privacy_bar,
 				'privacy_expiry'                 => Avada()->settings->get( 'privacy_expiry' ),
 				'privacy_embed_types'            => Avada()->settings->get( 'privacy_embed_types' ),
 				'privacy_embed_defaults'         => Avada()->settings->get( 'privacy_embed_defaults' ),
@@ -684,6 +690,7 @@ class Avada_Privacy_Embeds {
 	 * @return  string
 	 */
 	public function replace( $content ) {
+		global $fusion_library;
 
 		// Iframe replacements.
 		preg_match_all( '/<iframe.*src=\"(.*)\".*><\/iframe>/isU', $content, $iframes );
@@ -696,6 +703,15 @@ class Avada_Privacy_Embeds {
 				// Its already been filtered.
 				if ( strpos( $frame, 'data-privacy-src' ) ) {
 					continue;
+				}
+
+				// If "Avada" lazy-loading method is applied, then get the original src from 'data-orig-src'.
+				if ( $fusion_library->get_images_obj()->is_avada_iframe_lazy_load_enabled() && is_string( $frame ) && preg_match( '/<iframe.*data-orig-src=\"(.*)\".*><\/iframe>/isU', $frame, $lazy_loading_matches ) ) {
+
+					// Also replace the src with the lazy-loading src.
+					// This will make privacy script and lazy-loading script work no matter they order of execution.
+					$frame = str_replace( ' src="' . $src . '"', ' src="' . $lazy_loading_matches[1] . '"', $frame );
+					$src   = $lazy_loading_matches[1];
 				}
 
 				// Check the iframe type and continue if not one of ours.
@@ -711,7 +727,7 @@ class Avada_Privacy_Embeds {
 
 				// Replace src with data attribute.
 				$frame = str_replace( $src, '$$temp$$', $frame );
-				$frame = str_replace( 'src', 'data-privacy-src', $frame );
+				$frame = str_replace( ' src=', ' data-privacy-src=', $frame );
 				$frame = str_replace( '$$temp$$', $src, $frame );
 				$frame = str_replace( '<iframe ', '<iframe data-privacy-type="' . $type . '" src="" ', $frame );
 
@@ -745,6 +761,48 @@ class Avada_Privacy_Embeds {
 
 				// Replace iframe.
 				$content = str_replace( $orig, $frame . $placeholder, $content );
+			}
+
+			preg_match_all( '/<(lite-youtube|lite-vimeo) .*>.*<\/(lite-youtube|lite-vimeo)>/', $content, $facades );
+			if ( array_key_exists( 1, $facades ) ) {
+				foreach ( $facades[0] as $key => $facade ) {
+
+					$orig = $facade;
+					$src  = $facades[1][ $key ];
+
+					// Its already been filtered.
+					if ( strpos( $facade, 'data-privacy-src' ) ) {
+						continue;
+					}
+
+					// Check the iframe type and continue if not one of ours.
+					$type = $this->get_src_type( $src . '.com' );
+
+					if ( ! $type ) {
+						continue;
+					}
+
+					// Check if we already have consent.
+					if ( $this->get_consent( $type ) ) {
+						continue;
+					}
+
+					$facade = str_replace( '<' . $src, '<priv-fac-' . $src . ' class="fusion-hidden" data-privacy-type="' . $type . '"', $facade );
+					$facade = str_replace( '</' . $src, '</priv-fac-' . $src, $facade );
+
+					// Add placeholder.
+					$placeholder = '';
+					if ( ! strpos( $facade, 'data-fusion-no-placeholder' ) ) {
+						$placeholder = $this->script_placeholder( $type );
+
+						// Allow custom placeholder additions.
+						$placeholder = apply_filters( 'avada_privacy_placeholder', $placeholder, $type, false, false, $src );
+					}
+
+					// Replace facade.
+					$content = str_replace( $orig, $facade . $placeholder, $content );
+
+				}
 			}
 		}
 

@@ -227,23 +227,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				var shortcode    = '',
 					columnCID    = $thisColumn.data( 'cid' ),
 					module       = FusionPageBuilderElements.findWhere( { cid: columnCID } ),
-					plugins      = 'object' === typeof fusionBuilderConfig.plugins_active ? fusionBuilderConfig.plugins_active : false,
 					colType		   = module.get( 'type' ),
-					elementType  = this.model.get( 'element_type' ),
 					selector     = colType.includes( 'inner' ) ? '.fusion_module_block' : '.fusion_builder_column_element:not(.fusion-builder-column-inner .fusion_builder_column_element)',
 					columnParams = {},
 					ColumnAttributesCheck;
-
-				// If studio active.
-				if ( false !== plugins && true === plugins.awb_studio  && 'undefined' !== elementType && 'yes' === jQuery( '#pyre_studio_replace_params' ).val() ) {
-
-					// remove BC param.
-					if ( 'undefined' !== typeof fusionAllElements[ elementType ].defaults.padding ) {
-						delete fusionAllElements[ elementType ].defaults.padding;
-					}
-
-					module.set( 'params', jQuery.extend( true, {}, fusionAllElements[ elementType ].defaults, FusionPageBuilderApp.cleanParameters( module.get( 'params' ) ) ) );
-				}
 
 				_.each( module.get( 'params' ), function( value, name ) {
 					if ( 'undefined' === value || 'undefined' === typeof value ) {
@@ -297,7 +284,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// Loops params and add.
 				_.each( columnParams, function( value, name ) {
-					shortcode += ' ' + name + '="' + FusionPageBuilderApp.getParamValue( name, value, module ) + '"';
+					if ( ( 'on' === fusionBuilderConfig.removeEmptyAttributes && '' !== value ) || 'off' === fusionBuilderConfig.removeEmptyAttributes ) {
+						shortcode += ' ' + name + '="' + value + '"';
+					}
 				} );
 
 				shortcode += ']';
@@ -367,9 +356,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							delete innerColumnParams.type;
 
 							_.each( innerColumnParams, function( value, name ) {
-
-								shortcode += ' ' + name + '="' + FusionPageBuilderApp.getParamValue( name, value, module ) + '"';
-
+								if ( ( 'on' === fusionBuilderConfig.removeEmptyAttributes && '' !== value ) || 'off' === fusionBuilderConfig.removeEmptyAttributes ) {
+									shortcode += ' ' + name + '="' + value + '"';
+								}
 							} );
 
 							shortcode += ']';

@@ -102,9 +102,9 @@ class Avada_Upgrade {
 		// Check through all options names that were available for Global Options in databse.
 		$theme_options = get_option( Avada::get_option_name(), get_option( 'avada_theme_options', get_option( 'Avada_options', false ) ) );
 
-		// If no old version is in database or there are no saved options,
+		// If no old version is in database and there are no saved options,
 		// this is a new install, nothing to do, but to copy version to db.
-		if ( false === $this->database_theme_version || ! $theme_options ) {
+		if ( false === $this->database_theme_version && ! $theme_options ) {
 			$this->fresh_installation();
 			return;
 
@@ -171,6 +171,13 @@ class Avada_Upgrade {
 			'740' => [ '7.4.0', false ],
 			'741' => [ '7.4.1', false ],
 			'750' => [ '7.5.0', false ],
+			'760' => [ '7.6.0', false ],
+			'761' => [ '7.6.1', false ],
+			'762' => [ '7.6.2', false ],
+			'770' => [ '7.7.0', false ],
+			'771' => [ '7.7.1', false ],
+			'780' => [ '7.8.0', false ],
+			'781' => [ '7.8.1', false ],
 		];
 
 		$upgraded = false;
@@ -221,6 +228,10 @@ class Avada_Upgrade {
 
 		add_action( 'init', [ $this, 'update_installation' ] );
 
+		// The priority of this is best to be more than 10, because TGM plugin addon register the update hooks at priority 10.
+		if ( $upgraded ) {
+			add_action( 'init', [ $this, 'update_avada_needed_plugins' ], 20 );
+		}
 	}
 
 	/**
@@ -260,6 +271,7 @@ class Avada_Upgrade {
 	 */
 	public function fresh_installation() {
 		update_option( 'avada_version', $this->current_theme_version );
+		set_transient( 'awb_fresh_install', 'fresh' );
 		$this->clear_update_theme_transient();
 	}
 
@@ -465,6 +477,36 @@ class Avada_Upgrade {
 			var_dump( 'Previous Version: ' . get_option( 'avada_previous_version', [] ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 			var_dump( 'Update Notice: ' . get_user_meta( $current_user->ID, 'avada_update_notice', true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_dump
 		}
+	}
+
+	/**
+	 * Force the WordPress to do an auto-update again, if the fusion-builder or
+	 * core plugins are set for auto-update. To auto-update their version.
+	 *
+	 * This function is called after the Theme was updated.
+	 *
+	 * @return void
+	 */
+	public function update_avada_needed_plugins() {
+		// Check if either builder or core plugins are set to auto-update.
+		$auto_updates = get_option( 'auto_update_plugins' );
+		if ( ! is_array( $auto_updates ) ) {
+			return;
+		}
+		$found_avada_auto_update = preg_grep( '/fusion-core\.php|fusion-builder\.php/', $auto_updates );
+		if ( ! is_array( $found_avada_auto_update ) || ! count( $found_avada_auto_update ) ) {
+			return;
+		}
+
+		// Refresh plugin update info.
+		delete_site_transient( 'update_plugins' );
+		delete_site_transient( 'avada_premium_plugins_info' );
+		// Needed to be deleted because 'wp_version_check' won't run until at least 1 min passed since last run.
+		delete_site_transient( 'update_core' );
+		// Update the available newest versions of plugins. Not 100% sure if is needed here, but better be safe.
+		wp_update_plugins();
+
+		wp_schedule_single_event( time() + 3, 'wp_version_check' ); // phpcs:ignore WPThemeReview.PluginTerritory
 	}
 }
 

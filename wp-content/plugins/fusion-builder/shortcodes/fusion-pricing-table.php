@@ -107,6 +107,10 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				$parent = [
+					'margin_top'             => '',
+					'margin_right'           => '',
+					'margin_bottom'          => '',
+					'margin_left'            => '',
 					'hide_on_mobile'         => fusion_builder_default_visibility( 'string' ),
 					'class'                  => '',
 					'id'                     => '',
@@ -200,6 +204,11 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 
 				$this->parent_args['columns'] = min( $this->parent_args['columns'], 6 );
 
+				$this->parent_args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_bottom'], 'px' );
+				$this->parent_args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_left'], 'px' );
+				$this->parent_args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_right'], 'px' );
+				$this->parent_args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_top'], 'px' );
+
 				$this->set_num_of_columns( $content );
 
 				$this->is_first_column = true;
@@ -244,7 +253,10 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 			 */
 			public function attr() {
 
-				$attr = [];
+				$attr = [
+					'class' => '',
+					'style' => '',
+				];
 
 				$type = 'sep';
 				if ( '1' == $this->parent_args['type'] ) { // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison
@@ -254,6 +266,8 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 				$attr['class'] = 'fusion-pricing-table pricing-table-' . $this->pricing_table_counter . ' ' . $type . '-boxed-pricing row fusion-columns-' . $this->parent_args['columns'] . ' columns-' . $this->parent_args['columns'] . ' fusion-clearfix';
 
 				$attr = fusion_builder_visibility_atts( $this->parent_args['hide_on_mobile'], $attr );
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->parent_args );
 
 				if ( $this->parent_args['class'] ) {
 					$attr['class'] .= ' ' . $this->parent_args['class'];
@@ -587,7 +601,7 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 								'label'       => esc_html__( 'Pricing Box Style 1 Heading Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of style 1 pricing table headings.', 'fusion-builder' ),
 								'id'          => 'full_boxed_pricing_box_heading_color',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -595,7 +609,7 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 								'label'       => esc_html__( 'Pricing Box Style 2 Heading Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of style 2 pricing table headings.', 'fusion-builder' ),
 								'id'          => 'sep_pricing_box_heading_color',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -603,7 +617,7 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 								'label'       => esc_html__( 'Pricing Box Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color portions of pricing boxes.', 'fusion-builder' ),
 								'id'          => 'pricing_box_color',
-								'default'     => '#65bc7b',
+								'default'     => 'var(--awb-color4)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -616,7 +630,7 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 								'label'       => esc_html__( 'Pricing Box Background Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the main background and title background.', 'fusion-builder' ),
 								'id'          => 'pricing_bg_color',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -624,7 +638,7 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 								'label'       => esc_html__( 'Pricing Box Background Hover Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the hover color of the main background and title background.', 'fusion-builder' ),
 								'id'          => 'pricing_background_color_hover',
-								'default'     => $fusion_settings->get( 'pricing_border_color' ),
+								'default'     => 'var(--awb-color2)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -632,7 +646,7 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 								'label'       => esc_html__( 'Pricing Box Border Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the outer border, pricing row and footer row backgrounds.', 'fusion-builder' ),
 								'id'          => 'pricing_border_color',
-								'default'     => '#f2f3f5',
+								'default'     => 'var(--awb-color2)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -640,7 +654,7 @@ if ( fusion_is_element_enabled( 'fusion_pricing_table' ) ) {
 								'label'       => esc_html__( 'Pricing Box Divider Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the dividers in-between pricing rows.', 'fusion-builder' ),
 								'id'          => 'pricing_divider_color',
-								'default'     => '#e2e2e2',
+								'default'     => 'var(--awb-color3)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -685,7 +699,7 @@ function fusion_element_pricing_table() {
 				'on_save'                                 => 'pricingTableShortcodeFilter',
 				'on_change'                               => 'pricingTableShortcodeFilter',
 				'admin_enqueue_js'                        => FUSION_BUILDER_PLUGIN_URL . 'shortcodes/js/fusion-pricing-table.js',
-				'help_url'                                => 'https://theme-fusion.com/documentation/fusion-builder/elements/pricing-table-element/',
+				'help_url'                                => 'https://theme-fusion.com/documentation/avada/elements/pricing-table-element/',
 				'params'                                  => [
 					[
 						'type'        => 'radio_button_set',
@@ -788,6 +802,16 @@ function fusion_element_pricing_table() {
 						'param_name'  => 'element_content',
 						'value'       => '[fusion_pricing_column title="Standard" standout="no" class="" id=""][fusion_pricing_price currency="$" price="15.55" time="monthly"][/fusion_pricing_price][fusion_pricing_row]Feature 1[/fusion_pricing_row][fusion_pricing_row]Feature 2[/fusion_pricing_row][fusion_pricing_footer]Order Now[/fusion_pricing_footer][/fusion_pricing_column][fusion_pricing_column title="Premium" standout="yes" class="" id=""][fusion_pricing_price currency="$" price="25.55" time="monthly"][/fusion_pricing_price][fusion_pricing_row]Feature 1[/fusion_pricing_row][fusion_pricing_row]Feature 2[/fusion_pricing_row][fusion_pricing_footer]Order Now[/fusion_pricing_footer][/fusion_pricing_column]',
 						'hidden'      => true,
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

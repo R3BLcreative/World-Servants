@@ -24,7 +24,7 @@
 .fusion-recent-posts .columns .column .fusion-flexslider .slides {
   width: 100%;
 }
-.fusion-recent-posts .columns .column h4 {
+.fusion-recent-posts .columns .column .entry-title {
   margin: 15px 0 3px;
   clear: none;
 }
@@ -63,7 +63,7 @@
   margin: 0 20px 5px 0;
   width: 144px;
 }
-.fusion-recent-posts.layout-thumbnails-on-side .columns .column h4 {
+.fusion-recent-posts.layout-thumbnails-on-side .columns .column .entry-title {
   margin-top: 0;
 }
 .fusion-recent-posts.layout-date-on-side .date-and-formats {
@@ -89,6 +89,6 @@
 .fusion-recent-posts.layout-date-on-side .columns .column {
   margin-bottom: 20px;
 }
-.fusion-recent-posts.layout-date-on-side .columns .column h4 {
+.fusion-recent-posts.layout-date-on-side .columns .column .entry-title {
   margin-top: 0;
 }

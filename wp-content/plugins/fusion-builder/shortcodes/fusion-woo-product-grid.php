@@ -887,7 +887,7 @@ if ( fusion_is_element_enabled( 'fusion_woo_product_grid' ) && class_exists( 'Wo
 			 * @return  void
 			 */
 			public function alter_shop_loop( $query ) {
-				if ( ! is_admin() && $query->is_main_query() && $query->is_post_type_archive( 'product' ) && 'no' === fusion_get_option( 'show_wc_shop_loop' ) ) {
+				if ( ! is_admin() && $query->is_main_query() && ! $query->is_search && $query->is_post_type_archive( 'product' ) && 'no' === fusion_get_option( 'show_wc_shop_loop' ) ) {
 					$search_override        = get_post( wc_get_page_id( 'shop' ) );
 					$has_archives_component = $search_override && has_shortcode( $search_override->post_content, 'fusion_woo_product_grid' );
 
@@ -934,7 +934,7 @@ function fusion_element_woo_product_grid() {
 					'name'      => esc_attr__( 'Woo Product Grid', 'fusion-builder' ),
 					'shortcode' => 'fusion_woo_product_grid',
 					'icon'      => 'fusiona-product-grid-and-archives',
-					'help_url'  => 'https://theme-fusion.com/documentation/fusion-builder/elements/woocommerce-product-carousel-element/',
+					'help_url'  => 'https://theme-fusion.com/documentation/avada/elements/woocommerce-product-carousel-element/',
 					'params'    => [
 						[
 							'type'        => 'radio_button_set',
@@ -1261,7 +1261,7 @@ function fusion_element_woo_product_grid() {
 						[
 							'type'        => 'select',
 							'heading'     => esc_attr__( 'Grid Separator Style', 'fusion-builder' ),
-							'description' => __( 'Controls the line style of grid separators. <strong>Note:</strong> Separators will display, when buttons below the separators is displayed and Box Design mode set to Classic.', 'fusion-builder' ),
+							'description' => __( 'Controls the line style of grid separators. <strong>NOTE:</strong> Separators will display, when buttons below the separators is displayed and Box Design mode set to Classic.', 'fusion-builder' ),
 							'param_name'  => 'grid_separator_style_type',
 							'value'       => [
 								''              => esc_attr__( 'Default', 'fusion-builder' ),
@@ -1292,7 +1292,7 @@ function fusion_element_woo_product_grid() {
 						[
 							'type'        => 'colorpickeralpha',
 							'heading'     => esc_attr__( 'Grid Separator Color', 'fusion-builder' ),
-							'description' => __( 'Controls the line style color of grid separators. <strong>Note:</strong> Only work when Box Design mode set to Classic.', 'fusion-builder' ),
+							'description' => __( 'Controls the line style color of grid separators. <strong>NOTE:</strong> Only work when Box Design mode set to Classic.', 'fusion-builder' ),
 							'param_name'  => 'grid_separator_color',
 							'value'       => '',
 							'default'     => $fusion_settings->get( 'grid_separator_color' ),

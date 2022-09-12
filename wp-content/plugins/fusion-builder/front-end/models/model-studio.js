@@ -244,6 +244,43 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		},
 
 		/**
+		 * Sets options.
+		 *
+		 * @since 3.7
+		 * @param {Object} $layoutsContainer
+		 * @return {void}
+		 */
+		setOptions: function( $layoutsContainer ) {
+			var $wrapper = $layoutsContainer.closest( '.studio-wrapper' ).find( '.awb-import-options-group' ),
+				self     = this,
+				options  = { // Object of default values and current values.
+					'load-type-replace': FusionApp.preferencesData.contentPlacement,
+					'replace-pos': FusionApp.preferencesData.overWriteType,
+					'dont-invert': FusionApp.preferencesData.shouldInvert,
+					'do-import-images': FusionApp.preferencesData.imagesImport
+				};
+
+				jQuery.each( options, function( defaultVal, value ) {
+					if ( self.ValueExists( value ) ) {
+						$wrapper.find( '#' + value ).prop( 'checked', true );
+					} else {
+						$wrapper.find( '#' + defaultVal ).prop( 'checked', true );
+					}
+				} );
+		},
+
+		/**
+		 * Checks if value exists.
+		 *
+		 * @since 3.7
+		 * @param {string} item
+		 * @return {void}
+		 */
+		ValueExists: function( item ) {
+			return 'undefined' !== typeof item && '' !== item ? true : false;
+		},
+
+		/**
 		 * Gets import data to new value.
 		 *
 		 * @since 3.5

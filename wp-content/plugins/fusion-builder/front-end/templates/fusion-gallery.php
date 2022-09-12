@@ -11,9 +11,15 @@
 	<# if ( 'undefined' !== typeof usingDynamic && usingDynamic ) { #>
 		<div class="fusion-builder-placeholder"><?php esc_html_e( 'This gallery element is set to use dynamic data.  For a preview please check the front-end.', 'fusion-builder' ); ?></div>
 	<# } else { #>
-		<div {{{ _.fusionGetAttributes( attr ) }}}></div>
+		<div {{{ _.fusionGetAttributes( wrapperAttr ) }}}>
+			<div {{{ _.fusionGetAttributes( attr ) }}}></div>
+			{{{paginationHTML}}}
+		</div>
 	<# } #>
 	{{{captionStyles}}}
+	<style>
+		{{{aspectRatioStyles}}}
+	</style>
 	<div class="fusion-clearfix"></div>
 </script>
 

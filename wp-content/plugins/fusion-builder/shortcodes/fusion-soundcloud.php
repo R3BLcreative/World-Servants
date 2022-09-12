@@ -48,6 +48,10 @@ if ( fusion_is_element_enabled( 'fusion_soundcloud' ) ) {
 			public static function get_element_defaults() {
 
 				return [
+					'margin_top'     => '',
+					'margin_right'   => '',
+					'margin_bottom'  => '',
+					'margin_left'    => '',
 					'hide_on_mobile' => fusion_builder_default_visibility( 'string' ),
 					'class'          => 'fusion-soundcloud',
 					'id'             => '',
@@ -84,6 +88,11 @@ if ( fusion_is_element_enabled( 'fusion_soundcloud' ) ) {
 
 				$this->args = $defaults;
 
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
+
 				$autoplay = ( 'yes' === $auto_play ) ? 'true' : 'false';
 				$comments = ( 'yes' === $comments ) ? 'true' : 'false';
 
@@ -108,10 +117,11 @@ if ( fusion_is_element_enabled( 'fusion_soundcloud' ) ) {
 				$show_user    = ( 'yes' === $show_user ) ? 'true' : 'false';
 
 				if ( $color ) {
-					$color = str_replace( '#', '', $color );
+					$color = str_replace( '#', '', Fusion_Color::new_color( $color )->toCss() );
 				}
 
 				$html = '<div ' . FusionBuilder::attributes( 'soundcloud-shortcode' ) . '><iframe scrolling="no" frameborder="no" width="' . $width . '" height="' . $height . '" allow="autoplay" src="https://w.soundcloud.com/player/?url=' . $url . '&amp;auto_play=' . $autoplay . '&amp;hide_related=' . $show_related . '&amp;show_comments=' . $comments . '&amp;show_user=' . $show_user . '&amp;show_reposts=' . $show_reposts . '&amp;visual=' . $visual . '&amp;color=' . $color . '" title="soundcloud"></iframe></div>';
+				$html = fusion_library()->images->apply_global_selected_lazy_loading_to_iframe( $html );
 
 				$this->on_render();
 
@@ -127,7 +137,10 @@ if ( fusion_is_element_enabled( 'fusion_soundcloud' ) ) {
 			 */
 			public function attr() {
 
-				$attr = [];
+				$attr = [
+					'class' => '',
+					'style' => '',
+				];
 
 				if ( $this->args['class'] ) {
 					$attr['class'] = $this->args['class'];
@@ -136,6 +149,8 @@ if ( fusion_is_element_enabled( 'fusion_soundcloud' ) ) {
 				if ( $this->args['id'] ) {
 					$attr['id'] = $this->args['id'];
 				}
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				$attr = fusion_builder_visibility_atts( $this->args['hide_on_mobile'], $attr );
 
@@ -164,7 +179,7 @@ function fusion_element_soundcloud() {
 				'icon'       => 'fusiona-soundcloud',
 				'preview'    => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-soundcloud-preview.php',
 				'preview_id' => 'fusion-builder-block-module-soundcloud-preview-template',
-				'help_url'   => 'https://theme-fusion.com/documentation/fusion-builder/elements/soundcloud-element/',
+				'help_url'   => 'https://theme-fusion.com/documentation/avada/elements/soundcloud-element/',
 				'params'     => [
 					[
 						'type'        => 'textfield',
@@ -187,7 +202,7 @@ function fusion_element_soundcloud() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Show Comments', 'fusion-builder' ),
-						'description' => __( 'Choose to display comments. <strong>Note:</strong> This feature can only be turned off on tracks uploaded through a SoundCloud pro plan.', 'fusion-builder' ),
+						'description' => __( 'Choose to display comments. <strong>NOTE:</strong> This feature can only be turned off on tracks uploaded through a SoundCloud pro plan.', 'fusion-builder' ),
 						'param_name'  => 'comments',
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
@@ -198,7 +213,7 @@ function fusion_element_soundcloud() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Show Related', 'fusion-builder' ),
-						'description' => __( 'Choose to display related items. <strong>Note:</strong> This feature can only be turned off on tracks uploaded through a SoundCloud pro plan.', 'fusion-builder' ),
+						'description' => __( 'Choose to display related items. <strong>NOTE:</strong> This feature can only be turned off on tracks uploaded through a SoundCloud pro plan.', 'fusion-builder' ),
 						'param_name'  => 'show_related',
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
@@ -209,7 +224,7 @@ function fusion_element_soundcloud() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Show User', 'fusion-builder' ),
-						'description' => __( 'Choose to display the user who posted the item. <strong>Note:</strong> This feature can only be turned off on tracks uploaded through a SoundCloud pro plan.', 'fusion-builder' ),
+						'description' => __( 'Choose to display the user who posted the item. <strong>NOTE:</strong> This feature can only be turned off on tracks uploaded through a SoundCloud pro plan.', 'fusion-builder' ),
 						'param_name'  => 'show_user',
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
@@ -220,7 +235,7 @@ function fusion_element_soundcloud() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Autoplay', 'fusion-builder' ),
-						'description' => __( 'Choose to autoplay the track. <strong>Note:</strong> SoundCloud does not allow autoplay on mobile devices.', 'fusion-builder' ),
+						'description' => __( 'Choose to autoplay the track. <strong>NOTE:</strong> SoundCloud does not allow autoplay on mobile devices.', 'fusion-builder' ),
 						'param_name'  => 'auto_play',
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
@@ -244,6 +259,16 @@ function fusion_element_soundcloud() {
 						'value'            => [
 							'width'  => '100%',
 							'height' => '150px',
+						],
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
 						],
 					],
 					[

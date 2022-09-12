@@ -32,9 +32,10 @@ class Fusion_Builder_Form_Helper {
 	 * Returns the array of forms with their id.
 	 *
 	 * @since 3.1
+	 * @param string $type The type of data to fetch.
 	 * @return array
 	 */
-	public static function fusion_form_creator_form_list() {
+	public static function fusion_form_creator_form_list( $type = 'titles' ) {
 		global $post;
 
 		$form_list = [];
@@ -52,9 +53,9 @@ class Fusion_Builder_Form_Helper {
 			while ( $forms_query->have_posts() ) :
 				$forms_query->the_post();
 
-				$form_title       = get_the_title();
+				$value            = 'permalinks' === $type ? get_the_permalink() : get_the_title();
 				$id               = get_the_ID();
-				$form_list[ $id ] = $form_title;
+				$form_list[ $id ] = $value;
 			endwhile;
 		}
 
@@ -166,7 +167,8 @@ class Fusion_Builder_Form_Helper {
 		$form_meta = wp_parse_args(
 			(array) fusion_data()->post_meta( $id )->get_all_meta(),
 			[
-				'form_type'                   => 'database',
+				'form_type'                   => 'ajax',
+				'form_actions'                => [],
 				'method'                      => 'method',
 				'tooltip_text_color'          => '#ffffff',
 				'tooltip_background_color'    => '#333333',
@@ -199,8 +201,9 @@ class Fusion_Builder_Form_Helper {
 				'email_from_id'               => 'wordpress@' . $sitename,
 
 				/* translators: The title. */
-				'email_subject'               => sprintf( esc_html__( '%s form submissions received!', 'fusion-builder' ), get_the_title( $id ) ),
+				'email_subject'               => sprintf( esc_html__( '%s - Form Submission Notification', 'fusion-builder' ), get_the_title( $id ) ),
 				'email_subject_encode'        => 0,
+				'nonce_method'                => 'ajax',
 			]
 		);
 
@@ -229,6 +232,8 @@ class Fusion_Builder_Form_Helper {
 			'text_config'  => [],
 		];
 
+		$id = apply_filters( 'wpml_object_id', $id, 'fusion_form', true );
+
 		// If form post exists.
 		if ( false !== get_post_status( $id ) ) {
 			$fusion_form = [
@@ -245,4 +250,55 @@ class Fusion_Builder_Form_Helper {
 		return $fusion_form;
 	}
 
+	/**
+	 * Exception for Name <me@mail.com> from sanitize.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param String $str String to sanitize.
+	 * @return String
+	 */
+	public static function fusion_form_sanitize( $str ) {
+		if ( is_object( $str ) || is_array( $str ) ) {
+			return '';
+		}
+
+		$str = (string) $str;
+
+		$filtered = wp_check_invalid_utf8( $str );
+
+		if ( false !== strpos( $filtered, '<' ) ) {
+			// check if it contains email.
+			preg_match( '/<(.*?)>/', $filtered, $matches );
+			$tag_content = isset( $matches[1] ) ? $matches[1] : '';
+			if ( ! is_email( $tag_content ) ) {
+				$filtered = sanitize_textarea_field( $filtered );
+			}
+		} else {
+			$filtered = sanitize_textarea_field( $filtered );
+		}
+
+		return $filtered;
+	}
+
+	/**
+	 * Convert filed names to labels.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param String $str filed name.
+	 * @return String
+	 */
+	public static function fusion_name_to_label( $str ) {
+		if ( is_object( $str ) || is_array( $str ) ) {
+			return '';
+		}
+
+		$str = (string) $str;
+
+		$str = preg_replace( '/_|-/', ' ', $str );
+		return ucwords( $str );
+	}
 }

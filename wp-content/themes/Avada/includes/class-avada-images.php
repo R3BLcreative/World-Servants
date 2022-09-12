@@ -317,7 +317,7 @@ class Avada_Images extends Fusion_Images {
 
 		if ( in_array( $featured_image_size, [ 'full', 'fixed' ], true ) ) {
 			$height = apply_filters( 'avada_set_placeholder_image_height', '150' );
-			$width  = '1500px';
+			$width  = '100%';
 		} else {
 			$height = $_wp_additional_image_sizes[ $featured_image_size ]['height'];
 			$width  = $_wp_additional_image_sizes[ $featured_image_size ]['width'] . 'px';

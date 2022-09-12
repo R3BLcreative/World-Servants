@@ -453,75 +453,6 @@ if ( ! function_exists( 'fusion_render_post_metadata' ) ) {
 	}
 }
 
-if ( ! function_exists( 'fusion_calc_color_brightness' ) ) {
-	/**
-	 * Calculate the brightness of a color.
-	 *
-	 * @param  string $color Color (Hex) Code.
-	 * @return integer brightness level.
-	 */
-	function fusion_calc_color_brightness( $color ) {
-
-		$brightness_level = 150;
-		if ( ! is_string( $color ) ) {
-			return $brightness_level;
-		}
-
-		if ( in_array( strtolower( $color ), [ 'black', 'navy', 'purple', 'maroon', 'indigo', 'darkslategray', 'darkslateblue', 'darkolivegreen', 'darkgreen', 'darkblue' ], true ) ) {
-
-			$brightness_level = 0;
-
-		} elseif ( 0 === strpos( $color, '#' ) || 0 === strpos( $color, 'rgb' ) || ctype_xdigit( $color ) ) {
-
-			$color            = fusion_hex2rgb( $color );
-			$brightness_level = sqrt( pow( $color[0], 2 ) * 0.299 + pow( $color[1], 2 ) * 0.587 + pow( $color[2], 2 ) * 0.114 );
-
-		}
-
-		return (int) round( $brightness_level );
-	}
-}
-
-if ( ! function_exists( 'fusion_hex2rgb' ) ) {
-	/**
-	 * Convert Hex Code to RGB.
-	 *
-	 * @param  string $hex Color Hex Code.
-	 * @return array       RGB values.
-	 */
-	function fusion_hex2rgb( $hex ) {
-		if ( false !== strpos( $hex, 'rgb' ) ) {
-
-			$rgb_part = strstr( $hex, '(' );
-			$rgb_part = trim( $rgb_part, '(' );
-			$rgb_part = rtrim( $rgb_part, ')' );
-			$rgb_part = explode( ',', $rgb_part );
-
-			$rgb = [ $rgb_part[0], $rgb_part[1], $rgb_part[2], $rgb_part[3] ];
-
-		} elseif ( 'transparent' === $hex ) {
-			$rgb = [ '255', '255', '255', '0' ];
-		} else {
-
-			$hex = str_replace( '#', '', $hex );
-
-			if ( 3 === strlen( $hex ) ) {
-				$r = hexdec( substr( $hex, 0, 1 ) . substr( $hex, 0, 1 ) );
-				$g = hexdec( substr( $hex, 1, 1 ) . substr( $hex, 1, 1 ) );
-				$b = hexdec( substr( $hex, 2, 1 ) . substr( $hex, 2, 1 ) );
-			} else {
-				$r = hexdec( substr( $hex, 0, 2 ) );
-				$g = hexdec( substr( $hex, 2, 2 ) );
-				$b = hexdec( substr( $hex, 4, 2 ) );
-			}
-			$rgb = [ $r, $g, $b ];
-		}
-
-		return $rgb; // Returns an array with the rgb values.
-	}
-}
-
-
 if ( ! function_exists( 'avada_first_featured_image_markup' ) ) {
 	/**
 	 * Render the full markup of the first featured image, incl. image wrapper and rollover.
@@ -619,7 +550,7 @@ if ( ! function_exists( 'avada_featured_images_lightbox' ) ) {
 		$video_url = fusion_data()->post_meta( $post_id )->get( 'video_url', true );
 
 		if ( $video_url ) {
-			$video = '<a href="' . $video_url . '" class="iLightbox[gallery' . $post_id . ']"></a>';
+			$video = '<a href="' . $video_url . '" class="iLightbox[gallery' . $post_id . ']" data-link-type="video"></a>';
 		}
 
 		$i = 2;
@@ -1031,20 +962,6 @@ if ( ! function_exists( 'fusion_cached_query' ) ) {
 	}
 }
 
-if ( ! function_exists( 'fusion_flush_object_cache' ) ) {
-	/**
-	 * Deletes WP object cache.
-	 *
-	 * @since 1.2
-	 * @return void
-	 */
-	function fusion_flush_object_cache() {
-		wp_cache_flush();
-	}
-}
-add_action( 'save_post', 'fusion_flush_object_cache' );
-add_action( 'delete_post', 'fusion_flush_object_cache' );
-
 if ( ! function_exists( 'fusion_cached_get_posts' ) ) {
 	/**
 	 * Returns a cached query.
@@ -1226,23 +1143,6 @@ if ( ! function_exists( 'fusion_get_referer' ) ) {
 	 */
 	function fusion_get_referer() {
 		return wp_get_referer();
-	}
-}
-
-if ( ! function_exists( 'fusion_is_color_transparent' ) ) {
-	/**
-	 * Figure out if a color is transparent or not.
-	 *
-	 * @since 2.0
-	 * @param string $color The color we want to check.
-	 * @return bool
-	 */
-	function fusion_is_color_transparent( $color ) {
-		$color = trim( $color );
-		if ( 'transparent' === $color ) {
-			return true;
-		}
-		return ( 0 === Fusion_Color::new_color( $color )->alpha );
 	}
 }
 
@@ -1516,11 +1416,11 @@ if ( ! function_exists( 'fusion_element_attributes' ) ) {
 		$attrs = [];
 		$args  = apply_filters( 'fusion_element_attributes_args', $args, $el );
 		foreach ( $args as $prop => $val ) {
-			$attrs[] = esc_attr( $prop ) . '"' . esc_attr( $val ) . '"';
+			$attrs[] = esc_attr( $prop ) . '="' . esc_attr( $val ) . '"';
 		}
 
 		if ( ! $return ) {
-			echo esc_html( implode( ' ', $attrs ) );
+			echo implode( ' ', $attrs ); // phpcs:ignore WordPress.Security
 		}
 		return implode( ' ', $attrs );
 	}
@@ -1698,12 +1598,12 @@ if ( ! function_exists( 'avada_menu_element_add_login_box_to_nav' ) ) {
 						$output .= '<p class="fusion-menu-login-box-error">' . esc_html__( 'Login failed, please try again.', 'fusion-builder' ) . '</p>';
 					}
 					$output .= '<form action="' . esc_attr( site_url( 'wp-login.php', 'login_post' ) ) . '" name="loginform" method="post">';
-					$output .= '<p><label class="screen-reader-text hidden" for="username">' . esc_html__( 'Username:', 'fusion-builder' ) . '</label><input type="text" class="input-text" name="log" id="username" value="" placeholder="' . esc_html__( 'Username', 'fusion-builder' ) . '" /></p>';
-					$output .= '<p><label class="screen-reader-text hidden" for="password">' . esc_html__( 'Password:', 'fusion-builder' ) . '</label><input type="password" class="input-text" name="pwd" id="password" value="" placeholder="' . esc_html__( 'Password', 'fusion-builder' ) . '" /></p>';
-					$output .= '<p class="fusion-remember-checkbox"><label for="fusion-menu-login-box-rememberme"><input name="rememberme" type="checkbox" id="fusion-menu-login-box-rememberme" value="forever"> ' . esc_html__( 'Remember Me', 'fusion-builder' ) . '</label></p>';
+					$output .= '<p><label class="screen-reader-text hidden" for="username">' . esc_html__( 'Username:', 'fusion-builder' ) . '</label><input type="text" class="input-text" name="log" id="username-' . esc_attr( $args['menu_id'] ) . '" value="" placeholder="' . esc_html__( 'Username', 'fusion-builder' ) . '" /></p>';
+					$output .= '<p><label class="screen-reader-text hidden" for="password">' . esc_html__( 'Password:', 'fusion-builder' ) . '</label><input type="password" class="input-text" name="pwd" id="password-' . esc_attr( $args['menu_id'] ) . '" value="" placeholder="' . esc_html__( 'Password', 'fusion-builder' ) . '" /></p>';
+					$output .= '<p class="fusion-remember-checkbox"><label for="fusion-menu-login-box-rememberme"><input name="rememberme" type="checkbox" id="fusion-menu-login-box-rememberme-' . esc_attr( $args['menu_id'] ) . '" value="forever"> ' . esc_html__( 'Remember Me', 'fusion-builder' ) . '</label></p>';
 					$output .= '<input type="hidden" name="fusion_woo_login_box" value="true" />';
 					$output .= '<p class="fusion-login-box-submit">';
-					$output .= '<input type="submit" name="wp-submit" id="wp-submit" class="button button-small default comment-submit" value="' . esc_html__( 'Log In', 'fusion-builder' ) . '">';
+					$output .= '<input type="submit" name="wp-submit" id="wp-submit-' . esc_attr( $args['menu_id'] ) . '" class="button button-small default comment-submit" value="' . esc_html__( 'Log In', 'fusion-builder' ) . '">';
 					$output .= '<input type="hidden" name="redirect" value="' . esc_url( $referer ) . '">';
 					$output .= '</p>';
 					$output .= '</form>';
@@ -1866,7 +1766,6 @@ if ( ! function_exists( 'awb_get_responsive_type_data' ) ) {
 		$body_font_size_px = Fusion_Sanitize::convert_font_size_to_px( $body_font_size, $body_font_size );
 		$typography_factor = fusion_library()->get_option( 'typography_factor' );
 
-
 		if ( $font_size ) {
 			$font_size = fusion_library()->sanitize->get_value_with_unit( $font_size );
 		} else {
@@ -1944,5 +1843,27 @@ if ( ! function_exists( 'fusion_get_youtube_id' ) ) {
 		preg_match( '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i', $url, $matches );
 
 		return isset( $matches[1] ) ? $matches[1] : false;
+	}
+}
+
+if ( ! function_exists( 'awb_get_carousel_nav' ) ) {
+	/**
+	 * Returns the carousel navigation.
+	 *
+	 * @since 3.4
+	 * @param string $prev_class Additional CSS class for the prev button.
+	 * @param string $next_class Additional CSS class for the next button.
+	 * @return string The navigation.
+	 */
+	function awb_get_carousel_nav( $prev_class = '', $next_class = '' ) {
+		$prev_class = trim( 'fusion-nav-prev ' . $prev_class );
+		$next_class = trim( 'fusion-nav-next ' . $next_class );
+
+		$html  = '<div class="fusion-carousel-nav">';
+		$html .= '<button class="' . esc_attr( $prev_class ) . '" aria-label="' . esc_attr__( 'Previous', 'fusion-builder' ) . '"></button>';
+		$html .= '<button class="' . esc_attr( $next_class ) . '" aria-label="' . esc_attr__( 'Next', 'fusion-builder' ) . '"></button>';
+		$html .= '</div>';
+
+		return $html;
 	}
 }

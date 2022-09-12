@@ -395,6 +395,19 @@ function avada_options_section_layout( $sections ) {
 					],
 				],
 			],
+			'page_template'               => [
+				'label'       => esc_html__( 'Default Page Template', 'Avada' ),
+				'description' => esc_html__( 'Choose the default page template.', 'Avada' ),
+				'id'          => 'page_template',
+				'default'     => '100_width',
+				'type'        => 'radio-buttonset',
+				'choices'     => [
+					'100_width'  => esc_html__( '100% Width', 'Avada' ),
+					'site_width' => esc_html__( 'Site Width', 'Avada' ),
+				],
+				// No need to refresh the page.
+				'transport'   => 'postMessage',
+			],
 			'hundredp_padding'            => [
 				'label'       => esc_html__( '100% Width Padding', 'Avada' ),
 				'description' => esc_html__( 'Controls the left and right padding for page content when using 100% site width, 100% width page template or 100% width post option. This does not affect Avada Builder containers.', 'Avada' ),

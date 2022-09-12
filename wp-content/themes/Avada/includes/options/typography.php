@@ -148,6 +148,17 @@ function avada_options_section_typography( $sections ) {
 	Fusion_Dynamic_CSS::add_replace_pattern( '.avada-post-title-extras-elements-font-size', Fusion_Dynamic_CSS_Helpers::get_elements_string( $post_title_extras_typography_elements['size'] ) );
 	Fusion_Dynamic_CSS::add_replace_pattern( '.avada-post-title-extras-elements-color', Fusion_Dynamic_CSS_Helpers::get_elements_string( $post_title_extras_typography_elements['color'] ) );
 
+
+	$adobe_additional_info      = __( '<strong>NOTE:</strong> You can create a custom global font for each Adobe font, so when you want to change that font, you don\'t need to search for each element that used that font. Also note that when you change the project fonts, you need to refresh the Adobe Fonts cache.', 'Avada' );
+	$adobe_live_additional_info = '';
+	if ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() ) {
+		$adobe_live_additional_info = ' ' . __( 'To refresh the cache you need to go to global options in the admin back-end.', 'Avada' );
+	}
+	$adobe_multilingual_info = '<br /><br />' . esc_html__( 'If you use a multilingual plugin, the value of the Adobe Fonts Id used for fonts is the one from "All Languages" options page.', 'Avada' );
+
+	$adobe_info = '<div class="awb-adobe-fonts-info-wrapper">' . AWB_Adobe_Typography::get_adobe_included_fonts_display_html() . '</div><div class="fusion-redux-important-notice">' . $adobe_additional_info . $adobe_live_additional_info . $adobe_multilingual_info . '</div>';
+
+
 	$sections['typography'] = [
 		'label'    => esc_html__( 'Typography', 'Avada' ),
 		'id'       => 'heading_typography',
@@ -156,6 +167,21 @@ function avada_options_section_typography( $sections ) {
 		'icon'     => 'el-icon-fontsize',
 		'alt_icon' => 'fusiona-font-solid',
 		'fields'   => [
+			'global_typography'                 => [
+				'label'  => esc_html__( 'Global Typography', 'Avada' ),
+				'id'     => 'global_typography',
+				'type'   => 'sub-section',
+				'fields' => [
+					'typography_sets' => [
+						'label'       => esc_html__( 'Typography Sets', 'Avada' ),
+						'description' => __( 'Set your global typography sets. The sets defined here can be used from other global options, and element options. Each of the options within these sets can be individually overridden in options using the sets. <strong>IMPORTANT NOTE:</strong> If a global set that is used by other options gets deleted, these corresponding options will display the default font. Typography sets are internally stored with a fixed counter. Thus, adding a new set after deleting an old one, will set the same internal name to the new set.', 'Avada' ),
+						'id'          => 'typography_sets',
+						'default'     => AWB_Global_Typography()->get_defaults(),
+						'type'        => 'typography-sets',
+						'transport'   => 'postMessage',
+					],
+				],
+			],
 			'body_typography'                   => [
 				'label'  => esc_html__( 'Body Typography', 'Avada' ),
 				'id'     => 'body_typography',
@@ -172,6 +198,7 @@ function avada_options_section_typography( $sections ) {
 						'label'       => esc_html__( 'Body Typography', 'Avada' ),
 						'description' => esc_html__( 'These settings control the typography for all body text.', 'Avada' ),
 						'type'        => 'typography',
+						'global'      => true,
 						'choices'     => [
 							'font-family'    => true,
 							'font-size'      => true,
@@ -181,12 +208,12 @@ function avada_options_section_typography( $sections ) {
 							'color'          => true,
 						],
 						'default'     => [
-							'font-family'    => 'Open Sans',
-							'font-size'      => '16px',
+							'font-family'    => 'var(--awb-typography4-font-family)',
+							'font-size'      => 'var(--awb-typography4-font-size)',
 							'font-weight'    => '400',
-							'line-height'    => '1.8',
-							'letter-spacing' => '0',
-							'color'          => '#4a4e57',
+							'line-height'    => 'var(--awb-typography4-line-height)',
+							'letter-spacing' => 'var(--awb-typography4-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
 						],
 						'css_vars'    => [
 							[
@@ -232,7 +259,7 @@ function avada_options_section_typography( $sections ) {
 						'label'       => esc_html__( 'Link Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of all text links.', 'Avada' ),
 						'id'          => 'link_color',
-						'default'     => '#212934',
+						'default'     => 'var(--awb-color8)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -259,11 +286,13 @@ function avada_options_section_typography( $sections ) {
 						'type'        => 'custom',
 					],
 					'h1_typography'                 => [
-						'id'          => 'h1_typography',
-						'label'       => esc_html__( 'H1 Headings Typography', 'Avada' ),
-						'description' => esc_html__( 'These settings control the typography for all H1 headings.', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'h1_typography',
+						'label'                     => esc_html__( 'H1 Headings Typography', 'Avada' ),
+						'description'               => esc_html__( 'These settings control the typography for all H1 headings.', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
@@ -272,18 +301,20 @@ function avada_options_section_typography( $sections ) {
 							'color'          => true,
 							'margin-top'     => true,
 							'margin-bottom'  => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Zilla Slab',
-							'font-size'      => '54px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '64px',
 							'font-weight'    => '400',
-							'line-height'    => '1.16',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
 							'margin-top'     => '0.67em',
 							'margin-bottom'  => '0.67em',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--h1_typography-font-family',
 								'choice'   => 'font-family',
@@ -317,6 +348,10 @@ function avada_options_section_typography( $sections ) {
 								'callback' => [ 'sanitize_color', '' ],
 							],
 							[
+								'name'   => '--h1_typography-text-transform',
+								'choice' => 'text-transform',
+							],
+							[
 								'name'   => '--h1_typography-margin-top',
 								'choice' => 'margin-top',
 							],
@@ -327,11 +362,13 @@ function avada_options_section_typography( $sections ) {
 						],
 					],
 					'h2_typography'                 => [
-						'id'          => 'h2_typography',
-						'label'       => esc_html__( 'H2 Headings Typography', 'Avada' ),
-						'description' => esc_html__( 'These settings control the typography for all H2 headings.', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'h2_typography',
+						'label'                     => esc_html__( 'H2 Headings Typography', 'Avada' ),
+						'description'               => esc_html__( 'These settings control the typography for all H2 headings.', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
@@ -340,18 +377,20 @@ function avada_options_section_typography( $sections ) {
 							'color'          => true,
 							'margin-top'     => true,
 							'margin-bottom'  => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Zilla Slab',
-							'font-size'      => '40px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '48px',
 							'font-weight'    => '400',
-							'line-height'    => '1.2',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
 							'margin-top'     => '0em',
 							'margin-bottom'  => '1.1em',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--h2_typography-font-family',
 								'choice'   => 'font-family',
@@ -385,6 +424,10 @@ function avada_options_section_typography( $sections ) {
 								'callback' => [ 'sanitize_color', '' ],
 							],
 							[
+								'name'   => '--h2_typography-text-transform',
+								'choice' => 'text-transform',
+							],
+							[
 								'name'   => '--h2_typography-margin-top',
 								'choice' => 'margin-top',
 							],
@@ -395,11 +438,13 @@ function avada_options_section_typography( $sections ) {
 						],
 					],
 					'h3_typography'                 => [
-						'id'          => 'h3_typography',
-						'label'       => esc_html__( 'H3 Headings Typography', 'Avada' ),
-						'description' => esc_html__( 'These settings control the typography for all H3 headings.', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'h3_typography',
+						'label'                     => esc_html__( 'H3 Headings Typography', 'Avada' ),
+						'description'               => esc_html__( 'These settings control the typography for all H3 headings.', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
@@ -408,18 +453,20 @@ function avada_options_section_typography( $sections ) {
 							'color'          => true,
 							'margin-top'     => true,
 							'margin-bottom'  => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Zilla Slab',
-							'font-size'      => '32px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '36px',
 							'font-weight'    => '400',
-							'line-height'    => '1.3',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
 							'margin-top'     => '1em',
 							'margin-bottom'  => '1em',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--h3_typography-font-family',
 								'choice'   => 'font-family',
@@ -453,6 +500,10 @@ function avada_options_section_typography( $sections ) {
 								'callback' => [ 'sanitize_color', '' ],
 							],
 							[
+								'name'   => '--h3_typography-text-transform',
+								'choice' => 'text-transform',
+							],
+							[
 								'name'   => '--h3_typography-margin-top',
 								'choice' => 'margin-top',
 							],
@@ -463,11 +514,13 @@ function avada_options_section_typography( $sections ) {
 						],
 					],
 					'h4_typography'                 => [
-						'id'          => 'h4_typography',
-						'label'       => esc_html__( 'H4 Headings Typography', 'Avada' ),
-						'description' => esc_html__( 'These settings control the typography for all H4 headings.', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'h4_typography',
+						'label'                     => esc_html__( 'H4 Headings Typography', 'Avada' ),
+						'description'               => esc_html__( 'These settings control the typography for all H4 headings.', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
@@ -476,18 +529,20 @@ function avada_options_section_typography( $sections ) {
 							'color'          => true,
 							'margin-top'     => true,
 							'margin-bottom'  => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Zilla Slab',
-							'font-size'      => '28px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '24px',
 							'font-weight'    => '400',
-							'line-height'    => '1.36',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
 							'margin-top'     => '1.33em',
 							'margin-bottom'  => '1.33em',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--h4_typography-font-family',
 								'choice'   => 'font-family',
@@ -521,6 +576,10 @@ function avada_options_section_typography( $sections ) {
 								'callback' => [ 'sanitize_color', '' ],
 							],
 							[
+								'name'   => '--h4_typography-text-transform',
+								'choice' => 'text-transform',
+							],
+							[
 								'name'   => '--h4_typography-margin-top',
 								'choice' => 'margin-top',
 							],
@@ -531,11 +590,13 @@ function avada_options_section_typography( $sections ) {
 						],
 					],
 					'h5_typography'                 => [
-						'id'          => 'h5_typography',
-						'label'       => esc_html__( 'H5 Headings Typography', 'Avada' ),
-						'description' => esc_html__( 'These settings control the typography for all H5 headings.', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'h5_typography',
+						'label'                     => esc_html__( 'H5 Headings Typography', 'Avada' ),
+						'description'               => esc_html__( 'These settings control the typography for all H5 headings.', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
@@ -544,18 +605,20 @@ function avada_options_section_typography( $sections ) {
 							'color'          => true,
 							'margin-top'     => true,
 							'margin-bottom'  => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Zilla Slab',
-							'font-size'      => '24px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '20px',
 							'font-weight'    => '400',
-							'line-height'    => '1.4',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
 							'margin-top'     => '1.67em',
 							'margin-bottom'  => '1.67em',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--h5_typography-font-family',
 								'choice'   => 'font-family',
@@ -589,6 +652,10 @@ function avada_options_section_typography( $sections ) {
 								'callback' => [ 'sanitize_color', '' ],
 							],
 							[
+								'name'   => '--h5_typography-text-transform',
+								'choice' => 'text-transform',
+							],
+							[
 								'name'   => '--h5_typography-margin-top',
 								'choice' => 'margin-top',
 							],
@@ -599,11 +666,13 @@ function avada_options_section_typography( $sections ) {
 						],
 					],
 					'h6_typography'                 => [
-						'id'          => 'h6_typography',
-						'label'       => esc_html__( 'H6 Headings Typography', 'Avada' ),
-						'description' => esc_html__( 'These settings control the typography for all H6 headings.', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'h6_typography',
+						'label'                     => esc_html__( 'H6 Headings Typography', 'Avada' ),
+						'description'               => esc_html__( 'These settings control the typography for all H6 headings.', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
@@ -612,18 +681,20 @@ function avada_options_section_typography( $sections ) {
 							'color'          => true,
 							'margin-top'     => true,
 							'margin-bottom'  => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Zilla Slab',
-							'font-size'      => '18px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '16px',
 							'font-weight'    => '400',
-							'line-height'    => '1.5',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
 							'margin-top'     => '2.33em',
 							'margin-bottom'  => '2.33em',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--h6_typography-font-family',
 								'choice'   => 'font-family',
@@ -657,6 +728,10 @@ function avada_options_section_typography( $sections ) {
 								'callback' => [ 'sanitize_color', '' ],
 							],
 							[
+								'name'   => '--h6_typography-text-transform',
+								'choice' => 'text-transform',
+							],
+							[
 								'name'   => '--h6_typography-margin-top',
 								'choice' => 'margin-top',
 							],
@@ -667,27 +742,31 @@ function avada_options_section_typography( $sections ) {
 						],
 					],
 					'post_title_typography'         => [
-						'id'          => 'post_title_typography',
-						'label'       => esc_html__( 'Post Title Typography', 'Avada' ),
-						'description' => __( 'These settings control the typography of all post titles including archive and single posts.<br /><strong>IMPORTANT:</strong> On archive pages and in blog elements the linked post titles will use link color.', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'post_title_typography',
+						'label'                     => esc_html__( 'Post Title Typography', 'Avada' ),
+						'description'               => __( 'These settings control the typography of all post titles including archive and single posts.<br /><strong>IMPORTANT:</strong> On archive pages and in blog elements the linked post titles will use link color.', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
 							'line-height'    => true,
 							'letter-spacing' => true,
 							'color'          => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Zilla Slab',
-							'font-size'      => '32px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '48px',
 							'font-weight'    => '400',
-							'line-height'    => '1.3',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--post_title_typography-font-family',
 								'choice'   => 'font-family',
@@ -720,30 +799,38 @@ function avada_options_section_typography( $sections ) {
 								'choice'   => 'color',
 								'callback' => [ 'sanitize_color', '' ],
 							],
+							[
+								'name'   => '--post_title_typography-text-transform',
+								'choice' => 'text-transform',
+							],
 						],
 					],
 					'post_titles_extras_typography' => [
-						'id'          => 'post_titles_extras_typography',
-						'label'       => esc_html__( 'Post Title Extras Typography', 'Avada' ),
-						'description' => esc_html__( 'These settings control the typography of single post title extras such as "Comments", "Related Posts or Projects" and "Author Titles"', 'Avada' ),
-						'type'        => 'typography',
-						'choices'     => [
+						'id'                        => 'post_titles_extras_typography',
+						'label'                     => esc_html__( 'Post Title Extras Typography', 'Avada' ),
+						'description'               => esc_html__( 'These settings control the typography of single post title extras such as "Comments", "Related Posts or Projects" and "Author Titles"', 'Avada' ),
+						'type'                      => 'typography',
+						'text_transform_no_inherit' => true,
+						'global'                    => true,
+						'choices'                   => [
 							'font-family'    => true,
 							'font-size'      => true,
 							'font-weight'    => true,
 							'line-height'    => true,
 							'letter-spacing' => true,
 							'color'          => true,
+							'text-transform' => true,
 						],
-						'default'     => [
-							'font-family'    => 'Open Sans',
-							'font-size'      => '18px',
+						'default'                   => [
+							'font-family'    => 'var(--awb-typography1-font-family)',
+							'font-size'      => '20px',
 							'font-weight'    => '400',
-							'line-height'    => '1.5',
-							'letter-spacing' => '0',
-							'color'          => '#212934',
+							'line-height'    => 'var(--awb-typography1-line-height)',
+							'letter-spacing' => 'var(--awb-typography1-letter-spacing)',
+							'color'          => 'var(--awb-color8)',
+							'text-transform' => 'none',
 						],
-						'css_vars'    => [
+						'css_vars'                  => [
 							[
 								'name'     => '--post_titles_extras_typography-font-family',
 								'choice'   => 'font-family',
@@ -776,6 +863,10 @@ function avada_options_section_typography( $sections ) {
 								'choice'   => 'color',
 								'callback' => [ 'sanitize_color', '' ],
 							],
+							[
+								'name'   => '--post_titles_extras_typography-text-transform',
+								'choice' => 'text-transform',
+							],
 						],
 					],
 				],
@@ -785,13 +876,13 @@ function avada_options_section_typography( $sections ) {
 				'id'     => 'custom_webfont_typography_section',
 				'type'   => 'sub-section',
 				'fields' => [
-					'custom_fonts_info' => [
+					'custom_fonts_info'      => [
 						'label'       => '',
 						'description' => '<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> Please upload your custom fonts below. Once you upload a custom font, <strong>you will have to save your options and reload this page on your browser</strong>. After you reload the page you will be able to select your new fonts - they will be available at the top of the fonts-list in the typography controls.', 'Avada' ) . '</div>',
 						'id'          => 'custom_fonts_info',
 						'type'        => 'custom',
 					],
-					'custom_fonts'      => [
+					'custom_fonts'           => [
 						'label'       => esc_html__( 'Custom Fonts', 'Avada' ),
 						'description' => esc_html__( 'Upload a custom font to use throughout the site. All files are not necessary but are recommended for full browser support. You can upload as many custom fonts as you need. Click the "Add" button for additional upload boxes.', 'Avada' ),
 						'id'          => 'custom_fonts',
@@ -852,8 +943,33 @@ function avada_options_section_typography( $sections ) {
 							],
 						],
 					],
+					'adobe_fonts_id'         => [
+						'label'       => esc_html__( 'Adobe Fonts ID', 'Avada' ),
+						'description' => esc_html__( 'Enter the Adobe Fonts (formerly TypeKit) Web Project ID. You will need to save and reload the page.', 'Avada' ),
+						'id'          => 'adobe_fonts_id',
+						'type'        => 'text',
+						'default'     => '',
+					],
+					'adobe_cache_fonts_info' => [
+						'label'         => esc_html__( 'Adobe Fonts Reset Cache', 'Avada' ),
+						'description'   => esc_html__( 'See the added Adobe Fonts, or press the button to reset Adobe Fonts cache.' ),
+						'id'            => 'adobe_cache_fonts_info',
+						'default'       => '',
+						'type'          => 'raw',
+						'content'       => '<a class="button button-secondary" href="#" onclick="fusionResetAdobeFontsCache(event);" target="_self" >' . esc_html__( 'Refresh Adobe Fonts Cache', 'Avada' ) . '</a><span class="spinner fusion-spinner"></span>',
+						'full_width'    => false,
+						'transport'     => 'postMessage', // No need to refresh the page.
+						'hide_on_front' => true,
+					],
+					'adobe_fonts_notice'     => [
+						'label'       => '',
+						'description' => $adobe_info,
+						'id'          => 'adobe_fonts_notice',
+						'type'        => 'custom',
+					],
 				],
 			],
+
 		],
 	];
 

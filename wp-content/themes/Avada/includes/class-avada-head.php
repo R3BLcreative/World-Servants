@@ -228,30 +228,24 @@ class Avada_Head {
 	 */
 	public function insert_favicons() {
 		?>
-		<?php if ( '' !== Avada()->settings->get( 'favicon', 'url' ) ) : ?>
-			<link rel="shortcut icon" href="<?php echo esc_url_raw( Avada()->settings->get( 'favicon', 'url' ) ); ?>" type="image/x-icon" />
+		<?php if ( '' !== Avada()->settings->get( 'fav_icon', 'url' ) ) : ?>
+			<link rel="shortcut icon" href="<?php echo esc_url( Avada()->settings->get( 'fav_icon', 'url' ) ); ?>" type="image/x-icon" />
 		<?php endif; ?>
 
-		<?php if ( '' !== Avada()->settings->get( 'iphone_icon', 'url' ) ) : ?>
-			<!-- For iPhone -->
-			<link rel="apple-touch-icon" href="<?php echo esc_url_raw( Avada()->settings->get( 'iphone_icon', 'url' ) ); ?>">
+		<?php if ( '' !== Avada()->settings->get( 'fav_icon_apple_touch', 'url' ) ) : ?>
+			<!-- Apple Touch Icon -->
+			<link rel="apple-touch-icon" sizes="180x180" href="<?php echo esc_url( Avada()->settings->get( 'fav_icon_apple_touch', 'url' ) ); ?>">
 		<?php endif; ?>
 
-		<?php if ( '' !== Avada()->settings->get( 'iphone_icon_retina', 'url' ) ) : ?>
-			<!-- For iPhone Retina display -->
-			<link rel="apple-touch-icon" sizes="180x180" href="<?php echo esc_url_raw( Avada()->settings->get( 'iphone_icon_retina', 'url' ) ); ?>">
+		<?php if ( '' !== Avada()->settings->get( 'fav_icon_android', 'url' ) ) : ?>
+			<!-- Android Icon -->
+			<link rel="icon" sizes="192x192" href="<?php echo esc_url( Avada()->settings->get( 'fav_icon_android', 'url' ) ); ?>">
 		<?php endif; ?>
 
-		<?php if ( '' !== Avada()->settings->get( 'ipad_icon', 'url' ) ) : ?>
-			<!-- For iPad -->
-			<link rel="apple-touch-icon" sizes="152x152" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon', 'url' ) ); ?>">
+		<?php if ( '' !== Avada()->settings->get( 'fav_icon_edge', 'url' ) ) : ?>
+			<!-- MS Edge Icon -->
+			<meta name="msapplication-TileImage" content="<?php echo esc_url( Avada()->settings->get( 'fav_icon_edge', 'url' ) ); ?>">
 		<?php endif; ?>
-
-		<?php if ( '' !== Avada()->settings->get( 'ipad_icon_retina', 'url' ) ) : ?>
-			<!-- For iPad Retina display -->
-			<link rel="apple-touch-icon" sizes="167x167" href="<?php echo esc_url_raw( Avada()->settings->get( 'ipad_icon_retina', 'url' ) ); ?>">
-		<?php endif; ?>
-
 		<?php
 
 	}

@@ -35,7 +35,7 @@
 		</div>
 	</div>
 
-	<div {{{ _.fusionGetAttributes( wrapperAttr ) }}}>
+	<{{{ column_tag }}} {{{ _.fusionGetAttributes( wrapperAttr ) }}}>
 
 		<# if ( 'yes' === center_content && ! isFlex ) { #>
 			<div class="fusion-column-content-centered">
@@ -61,10 +61,6 @@
 		<# if ( 'yes' === center_content && ! isFlex ) { #>
 				</div>
 			</div>
-		<# } #>
-
-		<# if ( ieExtra ) { #>
-			<div {{{ _.fusionGetAttributes( ieExtra ) }}}></div>
 		<# } #>
 
 		<div class="fusion-clearfix"></div>
@@ -111,7 +107,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</{{{ column_tag }}}>
 
 	<div class="fusion-column-margins">
 		<div class="fusion-column-margin-top fusion-element-spacing">
@@ -130,11 +126,6 @@
 		<span {{{ _.fusionGetAttributes( hoverWrapperAttr ) }}}>
 			<a {{{ _.fusionGetAttributes( anchorAttr ) }}}>
 				<span {{{ _.fusionGetAttributes( hoverInnerWrapperAttr ) }}}></span>
-
-			<# if ( ieSpanExtra ) { #>
-				<span {{{ _.fusionGetAttributes( ieSpanExtra ) }}}></span>
-			<# } #>
-
 			</a>
 		</span>
 	<# } #>
@@ -145,6 +136,7 @@
 		<style type="text/css">{{{ styles }}}</style>
 		<style type="text/css" class="fusion-column-responsive-styles">{{{ responsiveStyles }}}</style>
 		{{{ filterStyle }}}
+		{{{ transformStyle }}}
 	</div>
 
 	<div class="fusion-column-spacing">

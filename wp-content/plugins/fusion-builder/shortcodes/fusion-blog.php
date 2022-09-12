@@ -161,52 +161,71 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				return [
-					'hide_on_mobile'            => fusion_builder_default_visibility( 'string' ),
-					'class'                     => '',
-					'id'                        => '',
-					'blog_grid_column_spacing'  => $fusion_settings->get( 'blog_grid_column_spacing' ),
-					'blog_grid_padding'         => $fusion_settings->get( 'blog_grid_padding' ),
-					'content_alignment'         => '',
-					'equal_heights'             => 'no',
-					'blog_grid_columns'         => $fusion_settings->get( 'blog_grid_columns' ),
-					'pull_by'                   => '',
-					'cat_slug'                  => '',
-					'tag_slug'                  => '',
-					'exclude_tags'              => '',
-					'excerpt'                   => $fusion_settings->get( 'blog_excerpt' ),
-					'excerpt_length'            => $fusion_settings->get( 'blog_excerpt_length' ),
-					'exclude_cats'              => '',
-					'grid_box_color'            => $fusion_settings->get( 'timeline_bg_color' ),
-					'grid_element_color'        => $fusion_settings->get( 'timeline_color' ),
-					'grid_separator_color'      => $fusion_settings->get( 'grid_separator_color' ),
-					'grid_separator_style_type' => $fusion_settings->get( 'grid_separator_style_type' ),
-					'layout'                    => 'large',
-					'meta_all'                  => 'yes',
-					'meta_author'               => 'yes',
-					'meta_categories'           => 'yes',
-					'meta_comments'             => 'yes',
-					'meta_date'                 => 'yes',
-					'meta_link'                 => 'yes',
-					'meta_read'                 => 'yes',
-					'meta_tags'                 => 'no',
-					'meta_type'                 => 'no',
-					'number_posts'              => '6',
-					'offset'                    => '',
-					'order'                     => 'DESC',
-					'orderby'                   => 'date',
-					'paging'                    => '',
-					'posts_per_page'            => '-1',
-					'post_status'               => '',
-					'scrolling'                 => 'infinite',
-					'show_title'                => 'yes',
-					'strip_html'                => 'yes',
-					'taxonomy'                  => 'category',
-					'thumbnail'                 => 'yes',
-					'title_link'                => 'yes',
-					'blog_masonry_grid_ratio'   => $fusion_settings->get( 'masonry_grid_ratio' ),
-					'blog_masonry_width_double' => $fusion_settings->get( 'masonry_width_double' ),
-					'excerpt_words'             => '50', // Deprecated.
-					'title'                     => '',   // Deprecated.
+					'margin_bottom'                  => '',
+					'margin_left'                    => '',
+					'margin_right'                   => '',
+					'margin_top'                     => '',
+					'hide_on_mobile'                 => fusion_builder_default_visibility( 'string' ),
+					'class'                          => '',
+					'id'                             => '',
+					'blog_grid_column_spacing'       => $fusion_settings->get( 'blog_grid_column_spacing' ),
+					'blog_grid_padding'              => $fusion_settings->get( 'blog_grid_padding' ),
+					'content_alignment'              => '',
+					'equal_heights'                  => 'no',
+					'blog_grid_columns'              => $fusion_settings->get( 'blog_grid_columns' ),
+					'pull_by'                        => '',
+					'cat_slug'                       => '',
+					'tag_slug'                       => '',
+					'exclude_tags'                   => '',
+					'excerpt'                        => $fusion_settings->get( 'blog_excerpt' ),
+					'excerpt_length'                 => $fusion_settings->get( 'blog_excerpt_length' ),
+					'exclude_cats'                   => '',
+					'grid_box_color'                 => $fusion_settings->get( 'timeline_bg_color' ),
+					'grid_element_color'             => $fusion_settings->get( 'timeline_color' ),
+					'grid_separator_color'           => $fusion_settings->get( 'grid_separator_color' ),
+					'grid_separator_style_type'      => $fusion_settings->get( 'grid_separator_style_type' ),
+					'layout'                         => 'large',
+					'meta_all'                       => 'yes',
+					'meta_author'                    => 'yes',
+					'meta_categories'                => 'yes',
+					'meta_comments'                  => 'yes',
+					'meta_date'                      => 'yes',
+					'meta_link'                      => 'yes',
+					'meta_read'                      => 'yes',
+					'meta_tags'                      => 'no',
+					'meta_type'                      => 'no',
+					'number_posts'                   => '6',
+					'offset'                         => '',
+					'order'                          => 'DESC',
+					'orderby'                        => 'date',
+					'paging'                         => '',
+					'posts_per_page'                 => '-1',
+					'post_status'                    => '',
+					'scrolling'                      => 'infinite',
+					'show_title'                     => 'yes',
+					'strip_html'                     => 'yes',
+					'taxonomy'                       => 'category',
+					'thumbnail'                      => 'yes',
+					'title_link'                     => 'yes',
+					'blog_masonry_grid_ratio'        => $fusion_settings->get( 'masonry_grid_ratio' ),
+					'blog_masonry_width_double'      => $fusion_settings->get( 'masonry_width_double' ),
+					'excerpt_words'                  => '50', // Deprecated.
+					'title'                          => '',   // Deprecated.
+					'title_size'                     => '2',
+					'timeline_title_size'            => '3',
+
+					'fusion_font_family_title_font'  => '',
+					'fusion_font_variant_title_font' => '',
+					'title_font_size'                => '',
+					'title_line_height'              => '',
+					'title_letter_spacing'           => '',
+					'title_text_transform'           => '',
+					'fusion_font_family_timeline_title_font' => '',
+					'fusion_font_variant_timeline_title_font' => '',
+					'timeline_title_font_size'       => '',
+					'timeline_title_line_height'     => '',
+					'timeline_title_letter_spacing'  => '',
+					'timeline_title_text_transform'  => '',
 				];
 			}
 
@@ -448,7 +467,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 						$featured_image_width  = fusion_get_option( 'fimg[width]' );
 						$featured_image_height = fusion_get_option( 'fimg[height]' );
 
-						$video = fusion_get_page_option( 'video', $id );
+						$video = apply_filters( 'privacy_iframe_embed', fusion_get_page_option( 'video', $id ) );
 
 						if ( has_post_thumbnail() ) {
 							$thumbnail = true;
@@ -492,10 +511,15 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 						$masonry_attributes = [];
 
 						// Set image or placeholder and correct corresponding styling.
+						$insert_bg_color = true;
 						if ( has_post_thumbnail() ) {
 							$post_thumbnail_attachment = wp_get_attachment_image_src( get_post_thumbnail_id(), 'full' );
-							$masonry_attribute_style   = 'background-image:url(' . $post_thumbnail_attachment[0] . ');';
-						} else {
+							if ( is_array( $post_thumbnail_attachment ) ) {
+								$masonry_attribute_style = 'background-image:url(' . $post_thumbnail_attachment[0] . ');';
+								$insert_bg_color         = false;
+							}
+						}
+						if ( $insert_bg_color ) {
 							$post_thumbnail_attachment = [];
 							$masonry_attribute_style   = 'background-color:#f6f6f6;';
 						}
@@ -810,6 +834,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 				if ( ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) && $this->args['blog_grid_column_spacing'] ) {
 					$html .= '<style type="text/css">.fusion-blog-shortcode-' . $this->blog_sc_counter . ' .fusion-blog-layout-grid .fusion-post-grid{padding:' . ( $defaults['blog_grid_column_spacing'] / 2 ) . 'px;}.fusion-blog-shortcode-' . $this->blog_sc_counter . ' .fusion-posts-container{margin-left: -' . ( $defaults['blog_grid_column_spacing'] / 2 ) . 'px !important; margin-right:-' . $defaults['blog_grid_column_spacing'] / 2 . 'px !important;}</style>';
 				}
+				$html .= $this->get_style_element();
 
 				$html .= '<div ' . FusionBuilder::attributes( 'blog-shortcode-posts-container' ) . '>';
 
@@ -892,6 +917,83 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 			}
 
 			/**
+			 * Get the HTML <style> element.
+			 *
+			 * @return string
+			 */
+			public function get_style_element() {
+				$style                   = '';
+				$base_class_name         = '.fusion-blog-shortcode.fusion-blog-shortcode-' . $this->blog_sc_counter;
+				$this->dynamic_css       = [];
+				$title_selector          = $base_class_name . ' .entry-title';
+				$timeline_title_selector = $base_class_name . ' .fusion-timeline-date';
+
+				$title_typography = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'title_font', 'array' );
+
+				if ( isset( $title_typography['font-family'] ) && $title_typography['font-family'] ) {
+					$this->add_css_property( $title_selector, 'font-family', $title_typography['font-family'], true );
+				}
+
+				if ( isset( $title_typography['font-weight'] ) && $title_typography['font-weight'] ) {
+					$this->add_css_property( $title_selector, 'font-weight', $title_typography['font-weight'], true );
+				}
+
+				if ( isset( $title_typography['font-style'] ) && $title_typography['font-style'] ) {
+					$this->add_css_property( $title_selector, 'font-style', $title_typography['font-style'], true );
+				}
+
+				if ( $this->args['title_font_size'] ) {
+					$this->add_css_property( $title_selector, 'font-size', $this->args['title_font_size'], true );
+				}
+
+				if ( $this->args['title_line_height'] ) {
+					$this->add_css_property( $title_selector, 'line-height', $this->args['title_line_height'], true );
+				}
+
+				if ( $this->args['title_letter_spacing'] ) {
+					$this->add_css_property( $title_selector, 'letter-spacing', $this->args['title_letter_spacing'], true );
+				}
+
+				if ( $this->args['title_text_transform'] ) {
+					$this->add_css_property( $title_selector, 'text-transform', $this->args['title_text_transform'], true );
+				}
+
+				$timeline_typography = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'timeline_title_font', 'array' );
+
+				if ( isset( $timeline_typography['font-family'] ) && $timeline_typography['font-family'] ) {
+					$this->add_css_property( $timeline_title_selector, 'font-family', $timeline_typography['font-family'], true );
+				}
+
+				if ( isset( $timeline_typography['font-weight'] ) && $timeline_typography['font-weight'] ) {
+					$this->add_css_property( $timeline_title_selector, 'font-weight', $timeline_typography['font-weight'], true );
+				}
+
+				if ( isset( $timeline_typography['font-style'] ) && $timeline_typography['font-style'] ) {
+					$this->add_css_property( $timeline_title_selector, 'font-style', $timeline_typography['font-style'], true );
+				}
+
+				if ( $this->args['timeline_title_font_size'] ) {
+					$this->add_css_property( $timeline_title_selector, 'font-size', $this->args['timeline_title_font_size'], true );
+				}
+
+				if ( $this->args['timeline_title_line_height'] ) {
+					$this->add_css_property( $timeline_title_selector, 'line-height', $this->args['timeline_title_line_height'], true );
+				}
+
+				if ( $this->args['timeline_title_letter_spacing'] ) {
+					$this->add_css_property( $timeline_title_selector, 'letter-spacing', $this->args['timeline_title_letter_spacing'], true );
+				}
+
+				if ( $this->args['timeline_title_text_transform'] ) {
+					$this->add_css_property( $timeline_title_selector, 'text-transform', $this->args['timeline_title_text_transform'], true );
+				}
+
+				$style = $this->parse_css();
+
+				return $style ? '<style>' . $style . '</style>' : '';
+			}
+
+			/**
 			 * Builds the attributes array.
 			 *
 			 * @access public
@@ -913,6 +1015,8 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 				$attr['class'] = 'fusion-blog-shortcode fusion-blog-shortcode-' . $this->blog_sc_counter . ' fusion-blog-archive ' . $blog_layout . ' fusion-blog-' . $this->args['scrolling'];
 
 				$attr = fusion_builder_visibility_atts( $this->args['hide_on_mobile'], $attr );
+
+				$attr['style'] = Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( ! $this->args['thumbnail'] ) {
 					$attr['class'] .= ' fusion-blog-no-images';
@@ -1184,10 +1288,15 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 				$element_base_padding      = 0.8;
 
 				// Set image or placeholder and correct corresponding styling.
+				$insert_bg_color = true;
 				if ( has_post_thumbnail() ) {
 					$post_thumbnail_attachment = wp_get_attachment_image_src( get_post_thumbnail_id(), 'full' );
-					$masonry_attribute_style   = $lazy_load ? '' : 'background-image:url(' . $post_thumbnail_attachment[0] . ');';
-				} else {
+					if ( is_array( $post_thumbnail_attachment ) ) {
+						$masonry_attribute_style = $lazy_load ? '' : 'background-image:url(' . $post_thumbnail_attachment[0] . ');';
+						$insert_bg_color         = false;
+					}
+				}
+				if ( $insert_bg_color ) {
 					$post_thumbnail_attachment = [];
 					$masonry_attribute_style   = 'background-color:#f6f6f6;';
 				}
@@ -1204,7 +1313,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 				$masonry_column_spacing = ( (int) $this->args['blog_grid_column_spacing'] ) . 'px';
 
 				// Calculate the correct size of the image wrapper container, based on orientation and column spacing.
-				if ( class_exists( 'Fusion_Sanitize' ) && class_exists( 'Fusion_Color' ) && ! fusion_is_color_transparent( $this->args['grid_element_color'] ) ) {
+				if ( class_exists( 'Fusion_Sanitize' ) && class_exists( 'Fusion_Color' ) && ! Fusion_Color::new_color( $this->args['grid_element_color'] )->is_color_transparent() ) {
 
 					$masonry_column_offset = ' - ' . ( (int) $this->args['blog_grid_column_spacing'] / 2 ) . 'px';
 					if ( false !== strpos( $element_orientation_class, 'fusion-element-portrait' ) ) {
@@ -1424,7 +1533,8 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 					$pre_title_content .= '<div ' . FusionBuilder::attributes( 'fusion-timeline-arrow' ) . ' style="color:' . $this->args['grid_element_color'] . ';"></div>';
 				}
 				if ( '' !== $link ) {
-					$link = '<h2 ' . FusionBuilder::attributes( 'blog-shortcode-post-title' ) . '>' . $link . '</h2>';
+					$title_tag = $this->get_title_tag( 'post' );
+					$link      = '<' . $title_tag . ' ' . FusionBuilder::attributes( 'blog-shortcode-post-title' ) . '>' . $link . '</' . $title_tag . '>';
 				}
 				$html = $pre_title_content . $link . $meta_data . $content_sep;
 
@@ -1473,9 +1583,10 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 
 					if ( 'masonry' === $this->args['layout'] ) {
 						$color     = Fusion_Color::new_color( $this->args['grid_box_color'] );
-						$color_css = $color->to_css( 'rgba' );
-						if ( 0 === $color->alpha ) {
-							$color_css = $color->to_css( 'rgb' );
+						$color_css = $color->to_css_var_or_rgba();
+						if ( $color->is_color_transparent() ) {
+							$color_css = $color->get_new( 'alpha', 1 );
+							$color_css = $color_css->to_css_var_or_rgba();
 						}
 						$attr['style'] .= 'background-color:' . $color_css . ';';
 					}
@@ -1502,14 +1613,14 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 
 				if ( 'masonry' === $this->args['layout'] ) {
 					$color     = Fusion_Color::new_color( $this->args['grid_box_color'] );
-					$color_css = $color->to_css( 'rgba' );
-					if ( 0 === $color->alpha ) {
-						$color_css = $color->to_css( 'rgb' );
+					$color_css = $color->to_css_var_or_rgba();
+					if ( $color->is_color_transparent() ) {
+						$color_css = $color->get_new( 'alpha', 1 );
+						$color_css = $color_css->to_css_var_or_rgba();
 					}
 					$attr['style'] = 'background-color:' . $color_css . ';';
 
-					$element_color = Fusion_Color::new_color( $this->args['grid_element_color'] );
-					if ( fusion_is_color_transparent( $this->args['grid_element_color'] ) ) {
+					if ( Fusion_Color::new_color( $this->args['grid_element_color'] )->is_color_transparent() ) {
 						$attr['class'] .= ' fusion-masonary-is-transparent ';
 						$attr['style'] .= 'border:none;';
 					} else {
@@ -1517,18 +1628,17 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 					}
 				} elseif ( 'grid' === $this->args['layout'] ) {
 					$color         = Fusion_Color::new_color( $this->args['grid_box_color'] );
-					$color_css     = $color->to_css( 'rgba' );
+					$color_css     = $color->to_css_var_or_rgba();
 					$attr['style'] = 'background-color:' . $color_css . ';';
 
-					$element_color = Fusion_Color::new_color( $this->args['grid_element_color'] );
-					if ( fusion_is_color_transparent( $this->args['grid_element_color'] ) ) {
+					if ( Fusion_Color::new_color( $this->args['grid_element_color'] )->is_color_transparent() ) {
 						$attr['style'] .= 'border:none;';
 					} else {
 						$attr['style'] .= 'border:1px solid ' . $this->args['grid_element_color'] . ';border-bottom-width:3px;';
 					}
 				} elseif ( 'timeline' === $this->args['layout'] ) {
 					$color         = Fusion_Color::new_color( $this->args['grid_box_color'] );
-					$color_css     = $color->to_css( 'rgba' );
+					$color_css     = $color->to_css_var_or_rgba();
 					$attr['style'] = 'background-color:' . $color_css . ';';
 				}
 				return $attr;
@@ -1652,7 +1762,8 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 						$inner_content = '</div>';
 					}
 
-					$inner_content .= '<h3 ' . FusionBuilder::attributes( 'fusion-timeline-date' ) . ' style="background-color:' . $this->args['grid_element_color'] . ';">' . get_the_date( $fusion_settings->get( 'timeline_date_format' ) ) . '</h3>';
+					$timeline_size  = $this->get_title_tag( 'timeline_title' );
+					$inner_content .= '<' . $timeline_size . ' ' . FusionBuilder::attributes( 'fusion-timeline-date' ) . ' style="background-color:' . $this->args['grid_element_color'] . ';">' . get_the_date( $fusion_settings->get( 'timeline_date_format' ) ) . '</' . $timeline_size . '>';
 					$inner_content .= '<div class="fusion-collapse-month">';
 				}
 
@@ -1769,6 +1880,32 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 			 */
 			public function page_links() {
 				fusion_link_pages();
+			}
+
+			/**
+			 * Get the tag of the title.
+			 *
+			 * @param string $title_type Either 'post' or 'timeline_title'.
+			 * @return string
+			 */
+			public function get_title_tag( $title_type ) {
+				if ( 'post' === $title_type ) {
+					$tag_option = $this->args['title_size'];
+					if ( ! $tag_option ) {
+						return 'h2';
+					}
+				} elseif ( 'timeline_title' === $title_type ) {
+					$tag_option = $this->args['timeline_title_size'];
+					if ( ! $tag_option ) {
+						return 'h3';
+					}
+				}
+
+				if ( is_numeric( $tag_option ) ) {
+					return 'h' . $tag_option;
+				}
+
+				return $tag_option;
 			}
 
 			/**
@@ -1899,7 +2036,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 								'label'       => esc_attr__( 'Load More Posts Button Background Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the background color of the load more button for ajax post loading for blog elements.', 'fusion-core' ),
 								'id'          => 'blog_element_load_more_posts_button_bg_color',
-								'default'     => 'rgba(242,243,245,0.7)',
+								'default'     => 'var(--awb-color7)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -1913,7 +2050,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 								'label'       => esc_attr__( 'Load More Posts Button Text Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the text color of the load more button for ajax post loading for blog elements.', 'fusion-core' ),
 								'id'          => 'blog_element_load_more_posts_button_text_color',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -1927,7 +2064,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 								'label'       => esc_attr__( 'Load More Posts Button Hover Background Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the hover background color of the load more button for ajax post loading for blog elements.', 'fusion-core' ),
 								'id'          => 'blog_element_load_more_posts_hover_button_bg_color',
-								'default'     => '#f2f3f5',
+								'default'     => 'var(--awb-color5)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -1941,7 +2078,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 								'label'       => esc_attr__( 'Load More Posts Hover Button Text Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the hover text color of the load more button for ajax post loading for blog elements.', 'fusion-core' ),
 								'id'          => 'blog_element_load_more_posts_hover_button_text_color',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -2034,7 +2171,7 @@ function fusion_element_blog() {
 				'icon'       => 'fusiona-blog',
 				'preview'    => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-blog-preview.php',
 				'preview_id' => 'fusion-builder-block-module-blog-preview-template',
-				'help_url'   => 'https://theme-fusion.com/documentation/fusion-builder/elements/blog-element/',
+				'help_url'   => 'https://theme-fusion.com/documentation/avada/elements/blog-element/',
 				'params'     => [
 					[
 						'type'        => 'select',
@@ -2424,6 +2561,112 @@ function fusion_element_blog() {
 					],
 					[
 						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Title Size', 'fusion-builder' ),
+						'description' => esc_attr__( 'Choose HTML tag of the title heading, either div or the heading tag, h1-h6.', 'fusion-builder' ),
+						'param_name'  => 'title_size',
+						'value'       => [
+							'1'   => 'H1',
+							'2'   => 'H2',
+							'3'   => 'H3',
+							'4'   => 'H4',
+							'5'   => 'H5',
+							'6'   => 'H6',
+							'div' => 'DIV',
+						],
+						'default'     => '2',
+						'dependency'  => [
+							[
+								'element'  => 'title',
+								'value'    => 'no',
+								'operator' => '!=',
+							],
+						],
+					],
+					[
+						'type'             => 'typography',
+						'remove_from_atts' => true,
+						'global'           => true,
+						'heading'          => esc_attr__( 'Post Title Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the title typography', 'fusion-builder' ),
+						'param_name'       => 'title_typography',
+						'choices'          => [
+							'font-family'    => 'title_font',
+							'font-size'      => 'title_font_size',
+							'line-height'    => 'title_line_height',
+							'letter-spacing' => 'title_letter_spacing',
+							'text-transform' => 'title_text_transform',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '',
+							'font-size'      => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'text-transform' => '',
+						],
+						'dependency'       => [
+							[
+								'element'  => 'title',
+								'value'    => 'no',
+								'operator' => '!=',
+							],
+						],
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Timeline Title Size', 'fusion-builder' ),
+						'description' => esc_attr__( 'Choose HTML tag of the timeline title heading, either div or the heading tag, h1-h6.', 'fusion-builder' ),
+						'param_name'  => 'timeline_title_size',
+						'value'       => [
+							'1'   => 'H1',
+							'2'   => 'H2',
+							'3'   => 'H3',
+							'4'   => 'H4',
+							'5'   => 'H5',
+							'6'   => 'H6',
+							'div' => 'DIV',
+						],
+						'default'     => '3',
+						'dependency'  => [
+							[
+								'element'  => 'layout',
+								'value'    => 'timeline',
+								'operator' => '==',
+							],
+						],
+					],
+					[
+						'type'             => 'typography',
+						'remove_from_atts' => true,
+						'global'           => true,
+						'heading'          => esc_attr__( 'Timeline Title Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the timeline title typography', 'fusion-builder' ),
+						'param_name'       => 'timeline_title_typography',
+						'choices'          => [
+							'font-family'    => 'timeline_title_font',
+							'font-size'      => 'timeline_title_font_size',
+							'line-height'    => 'timeline_title_line_height',
+							'letter-spacing' => 'timeline_title_letter_spacing',
+							'text-transform' => 'timeline_title_text_transform',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '',
+							'font-size'      => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'text-transform' => '',
+						],
+						'dependency'       => [
+							[
+								'element'  => 'layout',
+								'value'    => 'timeline',
+								'operator' => '==',
+							],
+						],
+					],
+					[
+						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Link Title To Post', 'fusion-builder' ),
 						'description' => esc_attr__( 'Choose if the title should be a link to the single post page.', 'fusion-builder' ),
 						'default'     => 'yes',
@@ -2729,7 +2972,7 @@ function fusion_element_blog() {
 					[
 						'type'        => 'select',
 						'heading'     => esc_attr__( 'Grid Separator Style', 'fusion-builder' ),
-						'description' => __( 'Controls the line style of grid separators. <strong>Note:</strong> Separators will display, when excerpt/content or meta data below the separators is displayed.', 'fusion-builder' ),
+						'description' => __( 'Controls the line style of grid separators. <strong>NOTE:</strong> Separators will display, when excerpt/content or meta data below the separators is displayed.', 'fusion-builder' ),
 						'param_name'  => 'grid_separator_style_type',
 						'value'       => [
 							''              => esc_attr__( 'Default', 'fusion-builder' ),
@@ -2839,6 +3082,19 @@ function fusion_element_blog() {
 								'value'    => 'large alternate',
 								'operator' => '!=',
 							],
+						],
+					],
+					[
+						'type'             => 'dimension',
+						'remove_from_atts' => true,
+						'heading'          => esc_attr__( 'Margin', 'fusion-builder' ),
+						'description'      => esc_attr__( 'In pixels or percentage, ex: 10px or 10%.', 'fusion-builder' ),
+						'param_name'       => 'margin',
+						'value'            => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
 						],
 					],
 					[

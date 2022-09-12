@@ -401,10 +401,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_related' ) ) {
 					 * Add navigation if needed.
 					 */
 					if ( true === $this->args['related_posts_navigation'] ) {
-						$content .= '<div class="fusion-carousel-nav">';
-						$content .= '<span class="fusion-nav-prev"></span>';
-						$content .= '<span class="fusion-nav-next"></span>';
-						$content .= '</div>';
+						$content .= awb_get_carousel_nav();
 					}
 
 					$content .= '</div><!-- fusion-carousel-positioner -->';

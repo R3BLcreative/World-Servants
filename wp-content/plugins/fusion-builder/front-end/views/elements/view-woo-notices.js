@@ -188,6 +188,16 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.addCssProperty( selectors, 'color', values.icon_color );
 				}
 
+				// Remove default cart icon styles.
+				selectors = [
+					this.baseSelector + ' .woocommerce-message .wc-forward:before',
+					this.baseSelector + ' .woocommerce-info .wc-forward:before'
+				];
+				if ( ! this.isDefault( 'cart_icon_style' ) ) {
+					this.addCssProperty( selectors, 'content', '""' );
+					this.addCssProperty( selectors, 'margin-right', '0' );
+				}
+
 				// Link & Hover styles.
 				selectors = [
 					this.baseSelector + ' .woocommerce-info .wc-forward',

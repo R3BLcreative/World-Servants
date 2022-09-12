@@ -1,4 +1,4 @@
-/* global fusionGlobalManager, fusionBuilderText, fusionAllElements, FusionEvents, FusionPageBuilderViewManager, FusionPageBuilderApp, FusionPageBuilderElements, FusionApp */
+/* global fusionGlobalManager, fusionBuilderText, fusionAppConfig, fusionAllElements, FusionEvents, FusionPageBuilderViewManager, FusionPageBuilderApp, FusionPageBuilderElements, FusionApp */
 /* eslint no-unused-vars: 0 */
 var FusionPageBuilder = FusionPageBuilder || {};
 
@@ -17,7 +17,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				'click .fusion-builder-column-remove': 'removeColumn',
 				'click .fusion-builder-column-clone': 'cloneColumn',
 				'click .fusion-builder-column-size': 'sizesShow',
-				'click .column-size': 'sizeSelectWirefame',
 				'click .fusion-builder-column-drag': 'preventDefault'
 			},
 
@@ -65,8 +64,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				setTimeout( function() {
 					self.droppableColumn();
-					self.sortableElements();
-					self.disableSortableElements();
 				}, 100 );
 
 				return this;
@@ -108,61 +105,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					hoverClass: 'ui-droppable-active',
 					accept: '.fusion-builder-column-inner',
 					drop: function( event, ui ) {
-						var parentCid,
-							destinationRow,
-							columnCid      = ui.draggable.data( 'cid' ),
-							columnView     = FusionPageBuilderViewManager.getView( columnCid ),
-							originalCid    = columnView.model.get( 'parent' ),
-							$target        = $el,
-							originalView,
-							newIndex;
-
-						if ( 'large' !== FusionApp.getPreviewWindowSize() && 'undefined' !== typeof self.isFlex && true === self.isFlex ) {
-
-							// Update columns' order.
-							FusionPageBuilderViewManager.getView( self.model.get( 'parent' ) )._updateResponsiveColumnsOrder(
-								ui.draggable,
-								$target.closest( '.fusion-builder-row' ).children( '.fusion-builder-column-inner' ),
-								parseInt( jQuery( event.target ).closest( '.fusion-builder-column-inner' ).data( 'cid' ) ),
-								jQuery( event.target ).hasClass( 'target-after' )
-							);
-
-							return;
-						}
-
-						// Move the actual html.
-						if ( jQuery( event.target ).hasClass( 'target-after' ) ) {
-							$target.after( ui.draggable );
-						} else {
-							$el.before( ui.draggable );
-						}
-
-						parentCid      = ui.draggable.closest( '.fusion-builder-row-content' ).data( 'cid' );
-						destinationRow = FusionPageBuilderViewManager.getView( parentCid );
-
-						newIndex = ui.draggable.parent().children( '.fusion-builder-column-inner' ).index( ui.draggable );
-						FusionPageBuilderApp.onDropCollectionUpdate( columnView.model, newIndex, parentCid );
-
-						// Update destination row which is this current one.
-						destinationRow.setRowData();
-
-						// If destination row and original row are different, update original as well.
-						if ( parentCid !== originalCid ) {
-							originalView = FusionPageBuilderViewManager.getView( originalCid );
-							originalView.setRowData();
-						}
-
-						FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.column + ' order changed' );
-
-						setTimeout( function() {
-							// If different container type we re-render so that it corrects for new situation.
-							if ( 'object' !== typeof originalView || FusionPageBuilderApp.sameContainerTypes( originalView.model.get( 'parent' ), destinationRow.model.get( 'parent' ) ) ) {
-								columnView.droppableColumn();
-							} else {
-								FusionEvents.trigger( 'fusion-close-settings-' + columnView.model.get( 'cid' ) );
-								columnView.reRender();
-							}
-						}, 300 );
+						var handleColumnNestedDrop = self.handleColumnNestedDrop.bind( self );
+						handleColumnNestedDrop( ui.draggable, $el, jQuery( event.target ) );
 					}
 				} );
 
@@ -171,73 +115,97 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					hoverClass: 'ui-droppable-active',
 					accept: '.fusion-builder-live-element',
 					drop: function( event, ui ) {
-						var parentCid   = self.model.get( 'cid' ),
-							elementCid  = ui.draggable.data( 'cid' ),
-							elementView = FusionPageBuilderViewManager.getView( elementCid ),
-							newIndex,
-							MultiGlobalArgs;
-
-						// Move the actual html.
-						$el.find( '.fusion-nested-column-content' ).append( ui.draggable );
-
-						newIndex = ui.draggable.parent().children( '.fusion-builder-live-element' ).index( ui.draggable );
-
-						FusionPageBuilderApp.onDropCollectionUpdate( elementView.model, newIndex, parentCid );
-
-						// Save history state
-						FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.moved + ' ' + fusionAllElements[ elementView.model.get( 'element_type' ) ].name + ' ' + fusionBuilderText.element );
-
-						// Handle multiple global elements.
-						MultiGlobalArgs = {
-							currentModel: elementView.model,
-							handleType: 'save',
-							attributes: elementView.model.attributes
-						};
-						fusionGlobalManager.handleMultiGlobal( MultiGlobalArgs );
-
-						FusionEvents.trigger( 'fusion-content-changed' );
-
-						self._equalHeights();
+						var handleElementDropInsideColumn = self.handleElementDropInsideColumn.bind( self );
+						handleElementDropInsideColumn( ui.draggable, $el );
 					}
 				} );
-
-				// If we are in wireframe mode, then disable.
-				if ( FusionPageBuilderApp.wireframeActive ) {
-					this.disableDroppableColumn();
-				}
 			},
 
-			/**
-			 * Destroy the droppable and draggable.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			disableDroppableColumn: function() {
-				var $el         = this.$el,
-					$droppables = $el.find( '.fusion-column-target' );
+			handleElementDropInsideColumn: function( $element, $targetEl ) {
+				var parentCid   = this.model.get( 'cid' ),
+					elementCid  = $element.data( 'cid' ),
+					elementView = FusionPageBuilderViewManager.getView( elementCid ),
+					newIndex,
+					MultiGlobalArgs;
 
-				if ( 'undefined' !== typeof $el.draggable( 'instance' ) ) {
-					$el.draggable( 'destroy' );
-				}
+				// Move the actual html.
+				$targetEl.find( '.fusion-nested-column-content' ).append( $element );
 
-				if ( 'undefined' !== typeof $droppables.droppable( 'instance' ) ) {
-					$droppables.droppable( 'destroy' );
-				}
+				newIndex = $element.parent().children( '.fusion-builder-live-element' ).index( $element );
 
-				if ( 'undefined' !== typeof $el.find( '.fusion-element-target-column' ).droppable( 'instance' ) ) {
-					$el.find( '.fusion-element-target-column' ).droppable( 'destroy' );
-				}
+				FusionPageBuilderApp.onDropCollectionUpdate( elementView.model, newIndex, parentCid );
+
+				// Save history state
+				FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.moved + ' ' + fusionAllElements[ elementView.model.get( 'element_type' ) ].name + ' ' + fusionBuilderText.element );
+
+				// Handle multiple global elements.
+				MultiGlobalArgs = {
+					currentModel: elementView.model,
+					handleType: 'save',
+					attributes: elementView.model.attributes
+				};
+				fusionGlobalManager.handleMultiGlobal( MultiGlobalArgs );
+
+				FusionEvents.trigger( 'fusion-content-changed' );
+
+				this._equalHeights();
 			},
 
-			/**
-			 * Enable the droppable and draggable.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			enableDroppableColumn: function() {
-				this.droppableColumn();
+			handleColumnNestedDrop: function( $column, $targetEl, $dropTarget ) {
+				var parentCid,
+					destinationRow,
+					columnCid      = $column.data( 'cid' ),
+					columnView     = FusionPageBuilderViewManager.getView( columnCid ),
+					originalCid    = columnView.model.get( 'parent' ),
+					originalView,
+					newIndex;
+
+				if ( 'large' !== FusionApp.getPreviewWindowSize() && 'undefined' !== typeof this.isFlex && true === this.isFlex ) {
+
+					// Update columns' order.
+					FusionPageBuilderViewManager.getView( this.model.get( 'parent' ) )._updateResponsiveColumnsOrder(
+						$column,
+						$targetEl.closest( '.fusion-builder-row' ).children( '.fusion-builder-column-inner' ),
+						parseInt( jQuery( $dropTarget ).closest( '.fusion-builder-column-inner' ).data( 'cid' ) ),
+						jQuery( $dropTarget ).hasClass( 'target-after' )
+					);
+
+					return;
+				}
+
+				// Move the actual html.
+				if ( jQuery( $dropTarget ).hasClass( 'target-after' ) ) {
+					$targetEl.after( $column );
+				} else {
+					$targetEl.before( $column );
+				}
+
+				parentCid      = $column.closest( '.fusion-builder-row-content' ).data( 'cid' );
+				destinationRow = FusionPageBuilderViewManager.getView( parentCid );
+
+				newIndex = $column.parent().children( '.fusion-builder-column-inner' ).index( $column );
+				FusionPageBuilderApp.onDropCollectionUpdate( columnView.model, newIndex, parentCid );
+
+				// Update destination row which is this current one.
+				destinationRow.setRowData();
+
+				// If destination row and original row are different, update original as well.
+				if ( parentCid !== originalCid ) {
+					originalView = FusionPageBuilderViewManager.getView( originalCid );
+					originalView.setRowData();
+				}
+
+				FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.column + ' Order Changed' );
+
+				setTimeout( function() {
+					// If different container type we re-render so that it corrects for new situation.
+					if ( 'object' !== typeof originalView || FusionPageBuilderApp.sameContainerTypes( originalView.model.get( 'parent' ), destinationRow.model.get( 'parent' ) ) ) {
+						columnView.droppableColumn();
+					} else {
+						FusionEvents.trigger( 'fusion-close-settings-' + columnView.model.get( 'cid' ) );
+						columnView.reRender();
+					}
+				}, 300 );
 			},
 
 			/**
@@ -255,9 +223,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 *
 			 * @since 2.0.0
 			 * @param {Object} event - The event triggering the column removal.
+			 * @param {bool} forceManually - Force manually, even if it's not an event, to update history and trigger content changes.
 			 * @return {void}
 			 */
-			removeColumn: function( event ) {
+			removeColumn: function( event, forceManually ) {
 				var modules,
 					row = FusionPageBuilderViewManager.getView( this.model.get( 'parent' ) ),
 					parentCid = this.$el.closest( '.fusion-builder-column-outer' ).data( 'cid' );
@@ -287,7 +256,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				row.setRowData();
 
 				// If the column is deleted manually
-				if ( event ) {
+				if ( event || forceManually ) {
 					FusionEvents.trigger( 'fusion-content-changed' );
 				}
 			},
@@ -387,9 +356,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 *
 			 * @since 2.0.0
 			 * @param {Object} event - The event.
+			 * @param {bool} forceManually - Force manually, even if it's not an event, to update history and trigger content changes.
 			 * @return {void}
 			 */
-			cloneColumn: function( event ) {
+			cloneColumn: function( event, forceManually ) {
 				var columnAttributes = jQuery.extend( true, {}, this.model.attributes ),
 					row              = FusionPageBuilderViewManager.getView( this.model.get( 'parent' ) ),
 					$thisColumn;
@@ -441,7 +411,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				} );
 
 				// If column is cloned manually
-				if ( event ) {
+				if ( event || forceManually ) {
 
 					// Save history state
 					FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.cloned + ' ' + fusionBuilderText.column );
@@ -452,126 +422,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					FusionEvents.trigger( 'fusion-content-changed' );
 				}
 				this._refreshJs();
-			},
-
-			/**
-			 * Changes the column size.
-			 *
-			 * @since 2.0.0
-			 * @param {Object} event - The event.
-			 * @return {void}
-			 */
-			sizeSelectWirefame: function( event ) {
-				var $thisEl = false,
-
-					// Get current column size
-					size = this.model.attributes.params.type,
-
-					// New column size.
-					newSize = '',
-
-					// New column size text.
-					columnNewSizeText = '',
-
-					// New fraction size.
-					fractionNewSize = '',
-
-					columnSizeText = this.getColumnSizeText( size ),
-					innerColumnsString = '',
-					innerRowWrapper = FusionPageBuilderViewManager.getView( this.model.get( 'parent' ) );
-
-				if ( 'undefined' === typeof event ) {
-					return;
-				}
-
-				event.preventDefault();
-
-				$thisEl = jQuery( event.currentTarget );
-				newSize = $thisEl.attr( 'data-column-size' );
-
-				if ( 'undefined' !== typeof newSize ) {
-
-					fractionNewSize   = newSize.replace( '_', '/' );
-					columnNewSizeText = this.getColumnSizeText( newSize ),
-
-					// Set new size.
-					this.$el.attr( 'data-column-size', newSize );
-
-					// Change css size class.
-					this.$el.removeClass( columnSizeText );
-					this.$el.removeClass( size );
-					this.$el.removeClass( 'fusion-builder-column-' + size );
-					this.$el.removeClass( 'fusion_builder_column_' + size );
-					this.$el.removeClass( 'fusion_builder_column_inner_' + size );
-
-					this.$el.addClass( columnNewSizeText );
-					this.$el.addClass( newSize );
-					this.$el.addClass( 'fusion-builder-column-' + newSize );
-					this.$el.addClass( 'fusion_builder_column_' + newSize );
-
-					this.$el.find( '.fusion-builder-resize-inner-column' ).text( fractionNewSize );
-
-					setTimeout( function() {
-						innerRowWrapper.$el.find( '.fusion-builder-column-inner' ).each( function() {
-							innerColumnsString += jQuery( this ).attr( 'data-column-size' ).replace( '_', '/' ) + ' + ';
-						} );
-
-						innerRowWrapper.$el.find( '.fusion-builder-module-preview p' ).html( innerColumnsString.slice( 0, innerColumnsString.length - 3 ) );
-					}, 100 );
-				}
-
-				this.sizeSelect( event );
-			},
-
-			/**
-			 * Returns the colum size class name.
-			 *
-			 * @since 2.0.0
-			 * @param {Object} event - The event.
-			 * @return {void}
-			 */
-			getColumnSizeText: function( size ) {
-				var sizeText = '';
-				switch ( size ) {
-				case '1_1':
-					sizeText = 'fusion-one-full';
-					break;
-				case '1_4':
-					sizeText = 'fusion-one-fourth';
-					break;
-				case '3_4':
-					sizeText = 'fusion-three-fourth';
-					break;
-				case '1_2':
-					sizeText = 'fusion-one-half';
-					break;
-				case '1_3':
-					sizeText = 'fusion-one-third';
-					break;
-				case '2_3':
-					sizeText = 'fusion-two-third';
-					break;
-				case '1_5':
-					sizeText = 'fusion-one-fifth';
-					break;
-				case '2_5':
-					sizeText = 'fusion-two-fifth';
-					break;
-				case '3_5':
-					sizeText = 'fusion-three-fifth';
-					break;
-				case '4_5':
-					sizeText = 'fusion-four-fifth';
-					break;
-				case '5_6':
-					sizeText = 'fusion-five-sixth';
-					break;
-				case '1_6':
-					sizeText = 'fusion-one-sixth';
-					break;
-				}
-
-				return sizeText;
 			},
 
 			/**
@@ -641,38 +491,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
-			 * Initialize element sortable.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			sortableElements: function() {
-				var self = this;
-
-				this.$el.find( '.fusion-builder-column-content' ).sortable( {
-					items: '.fusion-builder-live-element',
-					connectWith: '.fusion-builder-column-inner .fusion-builder-column-content',
-					cancel: '.fusion-builder-settings, .fusion-builder-clone, .fusion-builder-remove, .fusion-builder-element-save, .fusion-builder-add-element, .fusion-builder-insert-column, .fusion-builder-save-module-dialog, .fusion-builder-inner-row-close',
-					tolerance: 'pointer',
-					appendTo: self.$el.find( '.fusion-builder-column-content' ).parent(),
-					helper: 'clone',
-
-					over: function( event ) {
-						self.onSortOver( event );
-					},
-
-					update: function( event, ui ) {
-						self.onSortUpdate( event, ui );
-					},
-
-					stop: function( event, ui ) {
-						self.onSortStop( event, ui );
-					}
-
-				} );
-			},
-
-			/**
 			 * Checks if column layout type is block.
 			 *
 			 * @since 3.0.0
@@ -691,22 +509,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			getColumnContent: function() {
 				var columnParams   = {},
 					shortcode      = '',
-					self           = this,
-					plugins        = 'object' === typeof FusionApp.data.plugins_active ? FusionApp.data.plugins_active : false,
-					metaValue      = 'undefined' !== typeof FusionApp.data.postMeta._fusion.studio_replace_params ? FusionApp.data.postMeta._fusion.studio_replace_params : '',
-					elementType    = this.model.get( 'element_type' ),
 					columnAttributesCheck;
-
-				// If studio active.
-				if ( false !== plugins && true === plugins.awb_studio  && 'undefined' !== elementType && 'yes' === metaValue ) {
-
-					// remove BC param.
-					if ( 'undefined' !== typeof fusionAllElements[ elementType ].defaults.padding ) {
-						delete fusionAllElements[ elementType ].defaults.padding;
-					}
-
-					this.model.set( 'params', jQuery.extend( true, {}, fusionAllElements[ elementType ].defaults, _.fusionCleanParameters( this.model.get( 'params' ) ) ) );
-				}
 
 				_.each( this.model.get( 'params' ), function( value, name ) {
 					columnParams[ name ] = ( 'undefined' === value || 'undefined' === typeof value ) ? '' : value;
@@ -733,7 +536,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				shortcode += '[fusion_builder_column_inner type="' + columnParams.type + '"';
 
 				_.each( columnParams, function( value, name ) {
-					shortcode += ' ' + name + '="' + FusionPageBuilderApp.getParamValue( name, value, self.model ) + '"';
+					if ( ( 'on' === fusionAppConfig.removeEmptyAttributes && '' !== value ) || 'off' === fusionAppConfig.removeEmptyAttributes ) {
+						shortcode += ' ' + name + '="' + value + '"';
+					}
 				} );
 
 				shortcode += ']';
@@ -747,6 +552,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				return shortcode;
 			}
+
 		} );
 	} );
 }( jQuery ) );

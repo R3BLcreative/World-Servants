@@ -81,30 +81,45 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				$parent = [
-					'hide_on_mobile'      => fusion_builder_default_visibility( 'string' ),
-					'class'               => '',
-					'id'                  => '',
-					'columns'             => '1',
-					'circle'              => '',
-					'circle_color'        => $fusion_settings->get( 'icon_circle_color' ),
-					'circle_border_color' => $fusion_settings->get( 'icon_border_color' ),
-					'equal_heights'       => $fusion_settings->get( 'flip_boxes_equal_heights' ),
-					'flip_direction'      => $fusion_settings->get( 'flip_boxes_flip_direction' ),
-					'flip_effect'         => $fusion_settings->get( 'flip_boxes_flip_effect' ),
-					'flip_duration'       => $fusion_settings->get( 'flip_boxes_flip_duration' ),
-					'icon'                => '',
-					'icon_color'          => $fusion_settings->get( 'icon_color' ),
-					'icon_flip'           => '',
-					'icon_rotate'         => '',
-					'icon_spin'           => '',
-					'image'               => '',
-					'image_id'            => '',
-					'image_max_width'     => '',
+					'hide_on_mobile'                       => fusion_builder_default_visibility( 'string' ),
+					'class'                                => '',
+					'id'                                   => '',
+					'columns'                              => '1',
+					'circle'                               => '',
+					'circle_color'                         => $fusion_settings->get( 'icon_circle_color' ),
+					'circle_border_color'                  => $fusion_settings->get( 'icon_border_color' ),
+					'equal_heights'                        => $fusion_settings->get( 'flip_boxes_equal_heights' ),
+					'front_title_size'                     => '2',
+					'back_title_size'                      => '3',
+					'flip_direction'                       => $fusion_settings->get( 'flip_boxes_flip_direction' ),
+					'flip_effect'                          => $fusion_settings->get( 'flip_boxes_flip_effect' ),
+					'flip_duration'                        => $fusion_settings->get( 'flip_boxes_flip_duration' ),
+					'icon'                                 => '',
+					'icon_color'                           => $fusion_settings->get( 'icon_color' ),
+					'icon_flip'                            => '',
+					'icon_rotate'                          => '',
+					'icon_spin'                            => '',
+					'image'                                => '',
+					'image_id'                             => '',
+					'image_max_width'                      => '',
 
-					'margin_top'          => '',
-					'margin_right'        => '',
-					'margin_bottom'       => '',
-					'margin_left'         => '',
+					'fusion_font_family_front_title_font'  => '',
+					'fusion_font_variant_front_title_font' => '',
+					'front_title_font_size'                => '',
+					'front_title_line_height'              => '',
+					'front_title_letter_spacing'           => '',
+					'front_title_text_transform'           => '',
+					'fusion_font_family_back_title_font'   => '',
+					'fusion_font_variant_back_title_font'  => '',
+					'back_title_font_size'                 => '',
+					'back_title_line_height'               => '',
+					'back_title_letter_spacing'            => '',
+					'back_title_text_transform'            => '',
+
+					'margin_top'                           => '',
+					'margin_right'                         => '',
+					'margin_bottom'                        => '',
+					'margin_left'                          => '',
 				];
 
 				$child = [
@@ -382,11 +397,13 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 				}
 
 				if ( $title_front ) {
-					$title_front_output = '<h2 ' . FusionBuilder::attributes( 'flip-box-shortcode-heading-front' ) . '>' . $title_front . '</h2>';
+					$front_title_tag    = $this->get_title_tag( 'front' );
+					$title_front_output = '<' . $front_title_tag . ' ' . FusionBuilder::attributes( 'flip-box-shortcode-heading-front' ) . '>' . $title_front . '</' . $front_title_tag . '>';
 				}
 
 				if ( $title_back ) {
-					$title_back_output = '<h3 ' . FusionBuilder::attributes( 'flip-box-shortcode-heading-back' ) . '>' . $title_back . '</h3>';
+					$back_title_tag    = $this->get_title_tag( 'back' );
+					$title_back_output = '<' . $back_title_tag . ' ' . FusionBuilder::attributes( 'flip-box-shortcode-heading-back' ) . '>' . $title_back . '</' . $back_title_tag . '>';
 				}
 
 				$front_inner = '<div ' . FusionBuilder::attributes( 'flip-box-front-inner' ) . '>' . $icon_output . $title_front_output . $text_front . '</div>';
@@ -668,6 +685,7 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 
 				$attr = [
 					'class' => 'flip-box-heading',
+					'style' => '',
 				];
 
 				if ( ! $this->child_args['text_front'] ) {
@@ -675,7 +693,37 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 				}
 
 				if ( $this->child_args['title_front_color'] ) {
-					$attr['style'] = 'color:' . $this->child_args['title_front_color'] . ';';
+					$attr['style'] .= 'color:' . $this->child_args['title_front_color'] . ';';
+				}
+
+				$title_typography = Fusion_Builder_Element_Helper::get_font_styling( $this->parent_args, 'front_title_font', 'array' );
+
+				if ( isset( $title_typography['font-family'] ) && $title_typography['font-family'] ) {
+					$attr['style'] .= 'font-family:' . $title_typography['font-family'] . ';';
+				}
+
+				if ( isset( $title_typography['font-weight'] ) && $title_typography['font-weight'] ) {
+					$attr['style'] .= 'font-weight:' . $title_typography['font-weight'] . ';';
+				}
+
+				if ( isset( $title_typography['font-style'] ) && $title_typography['font-style'] ) {
+					$attr['style'] .= 'font-style:' . $title_typography['font-style'] . ';';
+				}
+
+				if ( $this->parent_args['front_title_font_size'] ) {
+					$attr['style'] .= 'font-size:' . $this->parent_args['front_title_font_size'] . ';';
+				}
+
+				if ( $this->parent_args['front_title_line_height'] ) {
+					$attr['style'] .= 'line-height:' . $this->parent_args['front_title_line_height'] . ';';
+				}
+
+				if ( $this->parent_args['front_title_letter_spacing'] ) {
+					$attr['style'] .= 'letter-spacing:' . $this->parent_args['front_title_letter_spacing'] . ';';
+				}
+
+				if ( $this->parent_args['front_title_text_transform'] ) {
+					$attr['style'] .= 'text-transform:' . $this->parent_args['front_title_text_transform'] . ';';
 				}
 
 				return $attr;
@@ -693,14 +741,71 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 
 				$attr = [
 					'class' => 'flip-box-heading-back',
+					'style' => '',
 				];
 
 				if ( $this->child_args['title_back_color'] ) {
-					$attr['style'] = 'color:' . $this->child_args['title_back_color'] . ';';
+					$attr['style'] .= 'color:' . $this->child_args['title_back_color'] . ';';
+				}
+
+				$title_typography = Fusion_Builder_Element_Helper::get_font_styling( $this->parent_args, 'back_title_font', 'array' );
+
+				if ( isset( $title_typography['font-family'] ) && $title_typography['font-family'] ) {
+					$attr['style'] .= 'font-family:' . $title_typography['font-family'] . ';';
+				}
+
+				if ( isset( $title_typography['font-weight'] ) && $title_typography['font-weight'] ) {
+					$attr['style'] .= 'font-weight:' . $title_typography['font-weight'] . ';';
+				}
+
+				if ( isset( $title_typography['font-style'] ) && $title_typography['font-style'] ) {
+					$attr['style'] .= 'font-style:' . $title_typography['font-style'] . ';';
+				}
+
+				if ( $this->parent_args['back_title_font_size'] ) {
+					$attr['style'] .= 'font-size:' . $this->parent_args['back_title_font_size'] . ';';
+				}
+
+				if ( $this->parent_args['back_title_line_height'] ) {
+					$attr['style'] .= 'line-height:' . $this->parent_args['back_title_line_height'] . ';';
+				}
+
+				if ( $this->parent_args['back_title_letter_spacing'] ) {
+					$attr['style'] .= 'letter-spacing:' . $this->parent_args['back_title_letter_spacing'] . ';';
+				}
+
+				if ( $this->parent_args['back_title_text_transform'] ) {
+					$attr['style'] .= 'text-transform:' . $this->parent_args['back_title_text_transform'] . ';';
 				}
 
 				return $attr;
 
+			}
+
+			/**
+			 * Get the tag of the title.
+			 *
+			 * @param string $title The title, front or back.
+			 * @return string
+			 */
+			public function get_title_tag( $title ) {
+				if ( 'front' === $title ) {
+					$tag_option = $this->parent_args['front_title_size'];
+					if ( ! $tag_option ) {
+						return 'h2';
+					}
+				} else {
+					$tag_option = $this->parent_args['back_title_size'];
+					if ( ! $tag_option ) {
+						return 'h3';
+					}
+				}
+
+				if ( is_numeric( $tag_option ) ) {
+					return 'h' . $tag_option;
+				}
+
+				return $tag_option;
 			}
 
 			/**
@@ -775,7 +880,7 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 								'label'       => esc_html__( 'Flip Box Background Color Frontside', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the frontside background.', 'fusion-builder' ),
 								'id'          => 'flip_boxes_front_bg',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color7)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -783,7 +888,7 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 								'label'       => esc_html__( 'Flip Box Heading Color Frontside', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the frontside heading.', 'fusion-builder' ),
 								'id'          => 'flip_boxes_front_heading',
-								'default'     => '#f9f9fb',
+								'default'     => 'var(--awb-color2)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -791,7 +896,7 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 								'label'       => esc_html__( 'Flip Box Text Color Frontside', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the frontside text.', 'fusion-builder' ),
 								'id'          => 'flip_boxes_front_text',
-								'default'     => '#4a4e57',
+								'default'     => 'var(--awb-color3)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -799,7 +904,7 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 								'label'       => esc_html__( 'Flip Box Background Color Backside', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the backside background.', 'fusion-builder' ),
 								'id'          => 'flip_boxes_back_bg',
-								'default'     => '#65bc7b',
+								'default'     => 'var(--awb-color5)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -807,7 +912,7 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 								'label'       => esc_html__( 'Flip Box Heading Color Backside', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the backside heading.', 'fusion-builder' ),
 								'id'          => 'flip_boxes_back_heading',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -815,7 +920,7 @@ if ( fusion_is_element_enabled( 'fusion_flip_boxes' ) ) {
 								'label'       => esc_html__( 'Flip Box Text Color Backside', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the backside text.', 'fusion-builder' ),
 								'id'          => 'flip_boxes_back_text',
-								'default'     => 'rgba(255,255,255,0.8)',
+								'default'     => 'hsla(var(--awb-color1-h),var(--awb-color1-s),var(--awb-color1-l),calc(var(--awb-color1-a) - 20%))',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -908,7 +1013,7 @@ function fusion_element_flip_boxes() {
 				'icon'          => 'fusiona-loop-alt2',
 				'preview'       => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-flipboxes-preview.php',
 				'preview_id'    => 'fusion-builder-block-module-flipboxes-preview-template',
-				'help_url'      => 'https://theme-fusion.com/documentation/fusion-builder/elements/flip-boxes-element/',
+				'help_url'      => 'https://theme-fusion.com/documentation/avada/elements/flip-boxes-element/',
 				'params'        => [
 					[
 						'type'        => 'tinymce',
@@ -974,6 +1079,84 @@ function fusion_element_flip_boxes() {
 							''    => esc_attr__( 'Default', 'fusion-builder' ),
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Front Title Size', 'fusion-builder' ),
+						'description' => esc_attr__( 'Choose HTML tag of the title heading, either div or the heading tag, h1-h6.', 'fusion-builder' ),
+						'param_name'  => 'front_title_size',
+						'value'       => [
+							'1'   => 'H1',
+							'2'   => 'H2',
+							'3'   => 'H3',
+							'4'   => 'H4',
+							'5'   => 'H5',
+							'6'   => 'H6',
+							'div' => 'DIV',
+						],
+						'default'     => '2',
+					],
+					[
+						'type'             => 'typography',
+						'remove_from_atts' => true,
+						'global'           => true,
+						'heading'          => esc_attr__( 'Front Title Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the title typography', 'fusion-builder' ),
+						'param_name'       => 'front_title_typography',
+						'choices'          => [
+							'font-family'    => 'front_title_font',
+							'font-size'      => 'front_title_font_size',
+							'line-height'    => 'front_title_line_height',
+							'letter-spacing' => 'front_title_letter_spacing',
+							'text-transform' => 'front_title_text_transform',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '',
+							'font-size'      => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'text-transform' => '',
+						],
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Back Title Size', 'fusion-builder' ),
+						'description' => esc_attr__( 'Choose HTML tag of the title heading, either div or the heading tag, h1-h6.', 'fusion-builder' ),
+						'param_name'  => 'back_title_size',
+						'value'       => [
+							'1'   => 'H1',
+							'2'   => 'H2',
+							'3'   => 'H3',
+							'4'   => 'H4',
+							'5'   => 'H5',
+							'6'   => 'H6',
+							'div' => 'DIV',
+						],
+						'default'     => '3',
+					],
+					[
+						'type'             => 'typography',
+						'remove_from_atts' => true,
+						'global'           => true,
+						'heading'          => esc_attr__( 'Back Title Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the title typography', 'fusion-builder' ),
+						'param_name'       => 'back_title_typography',
+						'choices'          => [
+							'font-family'    => 'back_title_font',
+							'font-size'      => 'back_title_font_size',
+							'line-height'    => 'back_title_line_height',
+							'letter-spacing' => 'back_title_letter_spacing',
+							'text-transform' => 'back_title_text_transform',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '',
+							'font-size'      => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'text-transform' => '',
 						],
 					],
 					[

@@ -50,6 +50,10 @@ $text_transform      = $fusion_settings->get( 'button_text_transform' );
 			style_type = style_type.replace( ' ', '_' );
 		}
 
+		if ( text_color && ( -1 !== text_color.indexOf( 'var(--' ) ) ) {
+			text_color = getComputedStyle( document.documentElement ).getPropertyValue( text_color.replace( 'var(', '' ).replace( ')', '' ) );
+		}
+
 		if ( text_color && ( -1 !== text_color.replace( /\s/g, '' ).indexOf( 'rgba(255,255,255' ) || '#ffffff' === text_color ) ) {
 			text_color = '#dddddd';
 		}

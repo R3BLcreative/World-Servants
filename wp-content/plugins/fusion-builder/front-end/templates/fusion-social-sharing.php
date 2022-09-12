@@ -11,9 +11,9 @@
 {{{styles}}}
 <div {{{ _.fusionGetAttributes( shortcodeAttr ) }}}>
 	<# if ( 'show' === taglineVisibility && '' !== tagline ) { #>
-	<h4 {{{ _.fusionGetAttributes( taglineAttr ) }}}>
+	<{{ taglineTag }} {{{ _.fusionGetAttributes( taglineAttr ) }}}>
 		{{{ tagline }}}
-	</h4>
+	</{{ taglineTag }}>
 	<# } #>
 	<div {{{ _.fusionGetAttributes( socialNetworksAttr ) }}}>
 		{{{ icons }}}

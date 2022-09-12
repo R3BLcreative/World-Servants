@@ -48,29 +48,34 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
 				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 
+				values.padding_bottom = _.fusionValidateAttrValue( values.padding_bottom, 'px' );
+				values.padding_left   = _.fusionValidateAttrValue( values.padding_left, 'px' );
+				values.padding_right  = _.fusionValidateAttrValue( values.padding_right, 'px' );
+				values.padding_top    = _.fusionValidateAttrValue( values.padding_top, 'px' );
+
 				switch ( values.type ) {
 				case 'general':
 					values.alert_class = 'info';
 					if ( ! values.icon || 'none' !== values.icon ) {
-						values.icon = 'fa-info-circle';
+						values.icon = 'awb-icon-info-circle';
 					}
 					break;
 				case 'error':
 					values.alert_class = 'danger';
 					if ( ! values.icon || 'none' !== values.icon ) {
-						values.icon = 'fa-exclamation-triangle';
+						values.icon = 'awb-icon-exclamation-triangle';
 					}
 					break;
 				case 'success':
 					values.alert_class = 'success';
 					if ( ! values.icon || 'none' !== values.icon ) {
-						values.icon = 'fa-check-circle';
+						values.icon = 'awb-icon-check-circle';
 					}
 					break;
 				case 'notice':
 					values.alert_class = 'warning';
 					if ( ! values.icon || 'none' !== values.icon ) {
-						values.icon = 'fa-lg fa-cog';
+						values.icon = 'awb-icon-cog';
 					}
 					break;
 				case 'blank':
@@ -98,7 +103,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			buildAttr: function( values ) {
 				var attr         = _.fusionVisibilityAtts( values.hide_on_mobile, {
 						class: 'fusion-alert alert fusion-live-alert fusion-alert-cid' + this.model.get( 'cid' ),
-						style: ''
+						style: '',
+						role: 'alert'
 					} ),
 					alertClass   = values.alert_class;
 
@@ -142,6 +148,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( '' !== values.margin_left ) {
 					attr.style += 'margin-left:' + values.margin_left + ';';
+				}
+
+				if ( '' !== values.padding_top ) {
+					attr.style += 'padding-top:' + values.padding_top + ';';
+				}
+
+				if ( '' !== values.padding_right ) {
+					attr.style += 'padding-right:' + values.padding_right + ';';
+				}
+
+				if ( '' !== values.padding_bottom ) {
+					attr.style += 'padding-bottom:' + values.padding_bottom + ';';
+				}
+
+				if ( '' !== values.padding_left ) {
+					attr.style += 'padding-left:' + values.padding_left + ';';
 				}
 
 				attr = _.fusionAnimations( values, attr );

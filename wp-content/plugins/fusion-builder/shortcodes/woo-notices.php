@@ -55,6 +55,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_notices' ) ) {
 				add_filter( 'fusion_attr_fusion_tb_woo_notices-notice-icon', [ $this, 'notice_icon_attr' ] );
 				add_filter( 'fusion_attr_fusion_tb_woo_notices-success-icon', [ $this, 'success_icon_attr' ] );
 				add_filter( 'fusion_attr_fusion_tb_woo_notices-error-icon', [ $this, 'error_icon_attr' ] );
+				add_filter( 'fusion_attr_fusion_tb_woo_notices-cart-icon', [ $this, 'cart_icon_attr' ] );
 
 				// Ajax mechanism for query related part.
 				add_action( 'wp_ajax_get_fusion_tb_woo_notices', [ $this, 'ajax_render' ] );
@@ -132,6 +133,8 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_notices' ) ) {
 					'error_text_color'           => '',
 					'error_link_color'           => '',
 					'error_link_hover_color'     => '',
+					'cart_icon_style'            => '',
+					'cart_icon'                  => 'awb-icon-shopping-cart',
 				];
 			}
 
@@ -231,7 +234,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_notices' ) ) {
 					wc_add_notice( $empty_msg, 'notice' );
 				}
 
-				if ( fusion_library()->woocommerce->is_new_checkout() && ! WC()->checkout()->is_registration_enabled() && WC()->checkout()->is_registration_required() && ! is_user_logged_in() ) {
+				if ( fusion_library()->woocommerce->is_checkout_layout() && ! WC()->checkout()->is_registration_enabled() && WC()->checkout()->is_registration_required() && ! is_user_logged_in() ) {
 					wc_add_notice( apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) ), 'error', [ 'class' => 'fusion-login-required' ] );
 				}
 
@@ -349,6 +352,22 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_notices' ) ) {
 			}
 
 			/**
+			 * Builds the attributes array.
+			 *
+			 * @access public
+			 * @since 3.7
+			 * @return array
+			 */
+			public function cart_icon_attr() {
+				$attr = [
+					'class'       => fusion_font_awesome_name_handler( $this->args['cart_icon'] ),
+					'aria-hidden' => 'true',
+				];
+
+				return $attr;
+			}
+
+			/**
 			 * Check for icon exists.
 			 *
 			 * @access public
@@ -380,7 +399,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_notices' ) ) {
 			public function print_notices( $return = false ) {
 				$notices = '';
 
-				if ( is_object( WC()->session ) ) {
+				if ( is_object( WC()->session ) && function_exists( 'wc_notice_count' ) ) {
 					$all_notices  = WC()->session->get( 'wc_notices', [] );
 					$notice_types = apply_filters( 'woocommerce_notice_types', [ 'error', 'success', 'notice' ] );
 
@@ -406,6 +425,11 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_notices' ) ) {
 									if ( preg_match( '/<a\s(.+?)>(.+?)<\/a>/i', $text_msg, $matches ) ) {
 										$grab_button = $matches[0];
 										$text_msg    = str_replace( $grab_button, '', $text_msg );
+
+										if ( 'success' === $notice_type && 'custom' === $this->args['cart_icon_style'] && '' !== $grab_button ) {
+											$icon_cart_content = '<i ' . FusionBuilder::attributes( 'fusion_tb_woo_notices-cart-icon' ) . '></i>';
+											$grab_button       = sprintf( '<a href="%s" tabindex="1" class="button wc-forward">%s %s</a>', esc_url( wc_get_cart_url() ), $icon_cart_content, esc_html__( 'View cart', 'fusion-builder' ) );
+										}
 									}
 									$text_msg = sprintf( '%s <span class="wc-notices-text">%s</span> %s', $notice_icon, $text_msg, $grab_button );
 
@@ -544,6 +568,16 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_notices' ) ) {
 				}
 				if ( ! $this->is_default( 'icon_color' ) ) {
 					$this->add_css_property( $selectors, 'color', $this->args['icon_color'] );
+				}
+
+				// Remove default cart icon styles.
+				$selectors = [
+					$this->base_selector . ' .woocommerce-message .wc-forward:before',
+					$this->base_selector . ' .woocommerce-info .wc-forward:before',
+				];
+				if ( ! $this->is_default( 'cart_icon_style' ) ) {
+					$this->add_css_property( $selectors, 'content', '""' );
+					$this->add_css_property( $selectors, 'margin-right', '0' );
 				}
 
 				// Link & Hover Styles.
@@ -826,6 +860,55 @@ function fusion_component_woo_notices() {
 						'max'         => '250',
 						'step'        => '1',
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Cart Icon Style', 'fusion-builder' ),
+						'description' => esc_attr__( 'Controls the cart icon style of the notice.', 'fusion-builder' ),
+						'param_name'  => 'cart_icon_style',
+						'value'       => [
+							''       => esc_attr__( 'Default', 'fusion-builder' ),
+							'custom' => esc_attr__( 'Custom', 'fusion-builder' ),
+						],
+						'default'     => '',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+						'callback'    => [
+							'function' => 'fusion_ajax',
+							'action'   => 'get_fusion_tb_woo_notices',
+							'ajax'     => true,
+						],
+						'dependency'  => [
+							[
+								'element'  => 'show_button',
+								'value'    => 'no',
+								'operator' => '!=',
+							],
+						],
+					],
+					[
+						'type'        => 'iconpicker',
+						'heading'     => esc_html__( 'Cart Icon', 'fusion-builder' ),
+						'param_name'  => 'cart_icon',
+						'value'       => '',
+						'description' => esc_html__( 'Select icon for cart message.', 'fusion-builder' ),
+						'group'       => esc_html__( 'Design', 'fusion-builder' ),
+						'callback'    => [
+							'function' => 'fusion_ajax',
+							'action'   => 'get_fusion_tb_woo_notices',
+							'ajax'     => true,
+						],
+						'dependency'  => [
+							[
+								'element'  => 'cart_icon_style',
+								'value'    => '',
+								'operator' => '!=',
+							],
+							[
+								'element'  => 'show_button',
+								'value'    => 'no',
+								'operator' => '!=',
+							],
+						],
 					],
 					[
 						'type'        => 'radio_button_set',

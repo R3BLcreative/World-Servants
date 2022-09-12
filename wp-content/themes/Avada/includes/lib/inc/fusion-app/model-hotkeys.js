@@ -70,12 +70,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							FusionApp.sidebarView.togglePanel();
 						}
 						break;
-
-						// Key Shift + W to toggle wireframe.
-					case 87:
-						event.preventDefault();
-						jQuery( '.fusion-builder-wireframe-toggle' ).trigger( 'click' );
-						break;
 					}
 				}
 

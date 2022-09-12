@@ -47,6 +47,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					attr[ 'class' ] += ' ' + values[ 'class' ];
 				}
 
+				if ( '' !== values.aspect_ratio ) {
+					attr[ 'class' ] += ' has-aspect-ratio';
+				}
+
 				if ( '' !== values.id ) {
 					attr.id = values.id;
 				}
@@ -120,6 +124,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if (  !  this.isDefault( 'border_radius_bottom_left' ) ) {
 					this.addCssProperty( this.baseSelector, 'border-bottom-left-radius',  _.fusionGetValueWithUnit( this.values.border_radius_bottom_left ) );
+				}
+
+				// Calc Ratio
+				let aspectRatio, width, height;
+                const selector = '.fusion-post-card-image.fusion-post-card-image-' + this.model.get( 'cid' ) + ' img';
+
+				if ( 'custom' ===  this.values.aspect_ratio && '' !==  this.values.custom_aspect_ratio ) {
+					this.addCssProperty( selector, 'aspect-ratio', `100 / ${this.values.custom_aspect_ratio}` );
+				} else {
+					aspectRatio = this.values.aspect_ratio.split( '-' );
+					width 		= aspectRatio[ 0 ] || '';
+					height 		= aspectRatio[ 1 ] || '';
+
+					this.addCssProperty( selector, 'aspect-ratio', `${width} / ${height}` );
+				}
+
+				//Ratio Position
+				if ( '' !==  this.values.aspect_ratio_position ) {
+					this.addCssProperty( selector, 'object-position', this.values.aspect_ratio_position );
 				}
 
 				css = this.parseCSS();

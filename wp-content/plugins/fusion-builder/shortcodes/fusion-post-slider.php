@@ -66,6 +66,10 @@ if ( fusion_is_element_enabled( 'fusion_postslider' ) ) {
 			public static function get_element_defaults() {
 
 				return [
+					'margin_top'     => '',
+					'margin_right'   => '',
+					'margin_bottom'  => '',
+					'margin_left'    => '',
 					'hide_on_mobile' => fusion_builder_default_visibility( 'string' ),
 					'class'          => '',
 					'id'             => '',
@@ -129,6 +133,11 @@ if ( fusion_is_element_enabled( 'fusion_postslider' ) ) {
 				extract( $defaults );
 
 				$this->args = $defaults;
+
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
 
 				$slider = '';
 				if ( 'attachments' === $layout ) {
@@ -368,13 +377,18 @@ if ( fusion_is_element_enabled( 'fusion_postslider' ) ) {
 			 */
 			public function attr() {
 
-				$attr['class'] = 'fusion-post-slider fusion-flexslider fusion-flexslider-loading flexslider-' . $this->args['layout'];
+				$attr = [
+					'class' => 'fusion-post-slider fusion-flexslider fusion-flexslider-loading flexslider-' . $this->args['layout'],
+					'style' => '',
+				];
 
 				$attr = fusion_builder_visibility_atts( $this->args['hide_on_mobile'], $attr );
 
 				if ( 'yes' === $this->args['lightbox'] && 'attachments' === $this->args['layout'] ) {
 					$attr['class'] .= ' flexslider-lightbox';
 				}
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( $this->args['class'] ) {
 					$attr['class'] .= ' ' . $this->args['class'];
@@ -480,7 +494,7 @@ function fusion_element_post_slider() {
 				'icon'       => 'fusiona-layers-alt',
 				'preview'    => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-post-slider-preview.php',
 				'preview_id' => 'fusion-builder-block-module-post-slider-preview-template',
-				'help_url'   => 'https://theme-fusion.com/documentation/fusion-builder/elements/post-slider-element/',
+				'help_url'   => 'https://theme-fusion.com/documentation/avada/elements/post-slider-element/',
 				'params'     => [
 					[
 						'type'        => 'select',
@@ -578,6 +592,16 @@ function fusion_element_post_slider() {
 								'value'    => 'attachments',
 								'operator' => '==',
 							],
+						],
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
 						],
 					],
 					[

@@ -73,7 +73,7 @@
 #slidingbar-area .fusion-accordian .fusion-panel {
   border-color: var(--slidingbar_bg_color);
 }
-#slidingbar-area .bbp-pagination .bbp-pagination-links a.inactive,
+#slidingbar-area #bbpress-forums .bbp-pagination .bbp-pagination-links a.inactive,
 #slidingbar-area .bbp-topic-pagination .page-numbers,
 #slidingbar-area .widget.widget.widget_display_replies ul li,
 #slidingbar-area .widget.widget_display_topics ul li,

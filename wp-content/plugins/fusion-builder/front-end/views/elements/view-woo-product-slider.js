@@ -57,6 +57,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			validateValues: function( values ) {
 				values.column_spacing = _.fusionValidateAttrValue( values.column_spacing, '' );
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -68,8 +73,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			buildWooProductSliderShortcodeAttr: function( values ) {
 				var wooProductSliderShortcode = _.fusionVisibilityAtts( values.hide_on_mobile, {
-					class: 'fusion-woo-product-slider fusion-woo-slider'
+					class: 'fusion-woo-product-slider fusion-woo-slider',
+					style: ''
 				} );
+
+				if ( '' !== values.margin_top ) {
+					wooProductSliderShortcode.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					wooProductSliderShortcode.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					wooProductSliderShortcode.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					wooProductSliderShortcode.style += 'margin-left:' + values.margin_left + ';';
+				}
 
 				if ( '' !== values[ 'class' ] ) {
 					wooProductSliderShortcode[ 'class' ] += ' ' + values[ 'class' ];

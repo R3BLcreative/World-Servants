@@ -18,6 +18,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.extras        = atts.extras;
 				atts.values.action = 'register';
 
+				this.validateValues( atts.values );
+
 				// Create attribute objects.
 				atts.loginShortCodeAttr     = this.buildLoginShortCodeAttr( atts.values );
 				atts.loginShortcodeFormAttr = this.buildLoginShortcodeFormAttr( atts.values );
@@ -32,6 +34,20 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
+			 * Modifies the values.
+			 *
+			 * @since 2.0
+			 * @param {Object} values - The values object.
+			 * @return {void}
+			 */
+			validateValues: function( values ) {
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
+			},
+
+			/**
 			 * Builds login attributes.
 			 *
 			 * @since 2.0
@@ -42,8 +58,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// LoginShortcode Attributes.
 				var loginShortcode = _.fusionVisibilityAtts( values.hide_on_mobile, {
-					class: 'fusion-login-box fusion-login-box-cid' + this.model.get( 'cid' ) + ' fusion-login-box-' + values.action + ' fusion-login-align-' + values.text_align + ' fusion-login-field-layout-' + values.form_field_layout
+					class: 'fusion-login-box fusion-login-box-cid' + this.model.get( 'cid' ) + ' fusion-login-box-' + values.action + ' fusion-login-align-' + values.text_align + ' fusion-login-field-layout-' + values.form_field_layout,
+					style: ''
 				} );
+
+				if ( '' !== values.margin_top ) {
+					loginShortcode.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					loginShortcode.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					loginShortcode.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					loginShortcode.style += 'margin-left:' + values.margin_left + ';';
+				}
 
 				if ( '' !== values[ 'class' ] ) {
 					loginShortcode[ 'class' ] += ' ' + values[ 'class' ];

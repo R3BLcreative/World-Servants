@@ -86,7 +86,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			buildAttr: function( values ) {
 				var attr = {
-					'class': 'fusion-woo-cart fusion-woo-cart-' + this.model.get( 'cid' )
+					'class': 'fusion-woo-cart fusion-woo-cart-' + this.model.get( 'cid' ),
+					'data-layout': values.variation_layout
 				};
 
 				if ( ! this.$el.closest( 'body' ).hasClass( 'woocommerce' ) ) {
@@ -170,7 +171,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( table, 'margin-left',  _.fusionGetValueWithUnit( this.values.margin_left ) );
 				}
 
-				table_td =  this.baseSelector + ' table td';
+				table_td =  this.baseSelector + ' table tr > *';
 				// Border size.
 				if ( !this.isDefault( 'border_sizes_top' ) ) {
 				  this.addCssProperty( table_td, 'border-top-width',  _.fusionGetValueWithUnit( this.values.border_sizes_top ) );
@@ -212,14 +213,23 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( table_td, 'background-color',  this.values.cell_background );
 				}
 
-				label =  this.baseSelector + ' td.label';
-				if ( 'floated' !==  this.values.variation_layout ) {
+				label =  this.baseSelector + ' tr .label';
+				if ( 'floated' !== this.values.variation_layout ) {
 				  table_tr =  this.baseSelector + ' table tr';
 				  this.addCssProperty( table_tr, 'display', 'flex' );
 				  this.addCssProperty( table_tr, 'flex-direction', 'column' );
 				  this.addCssProperty( table_tr, 'width', '100%' );
-				} else if ( !this.isDefault( 'label_area_width' ) ) {
-				  this.addCssProperty( label, 'width',  _.fusionGetValueWithUnit( this.values.label_area_width ) );
+
+				  this.addCssProperty( this.baseSelector + '.fusion-woo-cart tr:not(:first-of-type) > *,' + this.baseSelector + '.fusion-woo-cart  th + td,' + this.baseSelector + '.fusion-woo-cart td + td', 'border-top', 'none', true );
+
+				} else {
+					this.addCssProperty( this.baseSelector + '.fusion-woo-cart tr:not(:first-of-type) > *,' + this.baseSelector + '.fusion-woo-cart  th + td,' + this.baseSelector + '.fusion-woo-cart td + td', 'border-top-width',  _.fusionGetValueWithUnit( this.values.border_sizes_top ), true );
+					this.addCssProperty( this.baseSelector + '.fusion-woo-cart tr:not(:first-of-type) > *,' + this.baseSelector + '.fusion-woo-cart  th + td,' + this.baseSelector + '.fusion-woo-cart td + td', 'border-top-style', 'solid', true );
+					this.addCssProperty( this.baseSelector + '.fusion-woo-cart tr:not(:first-of-type) > *,' + this.baseSelector + '.fusion-woo-cart  th + td,' + this.baseSelector + '.fusion-woo-cart td + td', 'border-top-color', this.values.border_color, true );
+
+					if ( ! this.isDefault( 'label_area_width' ) ) {
+				  		this.addCssProperty( label, 'width',  _.fusionGetValueWithUnit( this.values.label_area_width ) );
+					}
 				}
 
 				if ( !this.isDefault( 'text_align' ) ) {
@@ -235,7 +245,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// Label text styling, share with grouped.
 				label = [
-					this.baseSelector + ' td.label',
+					this.baseSelector + ' tr .label',
 					this.baseSelector + ' .woocommerce-grouped-product-list label',
 					this.baseSelector + ' .woocommerce-grouped-product-list label a',
 					this.baseSelector + ' .woocommerce-grouped-product-list .amount'
@@ -247,6 +257,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( !this.isDefault( 'label_font_size' ) ) {
 				  this.addCssProperty( label, 'font-size',  _.fusionGetValueWithUnit( this.values.label_font_size ) );
+				}
+
+				if ( !this.isDefault( 'label_line_height' ) ) {
+					this.addCssProperty( label, 'line-height', this.values.label_line_height );
+				}
+
+				if ( !this.isDefault( 'label_text_transform' ) ) {
+					this.addCssProperty( label, 'text-transform', this.values.label_text_transform );
+				}
+
+				if ( !this.isDefault( 'label_letter_spacing' ) ) {
+					this.addCssProperty( label, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.label_letter_spacing ) );
 				}
 
 				headingStyles = _.fusionGetFontStyle( 'label_typography', values, 'object' );
@@ -375,7 +397,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				  if (  !  this.isDefault( 'swatch_border_color_active' ) ) {
 				    this.addCssProperty( active_swatches, 'border-color',  this.values.swatch_border_color_active );
-				    hover_color = jQuery.Color( this.values.swatch_border_color_active ).alpha( 0.5 ).toRgbaString();
+				    hover_color = jQuery.AWB_Color( this.values.swatch_border_color_active ).alpha( 0.5 ).toVarOrRgbaString();
 				    this.addCssProperty( hover_swatches, 'border-color', hover_color );
 				  }
 
@@ -607,6 +629,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( description, 'font-size',  _.fusionGetValueWithUnit( this.values.description_font_size ) );
 				}
 
+				if ( !this.isDefault( 'description_line_height' ) ) {
+					this.addCssProperty( description, 'line-height', this.values.description_line_height );
+				}
+
+				if ( !this.isDefault( 'description_text_transform' ) ) {
+					this.addCssProperty( description, 'text-transform', this.values.description_text_transform );
+				}
+
+				if ( !this.isDefault( 'description_letter_spacing' ) ) {
+					this.addCssProperty( description, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.description_letter_spacing ) );
+				}
+
 				headingStyles = _.fusionGetFontStyle( 'description_typography', values, 'object' );
 				jQuery.each( headingStyles, function( rule, value ) {
 					self.addCssProperty( description, rule, value );
@@ -634,6 +668,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( prices, 'font-size',  this.values.price_font_size );
 				}
 
+				if ( !this.isDefault( 'price_line_height' ) ) {
+					this.addCssProperty( prices, 'line-height', this.values.price_line_height );
+				}
+
+				if ( !this.isDefault( 'price_text_transform' ) ) {
+					this.addCssProperty( prices, 'text-transform', this.values.price_text_transform );
+				}
+
+				if ( !this.isDefault( 'price_letter_spacing' ) ) {
+					this.addCssProperty( prices, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.price_letter_spacing ) );
+				}
+
 				if ( !this.isDefault( 'price_color' ) ) {
 				  this.addCssProperty( prices, 'color',  this.values.price_color );
 				}
@@ -648,6 +694,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( sales, 'font-size',  this.values.sale_font_size );
 				}
 
+				if ( !this.isDefault( 'sale_line_height' ) ) {
+					this.addCssProperty( sales, 'line-height', this.values.sale_line_height );
+				}
+
+				if ( !this.isDefault( 'sale_text_transform' ) ) {
+					this.addCssProperty( sales, 'text-transform', this.values.sale_text_transform );
+				}
+
+				if ( !this.isDefault( 'sale_letter_spacing' ) ) {
+					this.addCssProperty( sales, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.sale_letter_spacing ) );
+				}
+
 				if ( !this.isDefault( 'sale_color' ) ) {
 				  this.addCssProperty( sales, 'color',  this.values.sale_color );
 				}
@@ -660,6 +718,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				stock = [ this.baseSelector + ' .stock', info + ' .woocommerce-variation-availability' ];
 				if ( !this.isDefault( 'stock_font_size' ) ) {
 				  this.addCssProperty( stock, 'font-size',  this.values.stock_font_size );
+				}
+
+				if ( !this.isDefault( 'stock_line_height' ) ) {
+					this.addCssProperty( stock, 'line-height', this.values.stock_line_height );
+				}
+
+				if ( !this.isDefault( 'stock_text_transform' ) ) {
+					this.addCssProperty( stock, 'text-transform', this.values.stock_text_transform );
+				}
+
+				if ( !this.isDefault( 'stock_letter_spacing' ) ) {
+					this.addCssProperty( stock, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.stock_letter_spacing ) );
 				}
 
 				if ( !this.isDefault( 'stock_color' ) ) {
@@ -682,7 +752,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					if ( 'floated' === this.values.variation_layout ) {
 						topMargin    = '' === this.values.clear_margin_top ? '0px' : _.fusionGetValueWithUnit( this.values.clear_margin_top );
 						bottomMargin = '' === this.values.clear_margin_bottom ? '0px' : _.fusionGetValueWithUnit( this.values.clear_margin_bottom );
-						this.addCssProperty( this.baseSelector + ' .variations tr:last-of-type td.label', 'padding-bottom', fusionSanitize.add_css_values( [ this.extras.body_font_size, topMargin, bottomMargin ] ) );
+						this.addCssProperty( this.baseSelector + ' .variations tr:last-of-type .label', 'padding-bottom', fusionSanitize.add_css_values( [ this.extras.body_font_size, topMargin, bottomMargin ] ) );
 					}
 				  }
 

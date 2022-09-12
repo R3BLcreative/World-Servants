@@ -39,6 +39,21 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.remove();
 			},
 
+			/**
+			* Toggles import options.
+			*
+			* @since 3.7
+			* @param {Object} event - The event.
+			* @return {void}
+			*/
+			toggleImportOptions: function( event ) {
+				var $wrapper = jQuery( event.currentTarget ).closest( '.studio-wrapper' );
+
+				if ( ! $wrapper.hasClass( 'fusion-studio-preview-active' ) ) {
+					$wrapper.find( '.awb-import-options' ).toggleClass( 'open' );
+				}
+			},
+
 			loadStudio: function( type ) {
 				var self              = this,
 					$container        = 'fusion_template' === type ? jQuery( '#fusion-builder-' + type + '-studio' ) : this.$el.find( '#fusion-builder-' + type + '-studio' ),
@@ -49,6 +64,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( '1' !== fusionBuilderConfig.studio_status ) {
 					return;
 				}
+
+				// Set import options.
+				FusionPageBuilderApp.studio.setImportOptions( $layoutsContainer );
 
 				// Ajax request for data.
 				if ( ! $layoutsContainer.children().length ) {
@@ -86,6 +104,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					type = 'forms';
 				}
 
+				// Off Canvas.
+				if ( 'fusion_template' === type && 'string' === typeof fusionBuilderConfig.post_type && 'awb_off_canvas' === fusionBuilderConfig.post_type ) {
+					type = 'awb_off_canvas';
+				}
+
 				if ( 'object' === typeof FusionPageBuilderApp.studio.studioData && 'undefined' !== typeof FusionPageBuilderApp.studio.studioData[ type ] ) {
 					studioElements = FusionPageBuilderApp.studio.filterLayouts( FusionPageBuilderApp.studio.studioData[ type ] );
 
@@ -107,9 +130,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * Imports studio post's media.
 			 *
 			 * @param {object} postData
+			 * @param {string} mediaKey
+			 * @param {object} importOptions
 			 * @return promise
 			 */
-			importStudioMedia: function( postData, mediaKey ) {
+			importStudioMedia: function( postData, mediaKey, importOptions ) {
 
 				jQuery( '.fusion-loader .awb-studio-import-status' ).html( fusionBuilderText.studio_importing_media + ' ' + mediaKey.replace( '_', ' ' ) );
 
@@ -123,6 +148,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							mediaImportKey: mediaKey,
 							postData: postData
 						},
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						fusion_load_nonce: FusionPageBuilderApp.fusion_load_nonce
 					},
 					success: function( data ) {

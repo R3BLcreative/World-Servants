@@ -1,4 +1,4 @@
-/* global fusionAppConfig, FusionPageBuilderViewManager, imagesLoaded */
+/* global fusionAppConfig, FusionPageBuilderViewManager, imagesLoaded, fusionBuilderText */
 /* jshint -W098 */
 /* eslint no-unused-vars: 0 */
 var FusionPageBuilder = FusionPageBuilder || {};
@@ -27,7 +27,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					isOriginLeft: jQuery( 'body.rtl' ).length ? false : true,
 					resizable: true,
 					initLayout: true,
-					view: this
+					view: this,
+					sortBy: 'number',
+					sortAscending: true
 				} );
 			},
 
@@ -36,14 +38,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					self = this;
 
 				imagesLoaded( galleryElements, function() {
+					self.setPagination();
 					self.fusionIsotope.updateLayout();
-
 					self.setOutlineControlsPosition();
 				} );
 			},
 
 			/**
-			 * Sets position of outlines and controls for the child elements to match column spacing..
+			 * Sets position of outlines and controls for the child elements to match column spacing.
 			 *
 			 * @since 2.0
 			 * @return {void}
@@ -57,8 +59,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.$el.children( 'style' ).remove();
 
 				css += '<style type="text/css">';
-				css += '.fusion-builder-live:not(.fusion-builder-ui-wireframe) div[data-cid="' + cid + '"] .fusion-builder-live-child-element:hover:after{ margin:' + halfColumnSpacing + ';}';
-				css += '.fusion-builder-live:not(.fusion-builder-ui-wireframe) div[data-cid="' + cid + '"] .fusion-builder-live-child-element:hover .fusion-builder-module-controls-container{ bottom: ' + halfColumnSpacing + '; right:' + halfColumnSpacing + ';}';
+				css += '.fusion-builder-live div[data-cid="' + cid + '"] .fusion-builder-live-child-element:hover:after{ margin:' + halfColumnSpacing + ';}';
+				css += '.fusion-builder-live div[data-cid="' + cid + '"] .fusion-builder-live-child-element:hover .fusion-builder-module-controls-container{ bottom: ' + halfColumnSpacing + '; right:' + halfColumnSpacing + ';}';
 				css += '</style>';
 
 				this.$el.prepend( css );
@@ -72,9 +74,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * @return {void}
 			 */
 			onGenerateChildElements: function( modules ) {
-				var i = 1;
+				var self = this,
+					i    = 1;
 
-				this.fusionIsotope.init();
+
+				setTimeout( function() {
+					self.fusionIsotope.init();
+				}, 50 );
+
 				this.addImagesToImageMap( modules, false, false );
 
 				// Set child counter. Used for grid layout clearfix.
@@ -166,6 +173,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.checkVerticalImages();
 
 				this.setOutlineControlsPosition();
+				this.setPagination();
 			},
 
 			/**
@@ -183,12 +191,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.values = atts.values;
 				this.extras = atts.extras;
 
-				attributes.values     = atts.values;
-				attributes.query_data = atts.query_data;
-				attributes.captionStyles = this.buildCaptionStyles( atts );
+				attributes.values            = atts.values;
+				attributes.query_data        = atts.query_data;
+				attributes.captionStyles     = this.buildCaptionStyles( atts );
+				attributes.aspectRatioStyles = this.buildAspectRatioStyles( atts );
+				attributes.paginationHTML    = this.buildPaginationHTML( atts.values );
 
-				// // Create attribute objects.
-				attributes.attr       = this.buildAttr( atts.values );
+				// Create attribute objects.
+				attributes.attr        = this.buildAttr( atts.values );
+				attributes.wrapperAttr = this.buildWrapperAttr( atts.values );
 
 				// Whether it has a dynamic data stream.
 				attributes.usingDynamic = 'undefined' !== typeof atts.values.multiple_upload && 'Select Images' !== atts.values.multiple_upload;
@@ -207,6 +218,39 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
+			 * Sets pagination.
+			 *
+			 * @since 3.8
+			 * @return {void}
+			 */
+			setPagination: function() {
+				var self = this,
+					counter = 0,
+					current = FusionPageBuilderViewManager.getView( this.model.get( 'cid' ) ),
+					cid,
+					childView;
+
+				if ( ! this.model.children.length ) {
+					return;
+				}
+
+				this.model.children.each( function( child ) {
+					cid  = child.attributes.cid;
+					childView = FusionPageBuilderViewManager.getView( cid );
+
+					if ( 0 < self.values.limit && counter >= self.values.limit ) {
+						childView.$el.addClass( 'awb-gallery-item-hidden' );
+					} else {
+						childView.$el.removeClass( 'awb-gallery-item-hidden' );
+					}
+					counter++;
+				} );
+
+				current.$el.find( '.awb-gallery-wrapper' ).attr( 'data-page', 1 );
+				current.$el.find( '.awb-gallery-wrapper' ).attr( 'data-limit', self.values.limit );
+			},
+
+			/**
 			 * Modifies the values.
 			 *
 			 * @since 2.0
@@ -221,6 +265,13 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( 'round' === values.border_radius ) {
 					values.border_radius = '50%';
 				}
+
+				values.limit = '0' == values.limit ? fusionAppConfig.posts_per_page : values.limit;
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -232,9 +283,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			buildAttr: function( values ) {
 				var totalNumOfColumns = this.model.children.length,
-					attr              = _.fusionVisibilityAtts( values.hide_on_mobile, {
+					attr              = {
 						class: 'fusion-gallery fusion-gallery-container fusion-child-element fusion-grid-' + values.columns + ' fusion-columns-total-' + totalNumOfColumns + ' fusion-gallery-layout-' + values.layout + ' fusion-gallery-' + this.model.get( 'cid' )
-					} ),
+					},
 					margin;
 
 				if ( values.column_spacing ) {
@@ -242,9 +293,113 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					attr.style = 'margin:' + margin + 'px;';
 				}
 
+				if ( '' !== values.order_by ) {
+					attr[ 'data-order' ] = values.order_by;
+				}
+
 				attr[ 'data-empty' ] = this.emptyPlaceholderText;
+				if ( '' !== values.aspect_ratio ) {
+					attr[ 'class' ] += ' has-aspect-ratio';
+				}
 
 				return attr;
+			},
+
+			/**
+			 * Builds wrapper attributes.
+			 *
+			 * @since 3.8
+			 * @param {Object} values - The values object.
+			 * @return {Object}
+			 */
+			buildWrapperAttr: function( values ) {
+				var attr = _.fusionVisibilityAtts( values.hide_on_mobile, {
+					class: 'awb-gallery-wrapper  awb-gallery-wrapper-' + this.model.get( 'cid' ),
+					style: ''
+				} );
+
+				if ( '' !==  values.limit && 0 < values.limit ) {
+					attr[ 'data-limit' ] =  values.limit;
+					attr[ 'data-page' ] = 1;
+				}
+
+				if ( '' !== values.load_more_btn_span ) {
+					attr[ 'class' ] += ' button-span-' + values.load_more_btn_span;
+				}
+
+				if ( '' !==  values.button_alignment ) {
+				attr.style += '--more-btn-alignment:' +  values.button_alignment + ';';
+				}
+
+				if ( '' !==  values.load_more_btn_color ) {
+				attr.style += '--more-btn-color:' +  values.load_more_btn_color + ';';
+				}
+
+				if ( '' !==  values.load_more_btn_bg_color ) {
+				attr.style += '--more-btn-bg:' +  values.load_more_btn_bg_color + ';';
+				}
+
+				if ( '' !==  values.load_more_btn_hover_color ) {
+				attr.style += '--more-btn-hover-color:' +  values.load_more_btn_hover_color + ';';
+				}
+
+				if ( '' !==  values.load_more_btn_hover_bg_color ) {
+				attr.style += '--more-btn-hover-bg:' +  values.load_more_btn_hover_bg_color + ';';
+				}
+
+				if ( '' !== values.margin_top ) {
+					attr.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					attr.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					attr.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					attr.style += 'margin-left:' + values.margin_left + ';';
+				}
+
+				return attr;
+			},
+
+			/**
+			 * Builds pagination HTML.
+			 *
+			 * @since 2.0
+			 * @param {Object} values - The values object.
+			 * @return {Object}
+			 */
+			buildPaginationHTML: function( values ) {
+				var html = '';
+
+				if ( 0 < values.limit && ( this.model.children.length > values.limit || ( values.element_content.match( /fusion_gallery_image/g ).length - 1 ) > values.limit ) ) {
+					if ( 'button' === values.pagination_type || 'infinite' === values.pagination_type ) {
+						html += '<div class="fusion-loading-container fusion-clearfix awb-gallery-posts-loading-container">';
+						html += '<div class="fusion-loading-spinner">';
+						html += '<div class="fusion-spinner-1"></div>';
+						html += '<div class="fusion-spinner-2"></div>';
+						html += '<div class="fusion-spinner-3"></div>';
+						html += '</div>';
+						html += '<div class="fusion-loading-msg"><em>' + fusionBuilderText.gallery_loading_message + '</em></div>';
+						html += '</div>';
+					}
+
+					if ( 'infinite' === values.pagination_type ) {
+						html += '<div class="awb-gallery-infinite-scroll-handle is-active"></div>';
+					}
+
+					if ( 'button' === values.pagination_type ) {
+						html += '<div class="awb-gallery-buttons">';
+						html += '<a href="#" class="fusion-button button-flat button-default fusion-button-default-size awb-gallery-load-more-btn">' + values.load_more_btn_text + '</a>';
+						html += '</div>';
+					}
+				}
+
+				return html;
 			},
 
 			/**
@@ -271,7 +426,7 @@ responsive = '';
 				selectors = [ this.baseSelector + ' .awb-imageframe-caption-container .awb-imageframe-caption-title' ];
 				// title color.
 				if ( ! this.isDefault( 'caption_title_color' ) ) {
-					this.addCssProperty( selectors, 'color', atts.values.caption_title_color );
+					this.addCssProperty( selectors, 'color', atts.values.caption_title_color, true );
 				}
 				// title size.
 				if ( ! this.isDefault( 'caption_title_size' ) ) {
@@ -286,7 +441,15 @@ responsive = '';
 				}
 				// title transform.
 				if ( ! this.isDefault( 'caption_title_transform' ) ) {
-					this.addCssProperty( selectors, 'text-transform', atts.values.caption_title_transform );
+					this.addCssProperty( selectors, 'text-transform', atts.values.caption_title_transform, true );
+				}
+				// Line height.
+				if ( ! this.isDefault( 'caption_title_line_height' ) ) {
+					this.addCssProperty( selectors, 'line-height', atts.values.caption_title_line_height, true );
+				}
+				// Letter spacing.
+				if ( ! this.isDefault( 'caption_title_letter_spacing' ) ) {
+					this.addCssProperty( selectors, 'letter-spacing', _.fusionGetValueWithUnit( atts.values.caption_title_letter_spacing ), true );
 				}
 
 				selectors = [ this.baseSelector + ' .awb-imageframe-caption-container .awb-imageframe-caption-text' ];
@@ -308,6 +471,14 @@ responsive = '';
 				// text transform.
 				if ( ! this.isDefault( 'caption_text_transform' ) ) {
 					this.addCssProperty( selectors, 'text-transform', atts.values.caption_text_transform );
+				}
+				// Line height.
+				if ( ! this.isDefault( 'caption_text_line_height' ) ) {
+					this.addCssProperty( selectors, 'line-height', atts.values.caption_text_line_height );
+				}
+				// Letter spacing.
+				if ( ! this.isDefault( 'caption_text_letter_spacing' ) ) {
+					this.addCssProperty( selectors, 'letter-spacing', _.fusionGetValueWithUnit( atts.values.caption_text_letter_spacing ) );
 				}
 
 				// Border color.
@@ -384,6 +555,44 @@ responsive = '';
 				}
 
 				return ( css ) ? '<style>' + css + '</style>' : '';
+			},
+
+			/**
+			 * Builds aspect ratio styles.
+			 *
+			 * @since 3.7
+			 * @param {Object} atts - The atts object.
+			 * @return {string}
+			 */
+			buildAspectRatioStyles: function() {
+				var selectors, aspectRatio, width, height;
+
+				if ( '' ===  this.values.aspect_ratio ) {
+					return '';
+				}
+
+				this.dynamic_css = {};
+				this.baseSelector = '.fusion-gallery.fusion-gallery-' + this.model.get( 'cid' );
+				selectors = [ this.baseSelector + ' .fusion-gallery-image img' ];
+
+				// Calc Ratio
+				if ( 'custom' ===  this.values.aspect_ratio && '' !==  this.values.custom_aspect_ratio ) {
+					this.addCssProperty( selectors, 'aspect-ratio', `100 / ${this.values.custom_aspect_ratio}` );
+				} else {
+					aspectRatio = this.values.aspect_ratio.split( '-' );
+					width 		= aspectRatio[ 0 ] || '';
+					height 		= aspectRatio[ 1 ] || '';
+
+					this.addCssProperty( selectors, 'aspect-ratio', `${width} / ${height}` );
+				}
+
+				//Ratio Position
+				if ( '' !==  this.values.aspect_ratio_position ) {
+					this.addCssProperty( selectors, 'object-position', this.values.aspect_ratio_position );
+				}
+				const css = this.parseCSS();
+
+				return css;
 			}
 
 		} );
@@ -404,7 +613,6 @@ responsive = '';
 				if ( 'undefined' === typeof parentView.imageMap.images[ imageId ] && 'undefined' !== typeof value && '' !== value ) {
 					queryData[ imageId ] = params;
 				}
-
 				// Send this data with ajax or rest.
 				if ( ! _.isEmpty( queryData ) ) {
 					jQuery.ajax( {
@@ -416,7 +624,8 @@ responsive = '';
 							action: 'get_fusion_gallery',
 							children: queryData,
 							fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
-							gallery: parentView.model.get( 'params' )
+							gallery: parentView.model.get( 'params' ),
+							image: params
 						}
 					} )
 					.done( function( response ) {
@@ -440,6 +649,7 @@ responsive = '';
 					if ( ! args.skip && 'undefined' !== typeof name ) {
 						elementView.changeParam( name, value );
 					}
+
 					if ( reRender ) {
 						elementView.reRender();
 					}

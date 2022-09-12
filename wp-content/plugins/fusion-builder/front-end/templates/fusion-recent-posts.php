@@ -8,7 +8,7 @@
 
 ?>
 <script type="text/html" id="tmpl-fusion_recent_posts-shortcode">
-
+	{{{ style }}}
 	<# // If Query Data is set, use it and continue.  If not, echo HTML. #>
 	<# if ( 'undefined' !== typeof query_data && 'undefined' !== typeof query_data.posts ) { #>
 		<#
@@ -88,9 +88,9 @@
 							<# if ( 'yes' === values.title ) { #>
 
 								{{{ post.rich_snippet.yes }}}
-								<h4 <# if ( extras.disable_date_rich_snippet_pages ) { #>class="entry-title"<# } #>>
+								<{{ titleTag }} <# if ( extras.disable_date_rich_snippet_pages ) { #>class="entry-title"<# } #>>
 									<a href="{{{ post.permalink }}}">{{{ post.title }}}</a>
-								</h4>
+								</{{ titleTag }}>
 
 							<# } else { #>
 

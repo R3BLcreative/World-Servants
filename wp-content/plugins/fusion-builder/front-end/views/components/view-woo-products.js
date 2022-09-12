@@ -125,8 +125,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				var output = '';
 
 				output += '<div class="fusion-carousel-nav">';
-				output += '<span class="fusion-nav-prev"></span>';
-				output += '<span class="fusion-nav-next"></span>';
+				output += '<button class="fusion-nav-prev" aria-label="Previous"></button>';
+				output += '<button class="fusion-nav-next" aria-label="Next"></button>';
 				output += '</div>';
 
 				return output;

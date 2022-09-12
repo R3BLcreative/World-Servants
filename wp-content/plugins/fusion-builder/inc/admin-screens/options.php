@@ -14,7 +14,7 @@ if ( null === FusionBuilder()->registration ) {
 }
 ?>
 <?php Fusion_Builder_Admin::header( 'builder-options' ); ?>
-	<?php $existing_settings = get_option( 'fusion_builder_settings' ); ?>
+	<?php $existing_settings = get_option( 'fusion_builder_settings', [] ); ?>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 
 		<section class="avada-db-card avada-db-card-first avada-db-settings-start">
@@ -40,9 +40,9 @@ if ( null === FusionBuilder()->registration ) {
 			<section class="avada-db-card">
 				<div class="fusion-builder-option">
 					<div class="fusion-builder-option-title">
-						<h2><?php esc_html_e( 'Avada Builder Auto Activation', 'fusion-builder' ); ?></h2>
+						<h2><?php esc_html_e( 'Builder Auto Activation', 'fusion-builder' ); ?></h2>
 						<span class="fusion-builder-option-label">
-							<p><?php esc_html_e( 'Turn on to enable the Avada Builder user interface by default when opening a page or post. Turn off to enable the default WP editor view.', 'fusion-builder' ); ?></p>
+							<p><?php esc_html_e( 'Turn on to enable the desired Builder user interface by default when opening a page or post. Turn off to enable the default WP editor view.', 'fusion-builder' ); ?></p>
 						</span>
 					</div>
 
@@ -55,7 +55,8 @@ if ( null === FusionBuilder()->registration ) {
 							}
 							?>
 							<input type="hidden" class="button-set-value" value="<?php echo esc_attr( $enable_builder_ui_by_default ); ?>" name="enable_builder_ui_by_default" id="enable_builder_ui_by_default">
-							<a data-value="1" class="ui-button buttonset-item<?php echo ( $enable_builder_ui_by_default ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'On', 'fusion-builder' ); ?></a>
+							<a data-value="live" class="ui-button buttonset-item<?php echo ( 'live' === $enable_builder_ui_by_default ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'Live Builder', 'fusion-builder' ); ?></a>
+							<a data-value="backend" class="ui-button buttonset-item<?php echo ( 'backend' === $enable_builder_ui_by_default ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'Back-end Builder', 'fusion-builder' ); ?></a>
 							<a data-value="0" class="ui-button buttonset-item<?php echo ( ! $enable_builder_ui_by_default ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'Off', 'fusion-builder' ); ?></a>
 						</div>
 					</div>
@@ -210,7 +211,7 @@ if ( null === FusionBuilder()->registration ) {
 					<div class="fusion-builder-option-title">
 						<h2><?php esc_html_e( 'Post Types', 'fusion-builder' ); ?></h2>
 						<span class="fusion-builder-option-label">
-							<p><?php esc_html_e( 'Avada Builder can be enabled or disabled on registered post types. Check the box to enable, uncheck to disable. Please note the Fusion element generator will still be active on any post type that is disabled.', 'fusion-builder' ); ?></p>
+							<p><?php esc_html_e( 'Avada Builder can be enabled or disabled on registered post types. Check the box to enable, uncheck to disable. Please note the Avada element generator will still be active on any post type that is disabled.', 'fusion-builder' ); ?></p>
 						</span>
 					</div>
 
@@ -308,6 +309,31 @@ if ( null === FusionBuilder()->registration ) {
 							<input type="hidden" class="button-set-value" value="<?php echo esc_attr( $enable_builder_sticky_publish_buttons ); ?>" name="enable_builder_sticky_publish_buttons" id="enable_builder_sticky_publish_buttons">
 							<a data-value="1" class="ui-button buttonset-item<?php echo ( $enable_builder_sticky_publish_buttons ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'On', 'fusion-builder' ); ?></a>
 							<a data-value="0" class="ui-button buttonset-item<?php echo ( ! $enable_builder_sticky_publish_buttons ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'Off', 'fusion-builder' ); ?></a>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="avada-db-card">
+				<div class="fusion-builder-option">
+					<div class="fusion-builder-option-title">
+						<h2><?php esc_html_e( 'Remove Empty Attributes', 'fusion-builder' ); ?></h2>
+						<span class="fusion-builder-option-label">
+							<p><?php esc_html_e( 'Set to "on" to remove empty attributes from elements at saving.', 'fusion-builder' ); ?></p>
+						</span>
+					</div>
+
+					<div class="fusion-builder-option-field">
+						<div class="fusion-form-radio-button-set ui-buttonset enable-builder-ui">
+							<?php
+							$remove_empty_attributes = 'off';
+							if ( isset( $existing_settings['remove_empty_attributes'] ) ) {
+								$remove_empty_attributes = $existing_settings['remove_empty_attributes'];
+							}
+							?>
+							<input type="hidden" class="button-set-value" value="<?php echo esc_attr( $remove_empty_attributes ); ?>" name="remove_empty_attributes" id="remove_empty_attributes">
+							<a data-value="on" class="ui-button buttonset-item<?php echo ( 'on' === $remove_empty_attributes ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'On', 'fusion-builder' ); ?></a>
+							<a data-value="off" class="ui-button buttonset-item<?php echo ( 'off' === $remove_empty_attributes ) ? ' ui-state-active' : ''; ?>" href="#"><?php esc_html_e( 'Off', 'fusion-builder' ); ?></a>
 						</div>
 					</div>
 				</div>

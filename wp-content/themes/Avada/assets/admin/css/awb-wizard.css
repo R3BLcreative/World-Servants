@@ -1,13 +1,15 @@
 /* stylelint-disable no-descending-specificity */
+.avada-db-setup .avada-db-header-main-container,
 .avada-db-performance .avada-db-header-main-container {
   min-height: 78px;
 }
+.avada-db-setup .avada-db-header-main-container h1,
 .avada-db-performance .avada-db-header-main-container h1 {
   font-size: 1.4em;
-  margin: 0 0 0 0.7em;
+  margin: 0 0.5em;
 }
 .wizard-hero-header {
-  padding-right: 1.7em;
+  margin: 0 1.7em;
 }
 .awb-wizard-tip {
   margin-top: 2em !important;
@@ -41,7 +43,7 @@
   background: #f0f0f1;
   padding: 0;
   display: inline-flex;
-  margin-right: 0.7em;
+  margin: 0.35em;
   border-radius: 50%;
   line-height: 1;
   width: 25px;
@@ -49,6 +51,9 @@
   align-items: center;
   justify-content: center;
   font-size: 13px;
+}
+.awb-wizard-steps ol > li .awb-wizard-link-text {
+  margin: 0.35em;
 }
 .awb-wizard-steps ol > li.active {
   border-bottom-color: #188fd9;
@@ -104,25 +109,29 @@ i.awb-wizard-hero-icon {
   margin-right: 0.5em;
 }
 .avada-dashboard .button-primary.awb-wizard-next {
-  float: right;
-  padding: 0.7em 1.2em;
-  font-size: 1.3em;
-  margin-top: 1.4em;
+  padding: 1em 1.3em;
+  margin: 1.4em 0.5em 0 0.5em;
   display: inline-flex;
   align-items: center;
   line-height: 1;
 }
-.avada-dashboard .button-primary.awb-wizard-next > i {
-  margin-left: 0.5em;
+.avada-dashboard .button-primary.awb-wizard-next .awb-text-wrapper {
+  font-size: 1.3em;
+}
+.awb-wizard-action-links {
+  margin: 0 0.5em;
 }
 .awb-wizard-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1.4em;
+  margin: 1.4em -0.5em 0 -0.5em;
 }
 .awb-wizard-actions .button-primary.awb-wizard-next {
   margin-top: 0;
-  margin-left: 0.7em;
+}
+.rtl .awb-wizard-actions .button-primary.awb-wizard-next i {
+  display: inline-flex;
+  transform: rotate(180deg);
 }
 .fusion-body .avada-db-card.awb-wizard-steps {
   padding: 0;
@@ -138,6 +147,16 @@ i.awb-wizard-hero-icon {
 }
 .awb-wizard-section {
   overflow: hidden;
+}
+.awb-wizard-section .pyre_metabox_field {
+  float: none;
+  overflow: hidden;
+}
+.awb-wizard-section .awb-typography {
+  margin: 0 5px;
+}
+.awb-wizard-section .awb-picker-global .awb-global-sets {
+  max-height: 182px;
 }
 .fusion-body .awb-wizard-section .awb-wizard-save.hidden {
   display: inline-flex;
@@ -536,4 +555,67 @@ i.awb-wizard-hero-icon {
 }
 .wizard-sep-heading + .awb-empty-feature {
   display: block;
+}
+.avada-dashboard.avada-db-performance .avada-db-welcome-setup .avada-db-welcome-container {
+  flex: 1;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 2.8em;
+  text-align: center;
+  background-color: #fcfcfc;
+}
+.avada-db-performance .avada-db-setup {
+  flex: 1;
+  padding: 2.8em;
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1em;
+  padding: 1.4em;
+  border-radius: 0.7em;
+  color: inherit;
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step.avada-db-completed .avada-db-setup-step-icon {
+  background-color: #65bc7b;
+  color: #fff;
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step.avada-db-completed .avada-db-setup-step-icon:before {
+  content: "\e930";
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step.avada-db-completed:hover .avada-db-setup-step-icon {
+  color: #fff;
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step:hover .avada-db-setup-step-icon {
+  color: #0e7abd;
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step-text {
+  margin-bottom: 0;
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 1.5em;
+  width: 3.5em;
+  height: 3.5em;
+  background-color: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  color: #198fd9;
+  transition: color 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
+}
+.avada-db-performance .avada-db-setup .avada-db-setup-step-icon:before {
+  font-size: 1.5em;
+}
+.avada-db-performance .avada-db-setup .avada-db-step-one {
+  border: 1px solid #dfdfdf;
+}
+.avada-db-performance .avada-db-setup .avada-db-step-two {
+  background-color: #fcfcfc;
+}
+.avada-db-performance .avada-db-setup .avada-db-step-three {
+  background-color: #f8f8f8;
 }

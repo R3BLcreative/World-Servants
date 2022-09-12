@@ -19,15 +19,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			'click .fusion-preview-only-link': 'generatePreview'
 		},
 
-		toggleWireframe: function( event ) {
-
-			if ( 'undefined' !== typeof event ) {
-				event.preventDefault();
-			}
-
-			FusionPageBuilderApp.wireframe.toggleWireframe();
-		},
-
 		initialize: function() {
 			this.builderHistory = new FusionPageBuilder.BuilderHistory();
 			this.listenTo( FusionEvents, 'fusion-post_title-changed', this.updatePreviewTitle );
@@ -42,29 +33,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		render: function() {
 			this.$el.html( this.template() );
 			this.$el.find( '.fusion-builder-history-container' ).append( this.builderHistory.render().el );
-
-			this.moveWireframe();
 			this.delegateEvents();
 
 			return this;
-		},
-
-		/**
-		 * Due to placement wireframe icon needs moved into shared area.
-		 *
-		 * @since 2.0.0
-		 * @return {Object} this
-		 */
-		moveWireframe: function() {
-
-			// Remove existing.
-			FusionApp.toolbarView.$el.find( '.fusion-wireframe-holder' ).remove();
-
-			// Copy new to location.
-			FusionApp.toolbarView.$el.find( '.fusion-builder-preview-viewport' ).after( this.$el.find( '.fusion-wireframe-holder' ) );
-
-			// Add listener to new location.
-			FusionApp.toolbarView.$el.find( '.fusion-builder-wireframe-toggle' ).on( 'click', this.toggleWireframe );
 		},
 
 		/**

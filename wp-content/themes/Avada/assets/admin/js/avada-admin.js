@@ -1,4 +1,4 @@
-/* global avadaAdminL10nStrings, ajaxurl, DemoImportNonce, allTags */
+/* global avadaAdminL10nStrings, ajaxurl, allTags, awbPrebuilts, awbSetupWizard */
 /* jshint -W117 */
 /* eslint no-unused-vars: off */
 this.imagePreview = function() {
@@ -75,7 +75,6 @@ jQuery( document ).ready( function() {
 		try {
 			jQuery( '.debug-report' ).slideDown();
 			jQuery( '.debug-report textarea' ).val( report ).focus().select();
-			jQuery( this ).parent().fadeOut();
 			return false;
 		} catch ( e ) {} // eslint-disable-line no-empty
 
@@ -187,7 +186,7 @@ jQuery( document ).ready( function() {
 							importLabel = avadaAdminL10nStrings.content;
 						}
 					} else if ( 'general_data' === data.importStages[ 0 ] ) {
-						importLabel = 'General Data';
+						importLabel = avadaAdminL10nStrings.general_data;
 					} else if ( -1 !== data.importStages[ 0 ].indexOf( 'convertplug_' ) ) {
 						importLabel = jQuery( 'label[for=import-convertplug-' + demoType + ']' ).html();
 					} else {
@@ -232,6 +231,14 @@ jQuery( document ).ready( function() {
 					message = xhr.responseJSON.data;
 				} else if ( 'Request Timeout' === errorThrown ) {
 					message = avadaAdminL10nStrings.error_timeout;
+				} else if ( 'Internal Server Error' === errorThrown && 'string' === typeof xhr.responseText ) {
+
+					message = xhr.responseText;
+
+					// Open default WP message link in new tab (happens when PHP max_execution time is reached).
+					if ( -1 !== xhr.responseText.indexOf( '<a href=' ) ) {
+						message = message.replace( '<a href=', '<a target="_blank" href=' );
+					}
 				} else {
 					message = avadaAdminL10nStrings.error_php_limits;
 				}
@@ -306,12 +313,13 @@ jQuery( document ).ready( function() {
 
 			data = {
 				action: 'fusion_import_demo_data',
-				security: DemoImportNonce,
+				security: awbPrebuilts.nonce_import_prebuilt,
 				demoType: demoType,
 				importStages: importArray,
 				contentTypes: importContentArray,
 				fetchAttachments: fetchAttachments,
-				allImport: allImport
+				allImport: allImport,
+				setupImport: false
 			};
 
 			jQuery( '#demo-modal-' + demoType ).addClass( 'demo-import-in-progress' );
@@ -408,7 +416,7 @@ jQuery( document ).ready( function() {
 			data = {
 				action: 'fusion_remove_demo_data',
 				demoType: demoType,
-				security: DemoImportNonce,
+				security: awbPrebuilts.nonce_import_prebuilt,
 				removeStages: removeArray
 			};
 
@@ -561,6 +569,10 @@ jQuery( document ).ready( function() {
 			}
 		} );
 
+	}
+
+	if ( jQuery( 'body' ).hasClass( 'avada_page_avada-prebuilt-websites' ) || jQuery( 'body' ).hasClass( 'avada_page_avada-setup' ) ) {
+
 		jQuery( '.avada-importer-tags-selector button' ).on( 'click', function( e ) {
 			var demos = jQuery( '.avada-db-demos-themes' ).find( '.fusion-admin-box' ),
 				value = this.getAttribute( 'data-tag' );
@@ -665,7 +677,7 @@ jQuery( document ).ready( function() {
 				avada_activate: 'activate-plugin',
 				plugin: $this.data( 'plugin' ),
 				plugin_name: $this.data( 'plugin_name' ),
-				avada_activate_nonce: $this.data( 'nonce' )
+				avada_activate_nonce: awbPrebuilts.nonce_activate_plugin
 			};
 
 		// Disable parallel plugin install
@@ -701,14 +713,14 @@ jQuery( document ).ready( function() {
 				avada_activate: 'activate-plugin',
 				plugin: $this.data( 'plugin' ),
 				plugin_name: $this.data( 'plugin_name' ),
-				avada_activate_nonce: $this.data( 'nonce' ),
+				avada_activate_nonce: awbPrebuilts.nonce_activate_plugin,
 				page: 'install-required-plugins'
 			};
 
 		// 'page' arg needed so 'avada_get_required_and_recommened_plugins' sets proper plugin URL.
 
 		data[ 'tgmpa-install' ] = 'install-plugin';
-		data[ 'tgmpa-nonce' ]   =  $this.data( 'tgmpa_nonce' );
+		data[ 'tgmpa-nonce' ]   = awbPrebuilts.nonce_install_plugin;
 
 		// Disable parallel plugin install
 		jQuery( '#demo-modal-' + demoType ).addClass( 'plugin-install-in-progress' );
@@ -815,7 +827,7 @@ function avadaPluginsManager() {
 							data.actionToDo = 'refresh-container';
 							jQuery.post( ajaxurl, data, function( refreshResponse ) {
 								if ( refreshResponse.success ) {
-									jQuery( '#avada-plugins-wrapper' ).replaceWith( refreshResponse.data );
+									jQuery( '.wrap.avada-db-plugins' ).replaceWith( refreshResponse.data );
 
 									// Retrigger the function to add listeners for new elements.
 									avadaPluginsManager();
@@ -832,7 +844,7 @@ function avadaPluginsManager() {
 				data.actionToDo = 'refresh-container';
 				jQuery.post( ajaxurl, data, function( refreshResponse ) {
 					if ( refreshResponse.success ) {
-						jQuery( '#avada-plugins-wrapper' ).replaceWith( refreshResponse.data );
+						jQuery( '.wrap.avada-db-plugins' ).replaceWith( refreshResponse.data );
 
 						// Retrigger the function to add listeners for new elements.
 						avadaPluginsManager();
@@ -846,42 +858,17 @@ function avadaPluginsManager() {
 // Avada Dashboard.
 jQuery( document ).ready( function() {
 
-	// Welcome Setup Toggle.
-	jQuery( '.avada-db-welcome-setup-completed .avada-db-more-info' ).on( 'click', function( e ) {
-		e.preventDefault();
-
-		jQuery( this ).parent().removeClass( 'avada-db-welcome-setup-completed' ).addClass( 'avada-db-welcome-setup-completed-toggled' );
-	} );
-
-	jQuery( '.avada-db-welcome-setup-completed .notice-dismiss' ).on( 'click', function( e ) {
-		e.preventDefault();
-
-		jQuery( this ).parent().removeClass( 'avada-db-welcome-setup-completed-toggled' ).addClass( 'avada-db-welcome-setup-completed' );
-	} );
-
-
 	// Welcome Video expand.
 	jQuery( '.avada-db-welcome-video' ).on( 'click', function( e ) {
-		e.preventDefault();
-
-		jQuery( '.avada-db-welcome-video-container' ).toggleClass( 'avada-db-active' );
-	} );
-
-
-	// Scroll to the registration form.
-	jQuery( '.avada-db-step-one' ).on( 'click', function( e ) {
-		var href               = jQuery( this ).attr( 'href' ),
-			target             = jQuery( href ),
-			animationRoot      = ( jQuery( 'html' ).hasClass( 'ua-edge' ) || jQuery( 'html' ).hasClass( 'ua-safari-12' ) || jQuery( 'html' ).hasClass( 'ua-safari-11' ) || jQuery( 'html' ).hasClass( 'ua-safari-10' ) ) ? 'body' : 'html',
-			adminbarHeight     = jQuery( '#wpadminbar' ).length ? jQuery( '#wpadminbar' ).height() : 0,
-			stickyHeaderHeight = jQuery( '.avada-db-header-sticky' ).height(),
-			newScrollPosition  = target.offset().top - adminbarHeight - stickyHeaderHeight;
+		var $container = jQuery( '.avada-db-welcome-media-container' );
 
 		e.preventDefault();
 
-		jQuery( animationRoot ).animate( {
-			scrollTop: newScrollPosition
-		}, 400 );
+		$container.toggleClass( 'avada-db-active' );
+
+		if ( $container.hasClass( 'avada-db-active' ) && 'undefined' === typeof $container.find( 'iframe' ).attr( 'src' ) ) {
+			$container.find( 'iframe' ).attr( 'src', $container.find( 'iframe' ).attr( 'data-src' ) );
+		}
 	} );
 
 	// Toggle the how to instructions for the registration.
@@ -913,24 +900,30 @@ jQuery( document ).ready( function() {
 				// Registered.
 				if ( jQuery( '#avada-db-registration' ).find( '.avada-db-reg-heading i' ).hasClass( 'fusiona-verified' ) ) {
 					jQuery( '.avada-db-menu-sticky-label' ).addClass( 'completed' );
-					jQuery( '.avada-db-step-one' ).addClass( 'avada-db-completed' );
 					jQuery( '#avada-db-registration' ).addClass( 'avada-db-completed' );
 
 					// Hide grace period warning.
 					if ( jQuery( '#fusion-legacy-notice' ).length ) {
 						jQuery( '#fusion-legacy-notice' ).remove();
 					}
+
+					// If on setup screen.
+					if ( 'undefined' !== typeof awbSetupWizard && 'undefined' !== typeof awbPrebuilts && jQuery( 'body' ).hasClass( 'avada_page_avada-setup' ) ) {
+
+						if ( true !== awbPrebuilts.plugins[ 'fusion-core' ].active || true !== awbPrebuilts.plugins[ 'fusion-builder' ].active ) {
+
+							// Activate FC & FB if not active.
+							awbSetupWizard.activateAvadaPlugins();
+						} else {
+							// Reload page and move to 2nd step.
+							window.location.reload( true );
+						}
+					}
 				} else {
 
 					// Unregistered.
 					jQuery( '.avada-db-menu-sticky-label' ).removeClass( 'completed' );
-					jQuery( '.avada-db-step-one' ).removeClass( 'avada-db-completed' );
 					jQuery( '#avada-db-registration' ).removeClass( 'avada-db-completed' );
-				}
-
-				// Remove the all completed class from the steps card.
-				if ( 3 > jQuery( '.avada-db-setup-step.avada-db-completed' ).length ) {
-					jQuery( '.avada-db-welcome-setup' ).removeClass( 'avada-db-welcome-setup-completed' );
 				}
 			}
 		);

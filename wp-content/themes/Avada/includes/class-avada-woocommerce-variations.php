@@ -80,8 +80,8 @@ class Avada_Woocommerce_Variations {
 			add_filter( 'before_avada_taxonomy_map', [ $this, 'term_options' ] );
 			add_filter( 'woocommerce_dropdown_variation_attribute_options_html', [ $this, 'variation_markup' ], 10, 2 );
 			add_action( 'wp', [ $this, 'enqueue_assets' ] );
-
 			add_action( 'woocommerce_product_option_terms', [ $this, 'option_terms' ], 20, 3 );
+			add_filter( 'woocommerce_layered_nav_term_html', [ $this, 'layered_nav_list_links' ], 10, 4 );
 		}
 	}
 
@@ -527,11 +527,12 @@ class Avada_Woocommerce_Variations {
 	/**
 	 * Create the preview columns, for custom avada attributes types.
 	 *
+	 * @access public
+	 * @since 7.7 
 	 * @param string     $content The previews content.
 	 * @param string     $column_id The column Id.
 	 * @param int|string $term_id The term Id.
 	 * @return string The content.
-	 * @since 7.2
 	 */
 	public function create_preview_column_for_custom_attribute_type( $content, $column_id, $term_id ) {
 		if ( 'avada_color' === $column_id ) {
@@ -563,6 +564,43 @@ class Avada_Woocommerce_Variations {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Filters the link markup for the WooCommerce layered nav list widgets.
+	 *
+	 * @access public
+	 * @since 7.7
+	 * @param string $term_html HTML of the term link.
+	 * @param object $term The term object.
+	 * @param string $link The link URL.
+	 * @param string $count Number of products matching the attribute.
+	 * @return string The content.
+	 */
+	public function layered_nav_list_links( $term_html, $term, $link, $count ) {
+		$attribute = wc_get_attribute( wc_attribute_taxonomy_id_by_name( $term->taxonomy ) );
+		$attr_type = $attribute->type;
+
+		switch ( $attr_type ) {
+			case 'avada_color':
+				$color     = fusion_data()->term_meta( $term->term_id )->get( 'attribute_color' );
+				$term_html = '<a class="awb-woo-attr" rel="nofollow" href="' . esc_url( $link ) . '"><span class="awb-woo-attr-wrapper"><span class="avada-color-select"><span style="background-color: ' . esc_attr( $color ) . '"></span></span><span class="awb-woo-attr-name">' . esc_html( $term->name ) . '</span></span><span class="awb-woo-attr-count">(' . esc_html( $count ) . ')</span></a>';
+				break;
+			case 'avada_image':
+				$image        = fusion_data()->term_meta( $term->term_id )->get( 'attribute_image' );
+				$image_id     = isset( $image['id'] ) ? $image['id'] : '';
+				$image_url    = isset( $image['url'] ) ? $image['url'] : '';
+				$image_size   = isset( $image['size'] ) ? $image['size'] : 'full';
+				$image_data   = fusion_library()->images->get_attachment_data_by_helper( $image_id, $image_url );
+				$image_output = is_array( $image_data ) ? wp_get_attachment_image( $image_data['id'], $image_size ) : '';
+				$term_html    = '<a class="awb-woo-attr" rel="nofollow" href="' . esc_url( $link ) . '"><span class="awb-woo-attr-wrapper"><span class="avada-image-select">' . $image_output . '</span><span class="awb-woo-attr-name">' . esc_html( $term->name ) . '</span></span><span class="awb-woo-attr-count">(' . esc_html( $count ) . ')</span></a>';              
+				break;
+			case 'avada_button':
+				$term_html = '<a class="awb-woo-attr" rel="nofollow" href="' . esc_url( $link ) . '"><span class="awb-woo-attr-wrapper"><span class="avada-button-select">' . esc_html( $term->name ) . '</span></span><span class="awb-woo-attr-count">(' . esc_html( $count ) . ')</span></a>';
+				break;
+		}
+
+		return $term_html;
 	}
 }
 

@@ -7,7 +7,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		fusion_preview: function( name, value, args, view ) {
 			var property = args.property,
 				element  = window.fusionAllElements[ view.model.get( 'element_type' ) ],
-				$theEl;
+				selectors;
 
 			if ( ! args.skip ) {
 				view.changeParam( name, value );
@@ -26,15 +26,21 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			if ( 'undefined' !== typeof args.unit ) {
 				value = _.fusionGetValueWithUnit( value, args.unit );
 			}
-			$theEl = ( 'undefined' === typeof args.selector ) ? view.$el : view.$el.find( args.selector );
-			if ( 'string' === typeof property ) {
-				$theEl.css( property, value );
-			}
-			if ( 'object' === typeof property ) {
-				_.each( args.property, function( singleProperty ) {
-					$theEl.css( singleProperty, value );
-				} );
-			}
+
+			selectors = 'undefined' === typeof args.selector ? 'none' : args.selector.split( ',' );
+
+			_.each( selectors, function( selector ) {
+				const $theElement = 'none' === selector.trim() ? view.$el : view.$el.find( selector.trim() ).first();
+
+				if ( 'string' === typeof property ) {
+					$theElement.css( property, value );
+				}
+				if ( 'object' === typeof property ) {
+					_.each( args.property, function( singleProperty ) {
+						$theElement.css( singleProperty, value );
+					} );
+				}
+			} );
 
 			return {
 				render: false
@@ -382,8 +388,27 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			} );
 		},
 
-		fusion_get_object_title: function() {
-			return 'undefined' !== typeof FusionApp.data ? FusionApp.getDynamicPost( 'post_title' ) : '';
+		fusion_get_object_title: function( args ) {
+			if ( 'undefined' === typeof FusionApp.data ) {
+				return '';
+			}
+
+			return jQuery.ajax( {
+				url: fusionAppConfig.ajaxurl,
+				type: 'get',
+				dataType: 'json',
+				data: {
+					action: 'ajax_dynamic_data_default_callback',
+					callback: FusionApp.data.dynamicOptions[ args.data ].callback[ 'function' ],
+					args: args,
+					fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
+					post_id: FusionApp.getDynamicPost( 'post_id' ),
+					is_term: FusionApp.getDynamicPost( 'is_term' )
+				}
+			} )
+			.done( function( response ) {
+				FusionPageBuilderApp.dynamicValues.setValue( args, response.content );
+			} );
 		},
 
 		fusion_get_post_id: function() {
@@ -551,7 +576,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			view.$el.find( 'style' ).first().replaceWith( attrs.inlineStyles );
 
 			// If the ajax markup is still there from initial load then data-count is wrong.
-			view.$el.find( 'nav' ).attr( 'data-count', view.model.get( 'cid' ) );
+			view.$el.find( 'nav' ).attr( 'data-cid', view.model.get( 'cid' ) );
 
 			return {
 				render: false
@@ -626,6 +651,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		},
 
 		woo_get_cart_count: function( args ) {
+
+			return jQuery.ajax( {
+				url: fusionAppConfig.ajaxurl,
+				type: 'get',
+				dataType: 'json',
+				data: {
+					action: 'ajax_dynamic_data_default_callback',
+					callback: FusionApp.data.dynamicOptions[ args.data ].callback[ 'function' ],
+					args: args,
+					fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
+					post_id: FusionApp.getDynamicPost( 'post_id' )
+				}
+			} )
+			.done( function( response ) {
+				FusionPageBuilderApp.dynamicValues.setValue( args, response.content );
+			} );
+		},
+
+		woo_get_cart_total: function( args ) {
 
 			return jQuery.ajax( {
 				url: fusionAppConfig.ajaxurl,
@@ -764,7 +808,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					parallaxStyles       = _.getGradientString( values, 'parallax' );
 					fadedStyles          = _.getGradientString( values, 'fade' );
 					overlayStyles        = _.getGradientString( values );
-					alphaBackgroundColor = jQuery.Color( values.background_color ).alpha();
+					alphaBackgroundColor = jQuery.AWB_Color( values.background_color ).alpha();
 
 					if ( '' === mainBGStyles && '' !== values.background_image && 'yes' !== values.fade ) {
 						mainBGStyles = 'url(\'' + values.background_image + '\')';
@@ -793,7 +837,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				case 'fusion_builder_column':
 				case 'fusion_builder_column_inner':
 					mainBGStyles         = _.getGradientString( values, 'column' );
-					alphaBackgroundColor = jQuery.Color( values.background_color ).alpha();
+					alphaBackgroundColor = jQuery.AWB_Color( values.background_color ).alpha();
 
 					if ( '' === mainBGStyles && '' !== values.background_image ) {
 						mainBGStyles = 'url(\'' + values.background_image + '\')';
@@ -882,6 +926,33 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 			view.model.set( 'markup', markup );
 			view.model.set( 'query_data', query_data );
+
+			return {
+				render: false
+			};
+		},
+
+		/**
+		 * Updates gallery load more button text.
+		 *
+		 * @param  {String} name  Param name.
+		 * @param  {String} value Param value.
+		 * @param  {Object} args  Args defined.
+		 * @param  {Object} view  Element view.
+		 * @return {Object}
+		 */
+		fusion_update_gallery_load_more_text: function( name, value, args, view ) {
+			var $theEl;
+
+			if ( ! args.skip ) {
+				view.changeParam( name, value );
+			}
+
+			$theEl = ( 'undefined' === typeof args.selector ) ? view.$el : view.$el.find( args.selector );
+			value  = '' === value && 'object' === typeof FusionApp ? FusionApp.settings.gallery_load_more_button_text : value;
+			value  = '' === value && 'undefined' !== typeof view.values ? view.values[ name ] : value;
+
+			$theEl.find( '.awb-gallery-load-more-btn' ).html( value );
 
 			return {
 				render: false
@@ -1193,6 +1264,27 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 		acf_get_image_field: function( args ) {
 			return this.acf_get_field( args, true );
+		},
+
+		fusion_gallery_image_ar_position: function( name, value, args, view ) {
+			view.$el[ 0 ].querySelector( 'img' ).style.objectPosition = value;
+			if ( ! args.skip ) {
+				view.changeParam( name, value );
+			}
+
+			return {
+				render: false
+			};
+		},
+		fusion_gallery_image_masonry_position: function( name, value, args, view ) {
+			view.$el[ 0 ].querySelector( '.fusion-masonry-element-container' ).style.backgroundPosition = value;
+			if ( ! args.skip ) {
+				view.changeParam( name, value );
+			}
+
+			return {
+				render: false
+			};
 		}
 	} );
 }( jQuery ) );

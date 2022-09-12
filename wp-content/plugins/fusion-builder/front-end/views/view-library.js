@@ -1,4 +1,4 @@
-/* global FusionApp, FusionPageBuilderViewManager, fusionBuilderText, FusionPageBuilderApp, fusionAppConfig, FusionEvents, fusionGlobalManager */
+/* global FusionApp, FusionPageBuilderViewManager, fusionAllElements, fusionBuilderText, avadaPanelIFrame, fusionBuilderText, FusionPageBuilderApp, fusionAppConfig, FusionEvents, fusionGlobalManager */
 /* eslint no-undef: 0 */
 /* eslint no-alert: 0 */
 var FusionPageBuilder = FusionPageBuilder || {};
@@ -19,13 +19,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				'click .fusion-builder-demo-button-load': 'loadDemoPage',
 				'click .ui-dialog-titlebar-close': 'removeView',
 				'click .fusion-builder-layout-button-load': 'loadLayout',
-				'click .fusion-studio-import': 'loadStudioLayout',
 				'click .fusion-builder-layout-button-save': 'saveLayout',
 				'click .fusion-builder-layout-button-delete': 'deleteLayout',
 				'click .fusion-builder-element-button-save': 'saveElement',
 				'click .awb-sites-import-js': 'importDemoPage',
-				'mouseenter .fusion-studio-load': 'maybeFlipPopup',
-				'mouseleave .fusion-studio-load': 'maybeUnFlipPopup'
+				'click .awb-import-options-toggle': 'toggleImportOptions',
+				'click .awb-import-studio-item': 'loadStudioLayout',
+				'change .awb-import-options .awb-import-style input[name="overwrite-type"]': 'triggerPreviewChanges',
+				'change .awb-import-options .awb-import-inversion input[name="invert"]': 'triggerPreviewChanges'
 			},
 
 			/**
@@ -43,6 +44,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				// Loader animation
 				this.listenTo( FusionEvents, 'fusion-show-loader', this.showLoader );
 				this.listenTo( FusionEvents, 'fusion-hide-loader', this.hideLoader );
+				this.listenTo( FusionEvents, 'awb-studio-import-modal-closed', this.removeView );
 			},
 
 			showLoader: function() {
@@ -709,17 +711,20 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * Loads the layout via AJAX.
 			 *
 			 * @since 2.0.0
-			 * @param {Object} event - The event.
+			 * @param {Object} [event]         The event.
 			 * @return {void}
 			 */
 			loadStudioLayout: function( event ) {
-				var $layout,
-					self = this,
-					category = 'undefined' !== typeof FusionApp.data.postDetails.post_type && 'fusion_form' === FusionApp.data.postDetails.post_type ? 'forms' : 'fusion_template';
+				var self          = this,
+					category      = 'undefined' !== typeof FusionApp.data.postDetails.post_type && 'fusion_form' === FusionApp.data.postDetails.post_type ? 'forms' : 'fusion_template',
+					importOptions = this.getImportOptions( event );
 
 				if ( event ) {
 					event.preventDefault();
 				}
+
+				// Off canvas.
+				category = 'undefined' !== typeof FusionApp.data.postDetails.post_type && 'awb_off_canvas' === FusionApp.data.postDetails.post_type ? FusionApp.data.postDetails.post_type : category;
 
 				if ( 'string' === typeof FusionApp.data.template_category ) {
 					category = FusionApp.data.template_category;
@@ -729,8 +734,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					return;
 				}
 				FusionPageBuilderApp.layoutIsLoading = true;
-
-				$layout = jQuery( event.currentTarget ).closest( '.fusion-page-layout' );
 
 				// Get correct content.
 				FusionPageBuilderApp.builderToShortcodes();
@@ -745,8 +748,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					data: {
 						action: 'fusion_builder_load_layout',
 						fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
-						fusion_layout_id: $layout.data( 'layout_id' ),
+						fusion_layout_id: importOptions.layoutID,
 						fusion_studio: true,
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						post_id: FusionApp.getPost( 'post_id' ),
 						category: category
 					},
@@ -789,7 +795,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								( function( k ) { // eslint-disable-line no-loop-func
 
 									dfdNext = dfdNext.then( function() {
-										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ] );
+										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ], importOptions );
 									} );
 
 									promises.push( dfdNext );
@@ -810,7 +816,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 									}
 									*/
 
-									self.setStudioContent( data, FusionPageBuilderApp.studio.getImportData().post_content, event );
+									self.setStudioContent( data, FusionPageBuilderApp.studio.getImportData().post_content );
 
 									FusionEvents.trigger( 'fusion-studio-content-imported', FusionPageBuilderApp.studio.getImportData() );
 
@@ -831,7 +837,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							);
 						} else {
 
-							self.setStudioContent( data, data.post_content, event );
+							self.setStudioContent( data, data.post_content );
 
 							FusionEvents.trigger( 'fusion-studio-content-imported', data );
 
@@ -874,11 +880,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * @param {Object} dataObj
 			 * @param {String} newContent
 			 */
-			setStudioContent: function( dataObj, newContent, event ) {
+			setStudioContent: function( dataObj, newContent ) {
 				var newCustomCss,
 					needsRefresh     = false,
 					existingCss      = 'undefined' !== typeof FusionApp.data.postMeta._fusion_builder_custom_css ? FusionApp.data.postMeta._fusion_builder_custom_css : '',
-					contentPlacement = jQuery( event.currentTarget ).data( 'load-type' ),
+					contentPlacement = jQuery( '.awb-import-options-group' ).find( 'input[name="load-type"]:checked' ).val(),
 					content          = '';
 
 					// Get correct content.
@@ -890,13 +896,13 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					newCustomCss = 'undefined' !== typeof dataObj.custom_css ? dataObj.custom_css : false;
 
-					if ( 'above' === contentPlacement ) {
+					if ( 'load-type-above' === contentPlacement ) {
 						content = newContent + content;
 						if ( newCustomCss ) {
 							FusionApp.data.postMeta._fusion_builder_custom_css = newCustomCss + '\n' + existingCss;
 						}
 
-					} else if ( 'below' === contentPlacement ) {
+					} else if ( 'load-type-below' === contentPlacement ) {
 						content = content + newContent;
 						if ( newCustomCss ) {
 							FusionApp.data.postMeta._fusion_builder_custom_css = existingCss + '\n' + newCustomCss;
@@ -1174,24 +1180,19 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 								if ( 'sections' === elementCategory ) {
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-module-controls-type-container .fusion-builder-module-controls' ).after( '<a href="#" class="fusion-builder-container-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-container-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_container + '</span></span></a>' );
-									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-wireframe-utility-toolbar' ).first().append( '<a href="#" class="fusion-builder-container-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-container-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_container + '</span></span></a>' );
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"]' ).addClass( 'fusion-global-container' );
 								} else if ( 'columns' === elementCategory ) {
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-module-controls-inner.fusion-builder-column-controls-inner' ).after( '<a href="#" class="fusion-builder-column-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-column-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_column + '</span></span></a>' );
-									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-wireframe-utility-toolbar' ).first().append( '<a href="#" class="fusion-builder-column-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-column-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_column + '</span></span></a>' );
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"]' ).addClass( 'fusion-global-column' );
 								} else if ( 'elements' === elementCategory && 'undefined' !== typeof elementView.model.get( 'multi' ) && 'multi_element_parent' === elementView.model.get( 'multi' ) ) {
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"]' ).addClass( 'fusion-global-parent-element' );
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-module-controls-inner' ).after( '<a href="#" class="fusion-builder-element-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-element-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_element + '</span></span></a>' );
-									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-wireframe-utility-toolbar' ).first().append( '<a href="#" class="fusion-builder-element-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-element-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_element + '</span></span></a>' );
 								} else if ( 'elements' === elementCategory && 'fusion_builder_row_inner' === elementView.model.get( 'element_type' )  ) {
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"]' ).addClass( 'fusion-global-nested-row' );
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-module-controls-inner' ).after( '<a href="#" class="fusion-builder-element-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-element-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_element + '</span></span></a>' );
-									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-wireframe-utility-toolbar' ).last().append( '<a href="#" class="fusion-builder-element-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-element-tooltip">' + fusionBuilderText.global_element + '</span></span></a>' );
 								} else if ( 'elements' === elementCategory  ) {
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"]' ).addClass( 'fusion-global-element' );
 									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-module-controls-inner' ).after( '<a href="#" class="fusion-builder-element-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-element-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_element + '</span></span></a>' );
-									FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"] .fusion-builder-wireframe-utility-toolbar' ).first().append( '<a href="#" class="fusion-builder-element-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid=' + cid + '><span class="fusiona-globe"></span><span class="fusion-element-tooltip"><span class="fusion-tooltip-text">' + fusionBuilderText.global_element + '</span></span></a>' );
 								}
 
 								FusionPageBuilderApp.$el.find( 'div[data-cid="' + cid + '"]' ).attr( 'fusion-global-layout', globalID );
@@ -1235,38 +1236,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				FusionApp.dialogCloseResets( this );
 
 				this.remove();
-			},
-
-			/**
-			 * Maybe adds CSS class to expand popup below instead.
-			 *
-			 * @param {Object} event
-			 */
-			maybeFlipPopup: function( event ) {
-				var $target           = jQuery( event.currentTarget ),
-					targetTop         = $target.offset().top,
-					$popUp            = $target.find( '.fusion-template-options' ),
-					popuHeight        = $target.find( '.fusion-template-options' ).outerHeight(),
-					$topBar           = jQuery( '.fusion-tabs-menu' ),
-					studioContainer   = $target.closest( '.studio-imports' ),
-					wrapperPaddingTop = parseInt( studioContainer.css( 'padding-top' ), 10 );
-
-					if ( popuHeight > targetTop - ( $topBar.offset().top + $topBar.outerHeight() + wrapperPaddingTop ) ) {
-						$popUp.addClass( 'fusion-template-options-flip' );
-					}
-			},
-
-			/**
-			 * Maybe remove added CSS class.
-			 *
-			 * @param {Object} event
-			 */
-			maybeUnFlipPopup: function( event ) {
-				if ( jQuery( event.currentTarget ).find( '.fusion-template-options' ).hasClass( 'fusion-template-options-flip' ) ) {
-					jQuery( event.currentTarget ).find( '.fusion-template-options' ).removeClass( 'fusion-template-options-flip' );
-				}
 			}
-
 		} );
 	} );
 }( jQuery ) );

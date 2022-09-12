@@ -101,6 +101,31 @@ class Fusion_Multilingual {
 		add_filter( 'wcml_multi_currency_ajax_actions', [ $this, 'add_action_to_multi_currency_ajax' ], 10, 1 );
 
 		add_filter( 'option_rewrite_rules', [ $this, 'wpml_portfolio_slug_filter_rewrite_rules' ], 1, 1 );
+
+		// We are adding a new layout section.
+		if ( isset( $_GET['from_post'], $_GET['post_type'], $_GET['new_lang'] ) && 'fusion_tb_section' === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			add_action( 'wp_after_insert_post', [ $this, 'translated_new_post' ], 10, 4 );
+		}
+	}
+
+	/**
+	 * Fires once a post, its terms and meta data has been saved.
+	 *
+	 * @param int          $post_id     Post ID.
+	 * @param WP_Post      $post        Post object.
+	 * @param bool         $update      Whether this is an existing post being updated.
+	 * @param null|WP_Post $post_before Null for new posts, the WP_Post object prior
+	 *                                  to the update for updated posts.
+	 */
+	public function translated_new_post( $post_id, $post, $update, $post_before ) {
+		// Get the category from the source.
+		$terms    = get_the_terms( (int) $_GET['from_post'], 'fusion_tb_category' ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$category = is_array( $terms ) ? $terms[0]->name : false;
+
+		// If category is found, set it to the new post.
+		if ( $category ) {
+			wp_set_object_terms( $post_id, $category, 'fusion_tb_category' );
+		}
 	}
 
 	/**
@@ -473,6 +498,23 @@ class Fusion_Multilingual {
 	}
 
 	/**
+	 * Get the default language option name.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.7
+	 * @return string
+	 */
+	public static function get_default_lang_option_name() {
+		$fusion_settings      = awb_get_fusion_settings();
+		$default_language     = self::get_default_language();
+		$original_option_name = $fusion_settings::get_original_option_name();
+		$original_option_name = 'en' === $default_language ? $original_option_name : $original_option_name . '_' . $default_language;
+
+		return $original_option_name;
+	}
+
+	/**
 	 * Filter rewrite rules for porftolio slugs.
 	 *
 	 * @access public
@@ -485,28 +527,48 @@ class Fusion_Multilingual {
 			return $rules;
 		}
 
+		$active_language            = self::get_active_language();
+		$active_lang_portfolio_slug = '';
+
 		if ( class_exists( 'WPML_ST_Slug_Translation_Settings' ) ) {
 			$slug_translation_settings = new WPML_ST_Slug_Translation_Settings();
 
 			if ( $slug_translation_settings->is_enabled() ) {
-				return $rules;
+				global $sitepress, $wpdb;
+
+
+				$key                            = 'avada_portfolio';
+				$post_slug_translation_settings = $sitepress->get_setting( 'posts_slug_translation', [] );
+
+				if ( ! empty( $post_slug_translation_settings['types'][ $key ] ) || $sitepress->is_translated_post_type( $key ) ) {
+					$results = $wpdb->get_results( $wpdb->prepare( "SELECT t.language, t.value FROM {$wpdb->prefix}icl_string_translations t JOIN {$wpdb->prefix}icl_strings s ON t.string_id = s.id WHERE s.name = %s AND t.status = %d", 'URL slug: ' . $key, ICL_TM_COMPLETE ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+					if ( ! empty( $results ) && is_array( $results ) ) {
+						$results = array_combine( wp_list_pluck( $results, 'language' ), wp_list_pluck( $results, 'value' ) );
+
+						if ( isset( $results[ $active_language ] ) ) {
+							$active_lang_portfolio_slug = $results[ $active_language ];
+						}
+					}
+				}
 			}
 		}
 
 		$results                     = [];
-		$original_option_name        = class_exists( 'Avada' ) ? Avada::get_original_option_name() : 'fusion_options';
-		$default_lang_glogal_options = get_option( $original_option_name, true );
+		$default_lang__option_name   = self::get_default_lang_option_name();
+		$default_lang_glogal_options = get_option( $default_lang__option_name, true );
 		$default_portfolio_slug      = isset( $default_lang_glogal_options['portfolio_slug'] ) && $default_lang_glogal_options['portfolio_slug'] ? $default_lang_glogal_options['portfolio_slug'] : 'portfolio-items';
-		$active_lang_portfolio_slug  = fusion_library()->get_option( 'portfolio_slug' );
+		$active_lang_portfolio_slug  = $active_lang_portfolio_slug ? $active_lang_portfolio_slug : fusion_library()->get_option( 'portfolio_slug' );
 
-		if ( self::get_active_language() !== self::get_default_language() && $default_portfolio_slug !== $active_lang_portfolio_slug ) {
+		if ( self::get_default_language() !== $active_language && $default_portfolio_slug !== $active_lang_portfolio_slug ) {
 			foreach ( $rules as $match => $query ) {
 				$new_match             = str_replace( $default_portfolio_slug, $active_lang_portfolio_slug, $match );
 				$results[ $new_match ] = $query;
-	
 			}
+
+			return $results;
 		}
 
-		return $results;
-	}    
+		return $rules;
+	}
 }

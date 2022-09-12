@@ -990,7 +990,7 @@ button.close {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1010;
+  z-index: 2010;
   display: none;
   max-width: 276px;
   padding: 1px;
@@ -1203,7 +1203,7 @@ table {
 }
 .tooltip {
   position: absolute;
-  z-index: 1030;
+  z-index: 2030;
   display: block;
   visibility: visible;
   font-size: 12px;
@@ -4027,9 +4027,6 @@ table {
   box-shadow: none !important;
   line-height: 1;
 }
-.fusion-social-networks .fusion-social-network-icon:hover {
-  opacity: 0.8;
-}
 .fusion-social-networks .fusion-social-network-icon:before {
   color: inherit;
 }
@@ -4146,6 +4143,7 @@ table {
   position: absolute;
   top: 50%;
   margin-top: -14px;
+  padding: 0;
   height: 29px;
   width: 29px;
   text-align: center;
@@ -4153,6 +4151,7 @@ table {
   color: transparent;
   background-color: rgba(0, 0, 0, 0.5);
   background-repeat: no-repeat;
+  border: none;
 }
 .fusion-carousel .fusion-carousel-nav .fusion-nav-next:before,
 .fusion-carousel .fusion-carousel-nav .fusion-nav-prev:before {

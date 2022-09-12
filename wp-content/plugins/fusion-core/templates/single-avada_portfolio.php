@@ -93,15 +93,19 @@ if ( ! class_exists( 'Avada' ) ) {
 			<?php
 			$portfolio_width          = ( 'half' === fusion_get_option( 'portfolio_featured_image_width', 'width', $post->ID ) ) ? 'half' : 'full';
 			$portfolio_width          = ( ! Avada()->settings->get( 'portfolio_featured_images' ) && 'half' === $portfolio_width ) ? 'full' : $portfolio_width;
-			$project_desc_title_style = ! fusion_get_option( 'portfolio_project_desc_title' ) ? 'display:none;' : '';
+			$project_desc             = fusion_get_option( 'portfolio_project_desc_title' );
 			$project_desc_width_style = ( 'full' === $portfolio_width && ! fusion_get_option( 'portfolio_project_details' ) ) ? ' width:100%;' : '';
 			$project_details          = fusion_get_option( 'portfolio_project_details' );
 			?>
 			<div class="project-content">
 				<?php echo fusion_render_rich_snippets_for_pages(); // phpcs:ignore WordPress.Security ?>
 				<div class="project-description post-content<?php echo ( $project_details ) ? ' fusion-project-description-details' : ''; ?>" style="<?php echo esc_attr( $project_desc_width_style ); ?>">
-					<?php if ( ! post_password_required( $post->ID ) ) : ?>
-						<?php echo apply_filters( 'fusion_portfolio_post_project_description_label', '<h3 style="' . $project_desc_title_style . '">' . esc_html__( 'Project Description', 'fusion-core' ) . '</h3>', esc_attr__( 'Project Description', 'fusion-core' ), $project_desc_title_style, 'h3' ); // phpcs:ignore WordPress.Security ?>
+					<?php if ( ! post_password_required( $post->ID ) && $project_desc ) : ?>
+						<?php
+						$project_desc_title = esc_html__( 'Project Description', 'fusion-core' );
+						$project_desc_tag   = 'h3';
+						echo apply_filters( 'fusion_portfolio_post_project_description_label', '<' . $project_desc_tag . '>' . $project_desc_title . '</' . $project_desc_tag . '>', $project_desc_title, $project_desc_tag, $project_desc_width_style ); // phpcs:ignore WordPress.Security
+						?>
 					<?php endif; ?>
 					<?php the_content(); ?>
 					<?php

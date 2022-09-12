@@ -83,6 +83,10 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 					'hide_on_mobile'      => fusion_builder_default_visibility( 'string' ),
 					'icon'                => '',
 					'id'                  => '',
+					'padding_bottom'      => '',
+					'padding_left'        => '',
+					'padding_right'       => '',
+					'padding_top'         => '',
 					'margin_bottom'       => '',
 					'margin_left'         => '',
 					'margin_right'        => '',
@@ -140,30 +144,35 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
 				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
 
+				$this->args['padding_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_bottom'], 'px' );
+				$this->args['padding_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_left'], 'px' );
+				$this->args['padding_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_right'], 'px' );
+				$this->args['padding_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_top'], 'px' );
+
 				switch ( $this->args['type'] ) {
 
 					case 'general':
 						$this->alert_class = 'info';
 						if ( ! $icon || 'none' !== $icon ) {
-							$this->args['icon'] = $icon = 'fa-info-circle';
+							$this->args['icon'] = $icon = 'awb-icon-info-circle';
 						}
 						break;
 					case 'error':
 						$this->alert_class = 'danger';
 						if ( ! $icon || 'none' !== $icon ) {
-							$this->args['icon'] = $icon = 'fa-exclamation-triangle';
+							$this->args['icon'] = $icon = 'awb-icon-exclamation-triangle';
 						}
 						break;
 					case 'success':
 						$this->alert_class = 'success';
 						if ( ! $icon || 'none' !== $icon ) {
-							$this->args['icon'] = $icon = 'fa-check-circle';
+							$this->args['icon'] = $icon = 'awb-icon-check-circle';
 						}
 						break;
 					case 'notice':
 						$this->alert_class = 'warning';
 						if ( ! $icon || 'none' !== $icon ) {
-							$this->args['icon'] = $icon = 'fa-lg fa-cog fa';
+							$this->args['icon'] = $icon = 'awb-icon-cog';
 						}
 						break;
 					case 'blank':
@@ -175,7 +184,6 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 				}
 
 				$html  = '<div ' . FusionBuilder::attributes( 'alert-shortcode' ) . '>';
-				$html .= ( 'yes' === $dismissable ) ? '<button ' . FusionBuilder::attributes( 'alert-shortcode-button' ) . '>&times;</button>' : '';
 				$html .= '<div class="fusion-alert-content-wrapper">';
 				if ( $icon && 'none' !== $icon ) {
 					$html .= '<span ' . FusionBuilder::attributes( 'alert-icon' ) . '>';
@@ -189,6 +197,7 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 				$html .= '<span class="fusion-alert-content">' . do_shortcode( $content ) . '</span>';
 				fusion_element_rendering_elements( false );
 				$html .= '</div>';
+				$html .= ( 'yes' === $dismissable ) ? '<button ' . FusionBuilder::attributes( 'alert-shortcode-button' ) . '>&times;</button>' : '';
 				$html .= '</div>';
 
 				$this->on_render();
@@ -215,6 +224,8 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 				$attr = fusion_builder_visibility_atts( $this->args['hide_on_mobile'], $attr );
 
 				$attr['class'] .= Fusion_Builder_Sticky_Visibility_Helper::get_sticky_class( $this->args['sticky_display'] );
+
+				$attr['role'] = 'alert';
 
 				if ( 'capitalize' === $this->args['text_transform'] ) {
 					$attr['class'] .= ' fusion-alert-capitalize';
@@ -243,6 +254,7 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 				$styles .= ( $args['accent_color'] ) ? 'color:' . $args['accent_color'] . ';border-color:' . $args['accent_color'] . ';' : '';
 				$styles .= ( $args['border_size'] ) ? 'border-width:' . $args['border_size'] . ';' : '';
 				$styles .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
+				$styles .= Fusion_Builder_Padding_Helper::get_paddings_style( $this->args );
 
 				if ( $styles ) {
 					$attr['style'] = $styles;
@@ -267,7 +279,7 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 			 */
 			public function icon_attr() {
 				return [
-					'class'       => 'fa-lg ' . fusion_font_awesome_name_handler( $this->args['icon'] ),
+					'class'       => fusion_font_awesome_name_handler( $this->args['icon'] ),
 					'aria-hidden' => 'true',
 				];
 			}
@@ -365,14 +377,14 @@ if ( fusion_is_element_enabled( 'fusion_alert' ) ) {
 										'callback' => [ 'sanitize_color' ],
 									],
 								],
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 							],
 							'info_accent_color'        => [
 								'label'       => esc_attr__( 'General Accent Color', 'fusion-builder' ),
 								'description' => esc_attr__( 'Set the accent color for general alert boxes.', 'fusion-builder' ),
 								'id'          => 'info_accent_color',
-								'default'     => '#4a4e57',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -634,7 +646,7 @@ function fusion_element_alert() {
 				'allow_generator'          => true,
 				'inline_editor'            => true,
 				'inline_editor_shortcodes' => false,
-				'help_url'                 => 'https://theme-fusion.com/documentation/fusion-builder/elements/alert-element/',
+				'help_url'                 => 'https://theme-fusion.com/documentation/avada/elements/alert-element/',
 				'params'                   => [
 					[
 						'type'        => 'select',
@@ -721,6 +733,20 @@ function fusion_element_alert() {
 							'center' => esc_attr__( 'Center', 'fusion-builder' ),
 							'right'  => esc_attr__( 'Right', 'fusion-builder' ),
 						],
+					],
+					[
+						'type'             => 'dimension',
+						'remove_from_atts' => true,
+						'heading'          => esc_attr__( 'Padding', 'fusion-builder' ),
+						'description'      => esc_attr__( 'In pixels or percentage, ex: 10px or 10%.', 'fusion-builder' ),
+						'param_name'       => 'padding',
+						'value'            => [
+							'padding_top'    => '',
+							'padding_right'  => '',
+							'padding_bottom' => '',
+							'padding_left'   => '',
+						],
+						'group'            => esc_attr__( 'General', 'fusion-builder' ),
 					],
 					'fusion_margin_placeholder'            => [
 						'param_name' => 'margin',

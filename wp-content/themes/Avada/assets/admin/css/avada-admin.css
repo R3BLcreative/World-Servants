@@ -94,6 +94,7 @@
 }
 .avada-dashboard .avada-db-menu-item-link .avada-db-menu-item-text {
   margin: 0 0.4em;
+  white-space: nowrap;
 }
 .avada-dashboard .avada-db-menu-sub-options,
 .avada-dashboard .avada-db-menu-sub-sliders {
@@ -178,8 +179,6 @@
 }
 .avada-dashboard .avada-db-header-main .avada-db-live {
   margin: 0 1.7em;
-  padding: 0.8em 1.3em;
-  font-size: 0.9em;
 }
 .avada-dashboard .avada-db-header-sticky {
   z-index: 10;
@@ -341,18 +340,13 @@
 .avada-dashboard .avada-db-welcome-setup.avada-db-card {
   padding: 0;
 }
-.avada-dashboard .avada-db-welcome-setup .notice-dismiss,
-.avada-dashboard .avada-db-welcome-setup .avada-db-more-info {
-  display: none;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container {
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-intro,
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-media-container {
   flex: 1;
-  padding: 2.8em;
-  text-align: center;
-  background-color: #fcfcfc;
+  margin: 0 1.4em;
 }
 .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-heading {
-  font-size: 2.4em;
+  font-size: 2.2em;
 }
 .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-text {
   margin-bottom: 1.4em;
@@ -360,8 +354,7 @@
 .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-video {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin: 0 -0.4em 2.8em -0.4em;
+  margin: 0 -0.4em;
 }
 .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-video .avada-db-welcome-video-icon {
   flex-shrink: 0;
@@ -369,8 +362,8 @@
   align-items: center;
   justify-content: center;
   margin: 0 0.4em;
-  width: 1.5em;
-  height: 1.5em;
+  width: 1.7em;
+  height: 1.7em;
   border-radius: 50%;
   background-color: #198fd9;
   transition: background-color 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
@@ -389,14 +382,15 @@
 .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-video .avada-db-welcome-video-text {
   margin: 0 0.4em;
   text-align: start;
+  font-size: 1.125em;
 }
-.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-video-container {
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-media-container {
   position: relative;
 }
-.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-video-container.avada-db-active .avada-db-welcome-image {
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-media-container.avada-db-active .avada-db-welcome-image {
   opacity: 0;
 }
-.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-video-container.avada-db-active .avada-db-welcome-video-iframe {
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-media-container.avada-db-active .avada-db-welcome-video-iframe {
   opacity: 1;
   pointer-events: auto;
 }
@@ -412,86 +406,29 @@
   max-width: 600px;
   transition: opacity 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
 }
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup {
-  flex: 1;
-  padding: 2.8em;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1em;
-  padding: 1.4em;
-  border-radius: 0.7em;
-  color: inherit;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step.avada-db-completed .avada-db-setup-step-icon {
-  background-color: #65bc7b;
-  color: #fff;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step.avada-db-completed .avada-db-setup-step-icon:before {
-  content: "\e930";
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step.avada-db-completed:hover .avada-db-setup-step-icon {
-  color: #fff;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step:hover .avada-db-setup-step-icon {
-  color: #0e7abd;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step-text {
-  margin-bottom: 0;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-left: 1.5em;
-  width: 3.5em;
-  height: 3.5em;
-  background-color: #fff;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.05);
-  border-radius: 50%;
-  color: #198fd9;
-  transition: color 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-setup-step-icon:before {
-  font-size: 1.5em;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-step-one {
-  border: 1px solid #dfdfdf;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-step-two {
-  background-color: #fcfcfc;
-}
-.avada-dashboard .avada-db-welcome-setup .avada-db-setup .avada-db-step-three {
-  background-color: #f8f8f8;
-}
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed {
-  overflow: visible;
-}
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed .avada-db-more-info {
-  display: block;
-}
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed .avada-db-welcome-container {
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container {
   display: flex;
   align-items: center;
   padding: 2.8em 1.4em;
   background-color: transparent;
+  overflow: hidden;
 }
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed .avada-db-welcome-intro,
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed .avada-db-welcome-video-container {
-  flex: 1;
-  margin: 0 1.4em;
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container .avada-db-welcome-media-container {
+  margin: -2.8em -1.4em;
 }
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed .avada-db-welcome-video {
-  margin-bottom: 0;
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container .avada-db-welcome-intro .avada-db-get-started-button {
+  display: inline-block;
+  padding: 15px 30px;
+  background: #65bc7b;
+  box-shadow: 0 1px 3px rgba(101, 188, 123, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+  transition: background-color 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
 }
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed .avada-db-setup {
-  display: none;
-}
-.avada-dashboard .avada-db-welcome-setup.avada-db-welcome-setup-completed-toggled .notice-dismiss {
-  display: block;
+.avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container .avada-db-welcome-intro .avada-db-get-started-button:hover {
+  background: #4fa063;
 }
 .avada-dashboard .avada-db-registration {
   order: 1;
@@ -664,6 +601,7 @@
   color: #0e7abd;
 }
 .avada-dashboard .button,
+.avada-dashboard .button.active,
 .avada-dashboard .page-title-action,
 .avada-dashboard #delete-link .delete {
   display: inline-flex;
@@ -686,18 +624,39 @@
   transition: color 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
 }
 .avada-dashboard .button:hover,
+.avada-dashboard .button.active:hover,
 .avada-dashboard .page-title-action:hover,
 .avada-dashboard #delete-link .delete:hover,
 .avada-dashboard .button:focus,
+.avada-dashboard .button.active:focus,
 .avada-dashboard .page-title-action:focus,
 .avada-dashboard #delete-link .delete:focus,
 .avada-dashboard .button:active,
+.avada-dashboard .button.active:active,
 .avada-dashboard .page-title-action:active,
 .avada-dashboard #delete-link .delete:active {
   background-color: #fff;
   border-color: #dfdfdf;
   color: #198fd9;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+.avada-dashboard .button .awb-text-wrapper,
+.avada-dashboard .button.active .awb-text-wrapper,
+.avada-dashboard .page-title-action .awb-text-wrapper,
+.avada-dashboard #delete-link .delete .awb-text-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 -0.25em;
+}
+.avada-dashboard .button .awb-text-wrapper i,
+.avada-dashboard .button.active .awb-text-wrapper i,
+.avada-dashboard .page-title-action .awb-text-wrapper i,
+.avada-dashboard #delete-link .delete .awb-text-wrapper i,
+.avada-dashboard .button .awb-text-wrapper span,
+.avada-dashboard .button.active .awb-text-wrapper span,
+.avada-dashboard .page-title-action .awb-text-wrapper span,
+.avada-dashboard #delete-link .delete .awb-text-wrapper span {
+  margin: 0 0.25em;
 }
 .avada-dashboard #delete-link .delete {
   color: #dc3232 !important;
@@ -808,6 +767,9 @@
 .avada-dashboard select:active,
 .avada-dashboard textarea:active {
   border-color: #198fd9;
+}
+.avada-dashboard input.current-page {
+  padding: 0 0.3em 1px;
 }
 .avada-dashboard textarea {
   padding: 1em;
@@ -1204,6 +1166,18 @@
 .fusion-body .avada-db-card .avada-db-card-notice .avada-db-card-notice-content {
   margin: 1em 0.4em 0 0.4em;
 }
+.fusion-body .avada-db-card .avada-db-card-notice-button {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  margin: 1em -2px 0 -2px;
+}
+.fusion-body .avada-db-card .avada-db-card-notice-button .avada-db-card-notice {
+  margin: 0 2px;
+}
+.fusion-body .avada-db-card .avada-db-card-notice-button .avada-db-card-notice.notice-button {
+  align-items: center;
+}
 .fusion-body .avada-db-card .avada-db-card-error {
   margin-top: 1em;
   padding: 1.4em;
@@ -1218,7 +1192,7 @@
 }
 .fusion-body .avada-db-card.avada-db-notice {
   position: relative;
-  margin: 1.7em 0 0 0;
+  margin: 1.7em 0;
   padding: 2.8em;
   max-width: none;
   border-top: none;
@@ -1523,13 +1497,24 @@
 .avada-dashboard .avada-db-plugins-themes .plugin-premium {
   position: absolute;
   top: 0.7em;
-  left: 0.7em;
   padding: 0.5em 0.7em;
   text-transform: uppercase;
   color: #fff;
   font-size: 0.8em;
   border-radius: 0.43em;
   transition: opacity 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
+}
+.ltr .avada-dashboard .avada-db-demos-themes .plugin-required,
+.ltr .avada-dashboard .avada-db-plugins-themes .plugin-required,
+.ltr .avada-dashboard .avada-db-demos-themes .plugin-premium,
+.ltr .avada-dashboard .avada-db-plugins-themes .plugin-premium {
+  left: 0.7em;
+}
+.rtl .avada-dashboard .avada-db-demos-themes .plugin-required,
+.rtl .avada-dashboard .avada-db-plugins-themes .plugin-required,
+.rtl .avada-dashboard .avada-db-demos-themes .plugin-premium,
+.rtl .avada-dashboard .avada-db-plugins-themes .plugin-premium {
+  right: 0.7em;
 }
 .avada-dashboard .avada-db-demos-themes .plugin-required,
 .avada-dashboard .avada-db-plugins-themes .plugin-required {
@@ -1607,9 +1592,6 @@
 .avada-dashboard.avada-db-status .get-system-status {
   display: block;
 }
-.avada-dashboard.avada-db-status .debug-report-button {
-  margin-top: 1em;
-}
 .avada-dashboard.avada-db-status .debug-report {
   display: none;
   margin-top: 1em;
@@ -1621,6 +1603,9 @@
   font-family: monospace;
   resize: none;
   outline: 0;
+}
+.avada-dashboard.avada-db-status .debug-report .submit {
+  padding: 1em 0 0 0;
 }
 .avada-dashboard.avada-db-status table {
   border: 1px solid #dfdfdf;
@@ -1665,8 +1650,16 @@
   color: #65bc7b;
   background: none;
 }
+.avada-dashboard.avada-db-status .awb-setup-update-tools table {
+  margin-bottom: 1.4em;
+}
+.avada-dashboard.avada-db-status .awb-setup-update-tools table:last-of-type {
+  margin-bottom: 0;
+}
+.avada-dashboard.avada-db-status .awb-status-legacy-conversion {
+  margin-top: 2.8em;
+}
 .avada-dashboard.avada-db-status .avada-db-status-version-control-notice {
-  margin-top: 2em;
   font-size: 0.8em;
 }
 .avada-dashboard.avada-db-status .avada-db-status-version-control-notice strong {
@@ -1947,6 +1940,13 @@
   }
 }
 @media screen and (max-width: 1100px) {
+  .avada-dashboard .avada-db-menu-sticky .avada-db-menu-item-link {
+    flex-flow: column;
+    padding: 1.5em 0;
+  }
+  .avada-dashboard .avada-db-menu-sticky .avada-db-menu-item-link .avada-db-menu-item-text {
+    margin-top: 0.3em;
+  }
   .avada-dashboard .avada-db-card .avada-db-card-grid {
     flex-flow: column;
     margin: 0.85em -0.85em 0 -0.85em;
@@ -1957,14 +1957,22 @@
   .avada-dashboard .avada-db-card .avada-db-card-grid .avada-db-card-notice:last-child {
     margin-bottom: 0;
   }
-  .avada-dashboard .avada-db-welcome-setup {
+  .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container {
     flex-direction: column;
   }
-  .avada-dashboard .avada-db-welcome-setup-completed .avada-db-welcome-container {
-    flex-direction: column;
+  .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container .avada-db-welcome-media-container {
+    margin: 1.4em -1.4em -2.8em -1.4em;
   }
-  .avada-dashboard .avada-db-welcome-setup-completed .avada-db-welcome-container .avada-db-welcome-video {
-    margin-bottom: 2.8em;
+  .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container .avada-db-welcome-media-container .avada-db-welcome-image {
+    max-width: none;
+    height: auto;
+    width: 100%;
+  }
+  .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container .avada-db-welcome-intro {
+    text-align: center;
+  }
+  .avada-dashboard .avada-db-welcome-setup .avada-db-welcome-container .avada-db-welcome-video {
+    justify-content: center;
   }
   .avada-dashboard.avada-db-builder-options .fusion-builder-option {
     flex-flow: column;
@@ -1988,18 +1996,23 @@
   .rtl .avada-dashboard .avada-db-menu-sticky .avada-db-menu-item:nth-child(4) .avada-db-menu-sub {
     left: 0;
   }
-  .avada-dashboard .avada-db-menu-sticky .avada-db-menu-item-link {
-    flex-flow: column;
-    padding: 1.5em 0;
-  }
-  .avada-dashboard .avada-db-menu-sticky .avada-db-menu-item-link .avada-db-menu-item-text {
-    margin-top: 0.3em;
-  }
   .ltr .avada-dashboard .avada-db-menu .avada-db-menu-item:last-child .avada-db-menu-sub {
     right: 0;
   }
   .rtl .avada-dashboard .avada-db-menu .avada-db-menu-item:last-child .avada-db-menu-sub {
     left: 0;
+  }
+  .avada-dashboard .avada-db-card-notice-button {
+    flex-flow: column;
+    align-items: stretch;
+    justify-content: space-around;
+    margin: 1em 0 0 0;
+  }
+  .avada-dashboard .avada-db-card-notice-button .avada-db-card-notice {
+    margin: 0;
+  }
+  .avada-dashboard .avada-db-card-notice-button .avada-db-card-notice.notice-button {
+    padding: 0 3.4em 1.4em 3.4em;
   }
   .avada-dashboard .avada-db-footer .avada-db-footer-menu ul,
   .avada-dashboard .avada-db-footer .avada-db-footer-menu-bottom {
@@ -2164,9 +2177,220 @@
   }
 }
 /* stylelint-disable no-descending-specificity */
+.awb-import-options {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #f2f3f5;
+  padding: 10px 0;
+  z-index: 10;
+  width: 240px;
+  display: flex;
+  white-space: nowrap;
+  align-items: center;
+  overflow: hidden;
+  transition: width 0.2s;
+  transition-timing-function: ease-in-out;
+  justify-content: space-between;
+  border-radius: 0 0 5px 5px;
+}
+.awb-import-options .awb-import-options-toggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #373d42;
+  cursor: pointer;
+  min-width: 240px;
+  font-family: "Noto Sans";
+  transition: color 0.2s cubic-bezier(0.21, 0.6, 0.35, 1);
+}
+.awb-import-options .awb-import-options-toggle .icon {
+  margin-right: 10px;
+}
+.awb-import-options .awb-import-options-group {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  column-gap: 30px;
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.21, 0.6, 0.35, 1);
+}
+.awb-import-options .awb-import-options-group .awb-import-option {
+  display: flex;
+  align-items: center;
+  column-gap: 15px;
+}
+.awb-import-options .awb-import-options-group .awb-import-option > label {
+  font-size: 11px;
+  color: #93999f;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.awb-import-options .awb-import-options-group .awb-import-option input {
+  cursor: pointer;
+}
+.awb-import-options .awb-import-options-group .awb-import-option input:hover ~ label i {
+  color: #2a3035;
+  transition: all 0.1s ease-in-out;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button {
+  display: flex;
+  background: #f2f3f5;
+  height: 40px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item {
+  width: 45px;
+  position: relative;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  color: #93999e;
+  font-weight: 700;
+  font-size: 1em;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label i {
+  font-size: 1.14em;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label:before {
+  content: attr(data-tooltip);
+  top: -37px;
+  background: #2a3035;
+  color: #fff;
+  border: 1px solid #2a3035;
+  white-space: nowrap;
+  padding: 0.8em;
+  font-size: 0.65em;
+  text-transform: uppercase;
+  border-radius: 0.35em;
+  margin: 0;
+  z-index: 999999;
+  pointer-events: none;
+  left: 50%;
+  transform: translateX(-50%);
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.21, 0.6, 0.35, 1) 0.2s;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label:after {
+  content: "";
+  border: 5px solid transparent;
+  border-top-color: #2a3035;
+  z-index: 2;
+  pointer-events: none;
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.21, 0.6, 0.35, 1) 0.2s;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input:checked + label {
+  background: #198fd9;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input:checked + label i {
+  color: #fff;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:first-child label {
+  border-radius: 4px 0 0 4px;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:last-child label {
+  border-radius: 0 4px 4px 0;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:hover label:before {
+  top: -45px;
+  opacity: 1;
+  visibility: visible;
+}
+.awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:hover label:after {
+  top: -8px;
+  opacity: 1;
+  visibility: visible;
+}
+.awb-import-options .awb-import-studio-item-in-preview {
+  background-color: #198fd9;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-right: 40px;
+  transition: all 0.4s ease-in-out;
+  opacity: 0;
+}
+.awb-import-options .awb-import-studio-item-in-preview:hover {
+  background-color: #1081c7;
+  color: #fff;
+}
+.awb-import-options .fusion-studio-preview-back {
+  display: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #198fd9;
+  cursor: pointer;
+  min-width: 240px;
+  font-family: "Noto Sans";
+  height: 2.9em;
+  transition: color 0.1s ease-in-out;
+}
+.awb-import-options .fusion-studio-preview-back:hover {
+  color: #1081c7;
+}
+.awb-import-options .fusion-studio-preview-back i {
+  margin-right: 10px;
+}
+.awb-import-options.open {
+  width: 100%;
+  overflow: visible;
+}
+.awb-import-options.open .awb-import-options-group,
+.awb-import-options.open .awb-import-studio-item-in-preview {
+  opacity: 1;
+}
+.awb-import-options.open .awb-import-options-toggle {
+  color: #198fd9;
+}
+@media all and (max-width: 1190px) {
+  .awb-import-options .awb-import-options-group .awb-import-option label {
+    display: none;
+  }
+  .awb-studio-modal .post-preview .fusion-studio-preview-back {
+    min-width: 140px;
+  }
+}
 .awb-studio-modal {
   opacity: 0;
   visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+.awb-studio-modal.active {
+  opacity: 1;
+  visibility: visible;
 }
 .awb-studio-modal .post-modal-bg {
   z-index: 100051;
@@ -2198,31 +2422,13 @@
   width: 100%;
   border-radius: 5px;
   box-sizing: border-box;
+  padding-bottom: 60px;
 }
 .awb-studio-modal .post-preview .fusion-studio-preview-back {
-  width: 25px;
-  height: 25px;
-  font-size: 10px;
-  padding: 8px 0 0 7px;
-  outline: none;
-  background: #fff;
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
-  position: absolute;
-  right: -6px;
-  top: -6px;
-  z-index: 100;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-.awb-studio-modal .post-preview .fusion-studio-preview-back:hover {
-  background: #f6f6f6;
-}
-.awb-studio-modal .post-preview .fusion-studio-preview-back:before {
-  font-size: 1.5em;
-  color: #21262a;
   display: block;
-  transform: rotate(45deg) translateX(-30%);
+}
+.awb-studio-modal .post-preview .awb-import-options-toggle {
+  display: none;
 }
 .awb-studio-modal #fusion-loader {
   position: absolute;
@@ -2269,7 +2475,6 @@
 }
 .awb-studio-start .awb-studio-sync {
   display: inline-flex;
-  margin-top: 1em;
   padding-right: 0.4em;
   padding-left: 0.4em;
 }
@@ -2380,6 +2585,16 @@
   transform: translate3d(0, 0, 0);
   opacity: 1;
 }
+.awb-studio-content #main-content .previews > article:hover {
+  border-color: #198fd9;
+}
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance:none) {
+    .awb-studio-content #main-content .previews > article {
+      transform: inherit;
+    }
+  }
+}
 .awb-studio-content #main-content .previews > article.hidden {
   opacity: 0;
   transform: translate3d(0, 40px, 0);
@@ -2400,6 +2615,7 @@
   height: auto;
   transition: opacity 0.3s ease-in;
   display: block;
+  cursor: pointer;
 }
 .awb-studio-content #main-content .previews > article .bar {
   height: 3.1em;
@@ -2433,6 +2649,23 @@
 .awb-studio-content #main-content .awb-studio-actions a:hover {
   color: #198fd9;
 }
+.awb-studio-content #main-content .awb-studio-actions .awb-save .fusiona-plus {
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+  background: #93999f;
+  display: flex;
+  padding: 1px 0 0 0;
+  box-sizing: border-box;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100%;
+  color: #fff;
+  transition: all 0.3s ease-in-out;
+}
+.awb-studio-content #main-content .awb-studio-actions .awb-save .fusiona-plus:hover {
+  background: #198fd9;
+}
 .awb-studio-content #main-content .awb-studio-actions .awb-save.progress i {
   display: none;
 }
@@ -2446,6 +2679,11 @@
   border-bottom: 3px solid #333;
   animation: avada-rotate 0.8s infinite linear;
   vertical-align: bottom;
+}
+@media only screen and (min-width: 1900px) {
+  .awb-studio-content #main-content .previews {
+    column-count: 4;
+  }
 }
 @media only screen and (max-width: 1100px) {
   .awb-studio-content #main-content .previews {
@@ -2488,7 +2726,7 @@
   text-align: center;
   flex: 1;
   margin: 0;
-  padding: 1.4em 0.8em;
+  padding: 1.4em 0.6em;
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: color 0.3s cubic-bezier(0.21, 0.6, 0.35, 1), border-color 0.3s cubic-bezier(0.21, 0.6, 0.35, 1);
@@ -2537,6 +2775,10 @@
 }
 .fusion-studio-preview-active {
   overflow: hidden;
+}
+.fusion-studio-preview-active #adminmenuback,
+.fusion-studio-preview-active #adminmenuwrap {
+  z-index: -1;
 }
 .fusion-studio-preview-active .avada-db-header-sticky {
   z-index: 0;
@@ -3096,6 +3338,10 @@ span.avada-loader {
   font-family: "icomoon";
   content: "\e930";
 }
+.avada-demo-dialog .ui-dialog-content .awb-prebuilt-import-message {
+  display: inline-block;
+  margin-top: 10px;
+}
 .avada-demo-dialog .ui-dialog-buttonpane {
   margin: 5px 0 0 !important;
   padding: 0 15px 13px !important;
@@ -3227,8 +3473,7 @@ span.avada-loader {
 .avada-admin-toggle .avada-admin-toggle-content {
   background: #fff none repeat scroll 0 0;
   border-color: -moz-use-text-color #dfdfdf #dfdfdf;
-  -o-border-image: none;
-     border-image: none;
+  border-image: none;
   border: 1px solid #dfdfdf;
   border-style: none solid solid;
   border-width: medium 1px 1px;

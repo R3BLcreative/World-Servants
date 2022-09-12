@@ -15,16 +15,17 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @since 2.0
  * @param string $string The string we want to convert.
+ * @param bool   $strip_slashes Decides if slashes should be stripped.
  * @return array
  */
-function fusion_string_to_array( $string ) {
+function fusion_string_to_array( $string, $strip_slashes = true ) {
 
 	// If already an array, return early.
 	if ( is_array( $string ) ) {
 		return $string;
 	}
 
-	$string = stripslashes( $string );
+	$string = $strip_slashes ? stripslashes( $string ) : $string;
 
 	if ( empty( $string ) ) {
 		return false;
@@ -304,6 +305,7 @@ function fusion_app_textdomain_strings() {
 		'to_get_started_ptb'                          => esc_html__( 'To get started building your Page Title Bar, add a container.', 'fusion-builder' ),
 		'to_get_started_footer'                       => esc_html__( 'To get started building your Footer, add a container.', 'fusion-builder' ),
 		'to_get_started_form'                         => esc_html__( 'To get started building your Form, add a container.', 'fusion-builder' ),
+		'to_get_started_off_canvas'                   => esc_html__( 'To get started building your Off Canvas, add a container.', 'fusion-builder' ),
 		'to_get_started_sub'                          => esc_html__( 'The building process always starts with a container, then columns, then elements.', 'fusion-builder' ),
 		'watch_the_video'                             => esc_html__( 'Watch The Video!', 'fusion-builder' ),
 		'edit_settings'                               => esc_html__( 'Edit Settings', 'fusion-builder' ),
@@ -332,9 +334,9 @@ function fusion_app_textdomain_strings() {
 		'deleted'                                     => esc_html__( 'Deleted', 'fusion-builder' ),
 		'cloned'                                      => esc_html__( 'Cloned', 'fusion-builder' ),
 		'pasted'                                      => esc_html__( 'Pasted', 'fusion-builder' ),
-		'pasted'                                      => esc_html__( 'Pasted', 'fusion-builder' ),
 		'moved'                                       => esc_html__( 'Moved', 'fusion-builder' ),
 		'edited'                                      => esc_html__( 'Edited', 'fusion-builder' ),
+		'invert'                                      => esc_html__( 'Invert', 'fusion-builder' ),
 		'reset_to_default'                            => esc_html__( 'Reset to Default', 'fusion-builder' ),
 		'added_nested_columns'                        => esc_html__( 'Added Nested Columns', 'fusion-builder' ),
 		'edited_nested_columns'                       => esc_html__( 'Edited Nested Columns', 'fusion-builder' ),
@@ -391,11 +393,12 @@ function fusion_app_textdomain_strings() {
 		'bulk_add_insert_choices'                     => esc_html__( 'Insert Choices', 'fusion-builder' ),
 		/* translators: Child element name. */
 		'empty_parent'                                => esc_html__( 'Empty %s element, please add child elements here.', 'fusion-builder' ),
+		'post_views_counter_disabled'                 => esc_html__( 'The views counter option is disabled. Enable it in the global options to use this element.', 'fusion-builder' ),
 		'to_add_images'                               => esc_html__( 'To add images to this post or page for attachments layout, navigate to "Upload Files" tab in media manager and upload new images.', 'fusion-builder' ),
 		'importing_single_page'                       => esc_html__( 'WARNING: Importing a single prebuilt page will remove all other page content, Avada Page Options and page template. Avada Global Options and images are not imported. Click OK to continue or cancel to stop.', 'fusion-builder' ),
 		'content_error_title'                         => esc_html__( 'Content Error', 'fusion-builder' ),
 		/* translators: Link URL. */
-		'content_error_description'                   => sprintf( __( 'Your page content could not be displayed as an Avada Builder layout. Most likely that means, there is some invalid markup or shortcode in it. Please check the contents in the text editor. <a href="%s" target="_blank">See here for more information</a>.', 'fusion-builder' ), 'https://theme-fusion.com/documentation/fusion-builder/technical/page-content-not-parsable-fusion-builder/' ),
+		'content_error_description'                   => sprintf( __( 'Your page content could not be displayed as an Avada Builder layout. Most likely that means, there is some invalid markup or shortcode in it. Please check the contents in the text editor. <a href="%s" target="_blank">See here for more information</a>.', 'fusion-builder' ), 'https://theme-fusion.com/documentation/avada/how-to/how-to-fix-page-content-not-parsable-avada-builder/' ),
 		'unknown_error_title'                         => esc_html__( 'Unknown Error Occurred', 'fusion-builder' ),
 		/* translators: Link URL. */
 		'unknown_error_link'                          => sprintf( __( '<a href="%s" target="_blank">Click here to learn more.</a>', 'fusion-builder' ), '#' ),
@@ -592,6 +595,12 @@ function fusion_app_textdomain_strings() {
 		'demo_importing_content'                      => esc_html__( 'Importing Prebuilt Page Content', 'fusion-builder' ),
 		'demo_importing_content_failed'               => esc_html__( 'Importing Prebuilt Page Content Failed', 'fusion-builder' ),
 		'demo_importing_media'                        => esc_html__( 'Importing Prebuilt Page Media:', 'fusion-builder' ),
+		'setup_plugin_error_title'                    => esc_html__( 'Plugin Installation Failed', 'fusion-builder' ),
+		'setup_prebuilt_error_title'                  => esc_html__( 'Importing Prebuilt Website Failed', 'fusion-builder' ),
+		'setup_general_error_title'                   => esc_html__( 'Something Went Wrong', 'fusion-builder' ),
+		'setup_general_error_message'                 => esc_html__( 'An error occured and the process could not be completed. Please check your error log for details.', 'fusion-builder' ),
+		'content'                                     => esc_html__( 'Content', 'fusion-builder' ),
+		'gallery_loading_message'                     => esc_html__( 'Loading the next set of gallery items...', 'fusion-builder' ),
 	];
 
 	return $text_strings;

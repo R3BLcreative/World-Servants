@@ -1,4 +1,4 @@
-/* global customizer, Fuse, FusionPageBuilderApp, FusionApp, FusionEvents, fusionBuilderText, fusionSanitize, fusionAppConfig */
+/* global customizer, Fuse, FusionPageBuilderApp, FusionApp, FusionEvents, fusionBuilderText, fusionSanitize, fusionAppConfig, awbPalette */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function() {
@@ -108,11 +108,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			if ( preferences && 'dialog' === preferences.editing_mode ) {
 				this.$el.find( '#customize-controls' ).attr( 'data-dialog', true );
 				this.updatePanelData( 'dialog', true );
-
-				// If element ediing is active and we are switching to dialog mode, switch to TO tab and save settings.
-				if ( 'eo' === this.panelData.context ) {
-					this.$el.find( '.fusion-builder-toggles a[href="#fusion-builder-sections-to"]' ).trigger( 'click' );
-				}
 			} else {
 				this.$el.find( '#customize-controls' ).attr( 'data-dialog', false );
 				this.updatePanelData( 'dialog', false );
@@ -1162,7 +1157,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		 * @return {string} - Returns the value as a string.
 		 */
 		fixToValueName: function( to, value, type, subset ) {
-			var flatTo  = this.getFlatToObject();
+			var flatTo  = this.getFlatToObject(),
+				colorObject;
 
 			if ( 'undefined' !== typeof flatTo[ to ] && 'undefined' !== typeof flatTo[ to ].choices && 'undefined' !== typeof flatTo[ to ].choices[ value ] && 'yesno' !== type ) {
 				return flatTo[ to ].choices[ value ];
@@ -1173,6 +1169,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				} else {
 					value = _.values( value ).join( ', ' );
 				}
+			}
+
+			if ( _.isString( value ) && awbPalette.getColorSlugFromCssVar( value ) ) {
+				colorObject = awbPalette.getColorObject( awbPalette.getColorSlugFromCssVar( value ) );
+				if ( ! colorObject ) {
+					colorObject = awbPalette.getDefaultColorObject();
+				}
+
+				value = colorObject.label;
 			}
 
 			switch ( type ) {
@@ -1338,6 +1343,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			this.$el.find( '#fusion-builder-sections-eo' ).append( view.render().el );
 
 			FusionPageBuilderApp.SettingsHelpers.renderDialogMoreOptions( view );
+			this.changeTabTitle();
 		},
 
 		openSidebarAndShowEOTab: function() {
@@ -1353,7 +1359,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			}
 
 			this.$el.find( '#fusion-builder-sections-eo' ).scrollTop( 0 );
+		},
+
+		/**
+		 * Change the tab title(that are for both navigator and element options) between navigator and element options.
+		 */
+		changeTabTitle: function() {
+			var button = this.$el.find( 'a[href="#fusion-builder-sections-eo"]' );
+			var navWrapper = this.$el.find( '.awb-builder-nav-wrapper' );
+			var showNavigator = navWrapper.is( ':visible' );
+
+			if ( showNavigator ) {
+				button.find( '.label-navigator, .fusiona-navigator' ).removeClass( 'hidden' );
+				button.find( '.label-options, .fusiona-pen' ).addClass( 'hidden' );
+			} else {
+				button.find( '.label-navigator, .fusiona-navigator' ).addClass( 'hidden' );
+				button.find( '.label-options, .fusiona-pen' ).removeClass( 'hidden' );
+			}
 		}
+
 	} );
 
 }( jQuery ) );

@@ -14,6 +14,9 @@
   bottom: 0;
   width: var(--side_header_width, 280px);
 }
+.side-header.fusion-body .fusion-tb-header.fusion-panel-customizable-needs-positioned {
+  position: absolute;
+}
 .side-header.single-fusion_tb_section.fusion-body .fusion-tb-header {
   position: absolute;
 }

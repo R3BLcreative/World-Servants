@@ -52,6 +52,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						values[ 'border_radius_' + corner ] = '0px';
 					}
 				} );
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -100,6 +105,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				// Box shadow.
 				if ( 'yes' === values.box_shadow ) {
 					style += '--fusion-audio-box-shadow:' + _.fusionGetBoxShadowStyle( values ) + ';';
+				}
+
+				if ( '' !== values.margin_top ) {
+					style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					style += 'margin-left:' + values.margin_left + ';';
 				}
 
 				attr.style = style;

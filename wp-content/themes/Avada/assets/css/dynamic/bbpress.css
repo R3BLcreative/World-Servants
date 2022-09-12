@@ -94,23 +94,25 @@ div.bbp-template-notice,
 #bbpress-forums .bbp-search-results .bbp-topic-content {
   border-color: var(--bbp_forum_border_color);
 }
-.bbp-pagination .bbp-pagination-links .pagination-prev:hover:before,
-.bbp-pagination .bbp-pagination-links .pagination-next:hover:after,
-.bbp-topics-front ul.super-sticky a:hover,
-.bbp-topics ul.super-sticky a:hover,
-.bbp-topics ul.sticky a:hover,
-.bbp-forum-content ul.sticky a:hover {
+#bbpress-forums .bbp-pagination .bbp-pagination-links a:hover,
+#bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev:hover:before,
+#bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-next:hover:after,
+#bbpress-forums .bbp-topic-pagination a:hover,
+#bbpress-forums .bbp-topics-front ul.super-sticky a:hover,
+#bbpress-forums .bbp-topics ul.super-sticky a:hover,
+#bbpress-forums .bbp-topics ul.sticky a:hover,
+#bbpress-forums .bbp-forum-content ul.sticky a:hover {
   color: var(--primary_color);
 }
-.bbp-pagination .bbp-pagination-links .current,
-.bbp-topic-pagination .page-numbers:hover,
+#bbpress-forums .bbp-pagination .bbp-pagination-links .current,
+#bbpress-forums .bbp-topic-pagination .page-numbers:hover,
 #bbpress-forums div.bbp-topic-tags a:hover,
-.bbp-pagination .bbp-pagination-links a.inactive:hover,
-.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-prev:hover,
-.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-next:hover {
+#bbpress-forums .bbp-pagination .bbp-pagination-links a.inactive:hover,
+.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev:hover,
+.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-next:hover {
   border-color: var(--primary_color);
 }
-.bbp-pagination .bbp-pagination-links .current {
+#bbpress-forums .bbp-pagination .bbp-pagination-links .current {
   background-color: var(--primary_color);
 }
 .bbp-topics-front ul.super-sticky,
@@ -119,11 +121,14 @@ div.bbp-template-notice,
 .bbp-forum-content ul.sticky {
   background-color: var(--primary_color-2a) !important;
 }
-.bbp-pagination .bbp-pagination-links,
-.bbp-pagination .bbp-pagination-links .pagination-prev,
-.bbp-pagination .bbp-pagination-links .pagination-next {
+#bbpress-forums .bbp-pagination .bbp-pagination-links,
+#bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev,
+#bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-next {
   font-size: var(--pagination_font_size);
 }
+#bbpress-forums fieldset.bbp-form input[type="password"],
+#bbpress-forums fieldset.bbp-form input[type="text"],
+#bbpress-forums fieldset.bbp-form select,
 #bbpress-forums .bbp-search-form #bbp_search,
 .bbp-reply-form input#bbp_topic_tags,
 .bbp-topic-form input#bbp_topic_title,
@@ -136,6 +141,9 @@ div.bbp-template-notice,
   font-size: var(--form_text_size);
   color: var(--form_text_color);
 }
+#bbpress-forums fieldset.bbp-form input[type="password"]:focus,
+#bbpress-forums fieldset.bbp-form input[type="text"]:focus,
+#bbpress-forums fieldset.bbp-form select:focus,
 #bbpress-forums .bbp-search-form #bbp_search:focus,
 .bbp-reply-form input#bbp_topic_tags:focus,
 .bbp-topic-form input#bbp_topic_title:focus,
@@ -171,37 +179,37 @@ div.bbp-template-notice,
   border-color: var(--form_border_color);
   border-radius: var(--form_border_radius);
 }
-.bbp-pagination .bbp-pagination-links a.inactive,
-.bbp-topic-pagination .page-numbers:not(.prev):not(.next),
-.bbp-pagination .bbp-pagination-links .current,
-.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-prev,
-.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-next,
-.bbp-pagination-links span.dots,
-.bbp-pagination .bbp-pagination-links .pagination-prev {
+#bbpress-forums .bbp-pagination .bbp-pagination-links a.inactive,
+#bbpress-forums .bbp-topic-pagination .page-numbers:not(.prev):not(.next),
+#bbpress-forums .bbp-pagination .bbp-pagination-links .current,
+.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev,
+.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-next,
+#bbpress-forums .bbp-pagination-links span.dots,
+#bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev {
   border-radius: var(--pagination_border_radius);
   border-width: var(--pagination_border_width);
 }
-body:not(.avada-has-pagination-padding) .bbp-pagination .bbp-pagination-links a.inactive,
-body:not(.avada-has-pagination-padding) .bbp-topic-pagination .page-numbers:not(.prev):not(.next),
-body:not(.avada-has-pagination-padding) .bbp-pagination .bbp-pagination-links .current,
-body:not(.avada-has-pagination-padding).fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-prev,
-body:not(.avada-has-pagination-padding).fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-next,
-body:not(.avada-has-pagination-padding) .bbp-pagination-links span.dots {
+body:not(.avada-has-pagination-padding) #bbpress-forums .bbp-pagination .bbp-pagination-links a.inactive,
+body:not(.avada-has-pagination-padding) #bbpress-forums .bbp-topic-pagination .page-numbers:not(.prev):not(.next),
+body:not(.avada-has-pagination-padding) #bbpress-forums .bbp-pagination .bbp-pagination-links .current,
+body:not(.avada-has-pagination-padding).fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev,
+body:not(.avada-has-pagination-padding).fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-next,
+body:not(.avada-has-pagination-padding) #bbpress-forums .bbp-pagination-links span.dots {
   width: var(--pagination_width_height);
   height: var(--pagination_width_height);
   margin-left: calc((var(--pagination_width_height)) / 10);
   margin-right: calc((var(--pagination_width_height)) / 10);
 }
-.avada-has-pagination-padding .bbp-pagination .bbp-pagination-links a.inactive,
-.avada-has-pagination-padding .bbp-topic-pagination .page-numbers:not(.prev):not(.next),
-.avada-has-pagination-padding .bbp-pagination .bbp-pagination-links .current,
-.avada-has-pagination-padding.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-prev,
-.avada-has-pagination-padding.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-next,
-.avada-has-pagination-padding .bbp-pagination-links span.dots {
+.avada-has-pagination-padding #bbpress-forums .bbp-pagination .bbp-pagination-links a.inactive,
+.avada-has-pagination-padding #bbpress-forums .bbp-topic-pagination .page-numbers:not(.prev):not(.next),
+.avada-has-pagination-padding #bbpress-forums .bbp-pagination .bbp-pagination-links .current,
+.avada-has-pagination-padding.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev,
+.avada-has-pagination-padding.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-next,
+.avada-has-pagination-padding #bbpress-forums .bbp-pagination-links span.dots {
   padding: var(--pagination_box_padding-height) var(--pagination_box_padding-width) var(--pagination_box_padding-height) var(--pagination_box_padding-width);
 }
-.fusion-footer-widget-area .bbp-pagination .bbp-pagination-links a.inactive,
-.fusion-footer-widget-area .bbp-topic-pagination .page-numbers,
+.fusion-footer-widget-area #bbpress-forums .bbp-pagination .bbp-pagination-links a.inactive,
+.fusion-footer-widget-area #bbpress-forums .bbp-topic-pagination .page-numbers,
 .fusion-footer-widget-area .widget.widget.widget_display_replies ul li,
 .fusion-footer-widget-area .widget.widget_display_forums ul li,
 .fusion-footer-widget-area .widget.widget_display_topics ul li,

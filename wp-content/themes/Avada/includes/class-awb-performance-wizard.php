@@ -136,9 +136,9 @@ class AWB_Performance_Wizard {
 		$version = Avada::get_theme_version();
 		wp_enqueue_style( 'awb_performance_css', trailingslashit( Avada::$template_dir_url ) . 'assets/admin/css/awb-wizard.css', [], $version );
 
-		wp_enqueue_script( 'fusion_app_assets', FUSION_LIBRARY_URL . '/inc/fusion-app/model-assets.js', [ 'backbone' ], FUSION_BUILDER_VERSION, true );
+		AWB_Global_Typography()->enqueue();
 
-		wp_enqueue_script( 'awb_performance_js', trailingslashit( Avada::$template_dir_url ) . 'assets/admin/js/awb-wizard.js', [ 'fusion_app_assets', 'jquery' ], $version, true );
+		wp_enqueue_script( 'awb_performance_js', trailingslashit( Avada::$template_dir_url ) . 'assets/admin/js/awb-wizard.js', [ 'jquery' ], $version, true );
 
 		wp_localize_script( 'awb_performance_js', 'fusionBuilderText', fusion_app_textdomain_strings() );
 
@@ -154,10 +154,10 @@ class AWB_Performance_Wizard {
 				'saveChange'         => __( 'Do you want to proceed without saving changes?', 'Avada' ),
 				'loadingHome'        => __( 'Loading the homepage to generate assets.', 'Avada' ),
 				'performLighthouse'  => __( 'Running a lighthouse test to find new performance scores.', 'Avada' ),
-				'errorLoadingPage'   => __( 'Automated asset generation failed.  Visit your homepage in the browser.', 'Avada' ),
-				'errorClearingCache' => __( 'There was a problem when clearing the cache.  Please clear this from the global options.', 'Avada' ),
-				'wizardComplete'     => __( 'Cache and assets has been cleared succesfully!', 'Avada' ),
-				'scanError'          => __( 'Something when wrong while scanning the content, check PHP error log and try again.', 'Avada' ),
+				'errorLoadingPage'   => __( 'Automated asset generation failed. Visit your homepage in the browser.', 'Avada' ),
+				'errorClearingCache' => __( 'There was a problem when clearing the cache. Please clear it from the Global Options.', 'Avada' ),
+				'wizardComplete'     => __( 'Cache and assets have been cleared successfully!', 'Avada' ),
+				'scanError'          => __( 'Something went wrong while scanning the content, please check PHP error log and try again.', 'Avada' ),
 			]
 		);
 
@@ -204,16 +204,9 @@ class AWB_Performance_Wizard {
 		);
 
 		// Color fields.
-		wp_enqueue_script( 'wp-color-picker' );
-		wp_enqueue_style( 'wp-color-picker' );
-
-		wp_enqueue_script(
-			'wp-color-picker-alpha',
-			Avada::$template_dir_url . '/assets/admin/js/wp-color-picker-alpha.js',
-			[ 'wp-color-picker' ],
-			$version,
-			false
-		);
+		if ( function_exists( 'AWB_Global_Colors' ) ) {
+			AWB_Global_Colors()->enqueue();
+		}
 
 		// Option type JS.
 		wp_enqueue_script(
@@ -273,7 +266,7 @@ class AWB_Performance_Wizard {
 
 		// Handle element saving, separate location.
 		if ( isset( $_POST['step'] ) && 'elements' === $_POST['step'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$builder_options = get_option( 'fusion_builder_settings' );
+			$builder_options = get_option( 'fusion_builder_settings', [] );
 
 			if ( ! $builder_options ) {
 				$builder_options = [];
@@ -410,7 +403,6 @@ class AWB_Performance_Wizard {
 			];
 		}
 
-
 		if ( ! $youtube ) {
 			$recommendations['status_yt'] = [
 				'value'   => '0',
@@ -533,6 +525,22 @@ class AWB_Performance_Wizard {
 			$recommendations['status_fusion_forms'] = [
 				'value'   => '1',
 				'message' => __( 'Avada forms found, only disable if you are not using them.', 'Avada' ),
+				'dynamic' => true,
+			];
+		}
+
+		// status_awb_Off_Canvas.
+		$avada_off_canvas = new WP_Query( [ 'post_type' => 'awb_off_canvas' ] );
+		if ( ! $avada_off_canvas->have_posts() ) {
+			$recommendations['status_awb_Off_Canvas'] = [
+				'value'   => '0',
+				'message' => __( 'No Avada off canvas found, can be disabled. Alternatively if you haven\'t tried them yet, give them a go.', 'Avada' ),
+				'dynamic' => true,
+			];
+		} else {
+			$recommendations['status_awb_Off_Canvas'] = [
+				'value'   => '1',
+				'message' => __( 'Avada off canvas found, only disable if you are not using them.', 'Avada' ),
 				'dynamic' => true,
 			];
 		}
@@ -1185,7 +1193,6 @@ class AWB_Performance_Wizard {
 					$icon_subset = 'fas';
 				}
 
-
 				// Finally update map array.
 				if ( true === $is_fa4_icon ) {
 					$this->icon_map[ $matches[0][ $i ] ] = [
@@ -1437,13 +1444,13 @@ class AWB_Performance_Wizard {
 			</header>
 			<header class="avada-db-header-sticky avada-db-card awb-wizard-steps">
 				<ol>
-					<li class="awb-wizard-link active" data-id="1"><?php esc_html_e( 'Start', 'Avada' ); ?></li>
-					<li class="awb-wizard-link" data-id="2"><?php esc_html_e( 'Features', 'Avada' ); ?></li>
-					<li class="awb-wizard-link" data-id="3"><?php esc_html_e( 'Icons', 'Avada' ); ?></li>
-					<li class="awb-wizard-link" data-id="4"><?php esc_html_e( 'Fonts', 'Avada' ); ?></li>
-					<li class="awb-wizard-link" data-id="5"><?php esc_html_e( 'Elements', 'Avada' ); ?></li>
-					<li class="awb-wizard-link" data-id="6"><?php esc_html_e( 'Optimization', 'Avada' ); ?></li>
-					<li class="awb-wizard-link" data-id="7"><?php esc_html_e( 'Finish', 'Avada' ); ?></li>
+					<li class="awb-wizard-link active" data-id="1"><span class="awb-wizard-link-text"><?php esc_html_e( 'Start', 'Avada' ); ?></span></li>
+					<li class="awb-wizard-link" data-id="2"><span class="awb-wizard-link-text"><?php esc_html_e( 'Features', 'Avada' ); ?></span></li>
+					<li class="awb-wizard-link" data-id="3"><span class="awb-wizard-link-text"><?php esc_html_e( 'Icons', 'Avada' ); ?></span></li>
+					<li class="awb-wizard-link" data-id="4"><span class="awb-wizard-link-text"><?php esc_html_e( 'Fonts', 'Avada' ); ?></span></li>
+					<li class="awb-wizard-link" data-id="5"><span class="awb-wizard-link-text"><?php esc_html_e( 'Elements', 'Avada' ); ?></span></li>
+					<li class="awb-wizard-link" data-id="6"><span class="awb-wizard-link-text"><?php esc_html_e( 'Optimization', 'Avada' ); ?></span></li>
+					<li class="awb-wizard-link" data-id="7"><span class="awb-wizard-link-text"><?php esc_html_e( 'Finish', 'Avada' ); ?></span></li>
 				</ol>
 			</header>
 

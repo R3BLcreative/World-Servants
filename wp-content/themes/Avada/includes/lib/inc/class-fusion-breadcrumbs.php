@@ -264,7 +264,7 @@ class Fusion_Breadcrumbs {
 		$this->breadcrumbs_parts['prefix'] = $this->get_single_breadcrumb_data( $this->home_prefix, '', false, false, false, '' );
 
 		// Add the "Home" link.
-		if ( is_home() && $fusion_settings->get( 'blog_title' ) ) { // If the home page is the main blog page.
+		if ( is_home() && is_front_page() && $fusion_settings->get( 'blog_title' ) ) { // If the home page is the main blog page.
 			$this->breadcrumbs_parts['home'] = $this->get_single_breadcrumb_data( $fusion_settings->get( 'blog_title' ), '', true, true, true );
 		} else {
 			$this->breadcrumbs_parts['home'] = $this->get_single_breadcrumb_data( $this->home_label, get_home_url() );

@@ -21,6 +21,7 @@ $icon_map = apply_filters(
 		'details'    => 'fusiona-details',
 		'cart'       => 'fusiona-woo-add-to-cart',
 		'caption'    => 'fusiona-comments',
+		'links'      => 'fusiona-link',
 	]
 );
 ?>

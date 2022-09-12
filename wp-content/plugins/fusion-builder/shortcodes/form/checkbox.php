@@ -57,6 +57,7 @@ if ( fusion_is_element_enabled( 'fusion_form_checkbox' ) ) {
 					'label'             => '',
 					'name'              => '',
 					'required'          => '',
+					'empty_notice'      => '',
 					'min_required'      => '0',
 					'max_required'      => '0',
 					'placeholder'       => '',
@@ -103,7 +104,7 @@ if ( fusion_is_element_enabled( 'fusion_form_checkbox' ) ) {
 						$max_fields = $min_fields;
 					}
 
-					$fieldset_error = $this->get_selection_fieldset_error_text( $min_fields, $max_fields, $number_of_options );
+					$fieldset_error = '' !== $this->args['empty_notice'] ? $this->args['empty_notice'] : $this->get_selection_fieldset_error_text( $min_fields, $max_fields, $number_of_options );
 
 					if ( $fieldset_error ) {
 						$this->args['required_label_text'] = $fieldset_error;
@@ -207,7 +208,7 @@ function fusion_form_checkbox() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Field Name', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the field name. Should be single word without spaces. Underscores and dashes are allowed.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter the field name. Please use only lowercase alphanumeric characters, dashes, and underscores.', 'fusion-builder' ),
 						'param_name'  => 'name',
 						'value'       => '',
 						'placeholder' => true,
@@ -222,6 +223,20 @@ function fusion_form_checkbox() {
 							'yes'       => esc_attr__( 'All', 'fusion-builder' ),
 							'selection' => esc_attr__( 'Selection', 'fusion-builder' ),
 							'no'        => esc_attr__( 'None', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Empty Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter text validation notice that should display if data input is empty.', 'fusion-builder' ),
+						'param_name'  => 'empty_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'required',
+								'value'    => 'no',
+								'operator' => '!=',
+							],
 						],
 					],
 					[

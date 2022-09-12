@@ -17,6 +17,7 @@ jQuery( document ).ready( function() {
 
 		jQuery( this ).parent().find( '#enable_builder_ui_by_default' ).val( jQuery( this ).data( 'value' ) );
 		jQuery( this ).parent().find( '#enable_builder_sticky_publish_buttons' ).val( jQuery( this ).data( 'value' ) );
+		jQuery( this ).parent().find( '#remove_empty_attributes' ).val( jQuery( this ).data( 'value' ) );
 		jQuery( this ).parent().find( '.ui-button' ).removeClass( 'ui-state-active' );
 		jQuery( this ).addClass( 'ui-state-active' );
 	} );
@@ -69,15 +70,6 @@ jQuery( document ).ready( function() {
 			$button.removeClass( 'disabled' );
 			$button.next().hide();
 		} );
-	} );
-
-	jQuery( '.enable-builder-ui .ui-button' ).on( 'click', function( e ) {
-		e.preventDefault();
-
-		jQuery( this ).parent().find( '#enable_builder_ui_by_default' ).val( jQuery( this ).data( 'value' ) );
-		jQuery( this ).parent().find( '#enable_builder_sticky_publish_buttons' ).val( jQuery( this ).data( 'value' ) );
-		jQuery( this ).parent().find( '.ui-button' ).removeClass( 'ui-state-active' );
-		jQuery( this ).addClass( 'ui-state-active' );
 	} );
 
 

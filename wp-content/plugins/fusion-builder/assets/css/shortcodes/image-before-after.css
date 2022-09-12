@@ -579,10 +579,25 @@
   left: 0;
   right: auto;
 }
-.fusion-image-before-after-wrapper {
+.fusion-image-before-after-wrapper.type-before_after {
   overflow: hidden;
 }
 .fusion-image-before-after-wrapper.fusion-image-before-after-vertical .fusion-image-before-after-after-label.before-after-label-out-image-up-down,
 .fusion-image-before-after-wrapper.fusion-image-before-after-vertical .fusion-image-before-after-before-label.before-after-label-out-image-up-down {
   text-align: center;
+}
+.fusion-image-before-after-wrapper.has-alignment {
+  display: flex;
+}
+.fusion-image-before-after-wrapper.has-alignment .fusion-image-before-after-element {
+  flex: 1;
+}
+.fusion-image-before-after-wrapper.has-alignment.align-center {
+  justify-content: center;
+}
+.fusion-image-before-after-wrapper.has-alignment.align-right {
+  justify-content: flex-end;
+}
+.fusion-image-before-after-wrapper.has-alignment.align-left {
+  justify-content: flex-start;
 }

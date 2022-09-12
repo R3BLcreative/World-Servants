@@ -243,6 +243,64 @@
 .fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set .ui-button:not(.ui-state-active):hover {
   color: #778;
 }
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only {
+  min-height: 56px;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button {
+  z-index: unset;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button span:not(.buttonset-item-label) {
+  margin: 0;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button span.buttonset-item-label {
+  display: none;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active) {
+  position: relative;
+  overflow: hidden;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):after,
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):before {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  line-height: normal;
+  z-index: 999999;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):after {
+  content: attr(aria-label);
+  background: #32383c;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.82);
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 5px;
+  z-index: 999999;
+  pointer-events: none;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):before {
+  content: "\f0d7";
+  font-family: "icomoon";
+  color: #33393d;
+  font-size: 30px;
+  z-index: 2;
+  pointer-events: none;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):hover {
+  overflow: visible;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):hover:not(.active):after,
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):hover:not(.active):before {
+  opacity: 1;
+  text-shadow: none;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):hover:after {
+  bottom: 45px;
+}
+.fusion-builder-module-settings li.subgroup .option-field .fusion-form-radio-button-set.backend-icons-only .ui-button.has-tooltip:not(.ui-state-active):hover:before {
+  bottom: 30px;
+}
 .fusion-builder-module-settings .fusion-subgroup-content {
   display: none;
   padding: 0 1.25%;
@@ -345,6 +403,34 @@
 .fusion-builder-modal-container select {
   max-width: 100%;
 }
+.fusion-builder-modal-container .awb-quick-edit-button {
+  width: 100%;
+  background: #008fc5;
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  margin: 15px 0 0 0;
+  padding: 5px 15px;
+  border-radius: 4px;
+  position: relative;
+  outline: 0;
+  font-weight: 600;
+  transition: background-color 0.1s ease;
+}
+.fusion-builder-modal-container .awb-quick-edit-button:hover,
+.fusion-builder-modal-container .awb-quick-edit-button:focus {
+  background: #0073aa;
+  color: #fff;
+}
+.fusion-builder-modal-container .awb-quick-edit-button i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.fusion-builder-modal-container .awb-quick-edit-button:not(.has-quick-edit) {
+  display: none;
+}
 .fusion-builder-modal-container h2,
 .fusion-builder-modal-container h3 {
   color: #23282d;
@@ -427,7 +513,7 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
 }
 .fusion-builder-modal-top-container {
   position: absolute;
-  top: 0;
+  top: 1px;
   left: 0;
   width: 100%;
   z-index: 999;
@@ -512,6 +598,44 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
 }
 .fusion-builder-modal-top-container .fusion-builder-modal-close:hover {
   background: #f6f6f6;
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top h2 {
+  width: 90%;
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings {
+  margin-bottom: 0;
+  padding-top: 0;
+  height: calc(100% - 8.5em);
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container {
+  height: 100%;
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container .fusion-tabs,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container .fusion-tabs,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container .fusion-tab-content,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container .fusion-tab-content,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container .studio-wrapper,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container .studio-wrapper {
+  height: inherit;
+  margin: 0;
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container .studio-wrapper,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container .studio-wrapper {
+  background: #f2f3f5;
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container .studio-wrapper section,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container .studio-wrapper section {
+  margin-bottom: 20px;
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container .studio-wrapper aside,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container .studio-wrapper aside {
+  background: #fff;
+}
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-all-elements-container .fusion-tab-content .fusion-builder-all-modules,
+.fusion-builder-modal-top-container.fusion-has-close-on-top ~ .fusion-builder-main-settings .fusion-builder-column-layouts-container .fusion-tab-content .fusion-builder-all-modules {
+  padding-top: 10px;
+  overflow: auto;
 }
 .fusion_builder_modal_inner_row_overlay,
 .fusion_builder_modal_overlay {
@@ -1206,11 +1330,10 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   transition: 0.2s all;
   text-decoration: none;
 }
-.ltr .fusion-builder-option .option-field.fusion-builder-option-container .fusion-builder-add-sortable-child .fusiona-plus {
-  padding-right: 5px;
-}
-.rtl .fusion-builder-option .option-field.fusion-builder-option-container .fusion-builder-add-sortable-child .fusiona-plus {
-  padding-left: 5px;
+.fusion-builder-option .option-field.fusion-builder-option-container .fusion-builder-add-sortable-child .fusiona-plus,
+.fusion-builder-option .option-field.fusion-builder-option-container .fusion-builder-add-sortable-child .add-sortable-child-text {
+  padding-right: 2.5px;
+  padding-left: 2.5px;
 }
 .fusion-builder-option .option-field.fusion-builder-option-container .fusion-sortable-text-options .fusion-sortable-option {
   background: transparent;
@@ -2721,7 +2844,7 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
 .fusion-builder-layouts-tab .studio-wrapper aside {
   padding: 20px;
   width: 240px;
-  min-height: 400px;
+  overflow: auto;
   box-sizing: border-box;
 }
 .fusion-tab-content .studio-wrapper aside ul,
@@ -2763,6 +2886,8 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   flex-grow: 1;
   background: #f2f3f5;
   width: calc(100% - 240px);
+  overflow: auto;
+  padding-bottom: 50px;
 }
 .fusion-tab-content .studio-wrapper section ul.studio-imports,
 .fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports {
@@ -2787,6 +2912,10 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   transition: all 0.3s ease-in-out;
   cursor: pointer;
   opacity: 1;
+}
+.fusion-tab-content .studio-wrapper section ul.studio-imports > li:not(.awb-demo-page-link):hover,
+.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li:not(.awb-demo-page-link):hover {
+  border-color: #198fd9 !important;
 }
 .fusion-tab-content .studio-wrapper section ul.studio-imports > li .preview,
 .fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .preview {
@@ -2825,12 +2954,12 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   text-align: left;
   padding-right: 0.5em;
 }
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load {
+.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .awb-import-studio-item,
+.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .awb-import-studio-item {
   position: relative;
 }
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusiona-plus,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusiona-plus {
+.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .awb-import-studio-item .fusiona-plus,
+.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .awb-import-studio-item .fusiona-plus {
   width: 30px;
   height: 30px;
   font-size: 13px;
@@ -2844,63 +2973,8 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   color: #fff;
   transition: all 0.3s ease-in-out;
 }
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusion-template-options,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusion-template-options {
-  display: none;
-  position: absolute;
-  bottom: 28px;
-  right: -5px;
-  width: 252px;
-  padding: 0 0 18px 0;
-  box-sizing: border-box;
-}
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusion-template-options.fusion-template-options-flip,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusion-template-options.fusion-template-options-flip {
-  bottom: auto;
-  top: 44px;
-  z-index: 9;
-}
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusion-template-options.fusion-template-options-flip ul:after,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load .fusion-template-options.fusion-template-options-flip ul:after {
-  bottom: auto;
-  top: -26px;
-  transform: rotate(180deg);
-}
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul {
-  background: #fff;
-  box-shadow: 0 3px 18px rgba(0, 0, 0, 0.3);
-  width: 100%;
-  padding: 0;
-  box-sizing: border-box;
-  position: relative;
-}
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul li,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul li {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  text-align: left;
-  cursor: pointer;
-  margin: 0;
-  width: 100%;
-  box-sizing: border-box;
-  font-weight: normal;
-}
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul li:hover,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul li:hover {
-  background: #f6f6f6;
-}
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul:after,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load ul:after {
-  border: 13px solid transparent;
-  content: "";
-  border-top-color: #fff;
-  position: absolute;
-  bottom: -22px;
-  right: 6px;
-}
-.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load:hover .fusiona-plus,
-.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .fusion-studio-load:hover .fusiona-plus {
+.fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .awb-import-studio-item:hover .fusiona-plus,
+.fusion-builder-layouts-tab .studio-wrapper section ul.studio-imports > li .bar .awb-import-studio-item:hover .fusiona-plus {
   background: #198fd9;
 }
 .fusion-tab-content .studio-wrapper section ul.studio-imports > li .bar .fusion-module-right,
@@ -2935,6 +3009,237 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   background: #f2f3f5;
   z-index: 99;
 }
+.fusion-tab-content .studio-wrapper .awb-import-options,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #f2f3f5;
+  padding: 10px 0;
+  z-index: 10;
+  width: 240px;
+  display: flex;
+  overflow: hidden;
+  white-space: nowrap;
+  align-items: center;
+  transition: width 0.3s;
+  transition-timing-function: ease-in-out;
+  justify-content: space-between;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-toggle,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-toggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #373d42;
+  cursor: pointer;
+  min-width: 240px;
+  font-family: "Noto Sans";
+  height: 2.9em;
+  transition: color 0.1s ease-in-out;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-toggle .icon,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-toggle .icon {
+  margin-right: 10px;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  column-gap: 30px;
+  margin: 0 auto;
+  opacity: 0;
+  transition: opacity 0.4s ease 0s;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option {
+  display: flex;
+  align-items: center;
+  column-gap: 15px;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option.awb-import-position,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option.awb-import-position {
+  display: none;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option > label,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option > label {
+  font-size: 0.85em;
+  color: #93999f;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option input:hover ~ label i,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option input:hover ~ label i {
+  color: #2a3035;
+  transition: all 0.1s ease-in-out;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button {
+  display: flex;
+  background: #f2f3f5;
+  height: 40px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item {
+  width: 45px;
+  position: relative;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  font-weight: 700;
+  color: #93999e;
+  font-size: 1em;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label i,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label i {
+  font-size: 1.14em;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label:before,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label:before {
+  content: attr(data-tooltip);
+  top: -33px;
+  background: #2a3035;
+  color: #fff;
+  border: 1px solid #2a3035;
+  white-space: nowrap;
+  padding: 0.8em;
+  font-size: 0.65em;
+  text-transform: uppercase;
+  border-radius: 0.35em;
+  margin: 0;
+  z-index: 999999;
+  pointer-events: none;
+  left: 50%;
+  transform: translateX(-50%);
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.21, 0.6, 0.35, 1) 0.2s;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label:after,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item label:after {
+  content: "";
+  border: 5px solid transparent;
+  border-top-color: #1d2226;
+  z-index: 2;
+  pointer-events: none;
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s cubic-bezier(0.21, 0.6, 0.35, 1) 0.2s;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  z-index: 10;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input:checked + label,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input:checked + label {
+  background: #198fd9;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input:checked + label i,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item input:checked + label i {
+  color: #fff !important;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:first-child label,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:first-child label {
+  border-radius: 4px 0 0 4px;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:last-child label,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:last-child label {
+  border-radius: 0 4px 4px 0;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:hover label:before,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:hover label:before {
+  top: -41px;
+  opacity: 1;
+  visibility: visible;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:hover label:after,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-option .awb-option-button .awb-option-item:hover label:after {
+  top: -8px;
+  opacity: 1;
+  visibility: visible;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options.open,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options.open {
+  overflow: visible;
+  width: 100%;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options.open .awb-import-options-group,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options.open .awb-import-options-group,
+.fusion-tab-content .studio-wrapper .awb-import-options.open .awb-import-studio-item-in-preview,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options.open .awb-import-studio-item-in-preview {
+  opacity: 1;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options.open .awb-import-options-toggle,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options.open .awb-import-options-toggle {
+  color: #198fd9;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-studio-item-in-preview,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-studio-item-in-preview {
+  background-color: #198fd9;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 5px;
+  margin-right: 40px;
+  transition: all 0.4s ease-in-out;
+  opacity: 0;
+  display: none;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .awb-import-studio-item-in-preview:hover,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-studio-item-in-preview:hover {
+  background-color: #1081c7;
+  color: #fff;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .fusion-studio-preview-back,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .fusion-studio-preview-back {
+  display: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #198fd9;
+  cursor: pointer;
+  min-width: 240px;
+  font-family: "Noto Sans";
+  height: 2.9em;
+  transition: color 0.1s ease-in-out;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .fusion-studio-preview-back:hover,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .fusion-studio-preview-back:hover {
+  color: #1081c7;
+}
+.fusion-tab-content .studio-wrapper .awb-import-options .fusion-studio-preview-back i,
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .fusion-studio-preview-back i {
+  margin-right: 10px;
+}
 .fusion-tab-content .studio-wrapper.loading,
 .fusion-builder-layouts-tab .studio-wrapper.loading {
   margin-top: -16px;
@@ -2954,6 +3259,8 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
 .fusion-tab-content .studio-wrapper.fusion-studio-preview-active,
 .fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active {
   position: initial;
+  background-color: #fff !important;
+  min-height: calc(94vh - 273px);
 }
 .fusion-tab-content .studio-wrapper.fusion-studio-preview-active aside,
 .fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active aside,
@@ -2966,34 +3273,7 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   width: 100%;
   height: auto;
   padding: 15px;
-}
-.fusion-tab-content .studio-wrapper.fusion-studio-preview-active .fusion-studio-preview-back,
-.fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active .fusion-studio-preview-back {
-  width: 25px;
-  height: 25px;
-  font-size: 10px;
-  padding: 8px 0 0 7px;
-  outline: none;
-  background: #fff;
-  border: none;
-  cursor: pointer;
-  border-radius: 50%;
-  position: absolute;
-  right: 7px;
-  top: 10px;
-  box-shadow: 0 1px 13px 0 rgba(0, 0, 0, 0.5);
-}
-.fusion-tab-content .studio-wrapper.fusion-studio-preview-active .fusion-studio-preview-back:before,
-.fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active .fusion-studio-preview-back:before {
-  font-size: 1.5em;
-  color: #21262a;
-  display: block;
-  transform: rotate(45deg) translateX(-30%);
-  transition: all 0.3s ease-in-out;
-}
-.fusion-tab-content .studio-wrapper.fusion-studio-preview-active .fusion-studio-preview-back:hover,
-.fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active .fusion-studio-preview-back:hover {
-  background: #f6f6f6;
+  margin-bottom: 53px;
 }
 .fusion-tab-content .studio-wrapper.fusion-studio-preview-active.loading section,
 .fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active.loading section {
@@ -3002,6 +3282,23 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
 .fusion-tab-content .studio-wrapper.fusion-studio-preview-active.loading section .studio-imports,
 .fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active.loading section .studio-imports {
   display: none;
+}
+.fusion-tab-content .studio-wrapper.fusion-studio-preview-active .awb-import-options .awb-import-studio-item-in-preview,
+.fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active .awb-import-options .awb-import-studio-item-in-preview {
+  display: flex;
+}
+.fusion-tab-content .studio-wrapper.fusion-studio-preview-active .awb-import-options.open .awb-import-options-toggle,
+.fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active .awb-import-options.open .awb-import-options-toggle {
+  display: none;
+}
+.fusion-tab-content .studio-wrapper.fusion-studio-preview-active .awb-import-options.open .fusion-studio-preview-back,
+.fusion-builder-layouts-tab .studio-wrapper.fusion-studio-preview-active .awb-import-options.open .fusion-studio-preview-back {
+  display: block;
+}
+.fusion-tab-content .awb-studio-not-reg,
+.fusion-builder-layouts-tab .awb-studio-not-reg {
+  margin: 1em 15.4px;
+  color: #23282d;
 }
 @media only screen and (max-width: 800px) {
   .fusion-tab-content .studio-wrapper section ul.studio-imports,
@@ -3893,13 +4190,23 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
 .fusion-iconpicker .icon_select_container .fusion-icon-set.no-search-results .no-search-results-notice {
   display: flex;
 }
+.fusion-iconpicker .fusion-icon-picker-nav-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 -7px;
+}
+.fusion-iconpicker .fusion-icon-picker-nav-wrapper > a {
+  padding: 0 7px;
+}
 .fusion-iconpicker .fusion-icon-picker-nav {
+  flex-grow: 2;
+  overflow: hidden;
+  white-space: nowrap;
   height: 40px;
   text-transform: none;
   font-weight: 700;
   border: none !important;
-  margin-left: -7px;
-  margin-right: -7px;
 }
 .fusion-iconpicker .fusion-icon-picker-nav a {
   text-decoration: none;
@@ -3951,7 +4258,6 @@ body.wp-admin.fusion-builder-enabled .upload-image-remove,
   width: 100%;
   border: 1px solid #ddd;
   margin: 0 0 1em;
-  float: left;
   cursor: move;
   background-color: #fff;
   text-align: left;
@@ -4171,8 +4477,12 @@ h4.fusion_module_title span.fusion-global-tooltip {
 }
 .fusion-builder-add-predefined-multi-child .fusiona-plus,
 .fusion-builder-add-multi-child .fusiona-plus,
-.fusion-builder-add-multi-gallery-images .fusiona-plus {
-  margin-right: 4px;
+.fusion-builder-add-multi-gallery-images .fusiona-plus,
+.fusion-builder-add-predefined-multi-child .add-sortable-child-text,
+.fusion-builder-add-multi-child .add-sortable-child-text,
+.fusion-builder-add-multi-gallery-images .add-sortable-child-text {
+  padding-right: 2.5px;
+  padding-left: 2.5px;
 }
 .fusion-builder-add-predefined-multi-child:hover,
 .fusion-builder-add-multi-child:hover,
@@ -4842,11 +5152,12 @@ input[type=text].fusion-builder-section-name:hover {
   margin-bottom: 1.2em !important;
 }
 .fusion-builder-layouts-tab .studio-wrapper {
-  min-height: calc(100vh - 165px);
+  min-height: inherit;
+  height: inherit;
   margin-top: 0;
 }
-.fusion-builder-layouts-tab .studio-wrapper section .studio-imports li .bar .fusion-studio-load:hover .fusion-template-options {
-  display: block;
+.fusion-builder-layouts-tab .studio-wrapper .awb-import-options .awb-import-options-group .awb-import-position {
+  display: flex !important;
 }
 #fusion-page-builder-layout-tabs li a:hover,
 #fusion-page-builder-layout-tabs li.ui-tabs-active a {
@@ -5219,6 +5530,7 @@ h2#fusion-builder-demo-url-invalid {
   cursor: pointer !important;
   outline: none !important;
   border-radius: 0 !important;
+  font-size: 0;
 }
 .fusion-builder-dialog .ui-dialog-titlebar-close:before {
   font-size: 18px !important;
@@ -5671,14 +5983,6 @@ tr:hover .fusion-builder-table-delete-row {
   margin-right: 2.5%;
   width: calc(95% - 20px);
 }
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .wp-picker-container .wp-color-result.button {
-  margin: 0;
-  width: 100%;
-  box-shadow: none;
-  border-radius: 0;
-  border: none;
-  height: 35px;
-}
 .fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .option-field {
   width: auto;
   float: none;
@@ -5686,33 +5990,8 @@ tr:hover .fusion-builder-table-delete-row {
   padding: 0;
   font-weight: 400;
 }
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .option-field .wp-picker-container.wp-picker-alpha-container.wp-picker-active {
-  width: auto;
-}
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .option-field .wp-picker-container.wp-picker-alpha-container.wp-picker-active .wp-picker-holder {
-  width: 365px;
-}
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .option-field .wp-picker-container.wp-picker-alpha-container.wp-picker-active .wp-picker-input-wrap {
-  position: absolute;
-  top: 35px;
-  z-index: 9;
-  box-sizing: border-box;
-  width: 362px;
-  padding: 5px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-bottom: none;
-}
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .wp-picker-container .wp-color-result-text {
-  display: none;
-}
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .wp-picker-container {
-  position: relative;
-}
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .wp-picker-holder {
-  position: absolute;
-  z-index: 9;
-  top: 70px;
+.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .option-field .awb-picker-outer {
+  padding: 12px;
 }
 .fusion-table-builder-chart.fusion-table-builder .fusion-builder-table td:last-child .wp-picker-holder,
 .fusion-table-builder-chart.fusion-table-builder .fusion-builder-table th:last-child .wp-picker-holder {
@@ -5721,20 +6000,6 @@ tr:hover .fusion-builder-table-delete-row {
 .fusion-table-builder-chart.fusion-table-builder .fusion-builder-table td:last-child .option-field .wp-picker-container.wp-picker-alpha-container.wp-picker-active .wp-picker-input-wrap,
 .fusion-table-builder-chart.fusion-table-builder .fusion-builder-table th:last-child .option-field .wp-picker-container.wp-picker-alpha-container.wp-picker-active .wp-picker-input-wrap {
   right: 0;
-}
-.fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .fusion-color-preview {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  pointer-events: none;
-  z-index: 1;
-  line-height: 35px;
-  color: #fff;
-  font-weight: 400;
-  overflow: hidden;
 }
 .fusion-table-builder-chart.fusion-table-builder .fusion-builder-table .fusion-dark-text {
   color: #000;
@@ -7043,9 +7308,6 @@ body.wp-admin.fusion-builder-enabled .uploadfile .fusion-upload-file .fusion-bui
   text-align: center !important;
   width: 100%;
 }
-.awb-sites-wrapper .studio-imports > li:hover {
-  border-color: #198fd9 !important;
-}
 .awb-sites-wrapper .awb-page-wrap {
   display: flex;
   align-items: flex-start;
@@ -7073,6 +7335,9 @@ body.wp-admin.fusion-builder-enabled .uploadfile .fusion-upload-file .fusion-bui
   background: #008fc5;
   border-color: #008fc5;
   visibility: hidden;
+}
+.awb-sites-wrapper .awb-page-wrap .awb-website-pages > li:hover {
+  cursor: pointer;
 }
 .awb-sites-wrapper .awb-page-wrap .awb-website-pages > li:hover .button {
   visibility: visible;
@@ -7151,4 +7416,128 @@ body.wp-admin.fusion-builder-enabled .uploadfile .fusion-upload-file .fusion-bui
   text-transform: uppercase;
   color: #999;
   margin-top: 2.3em;
+}
+.fusion-image-focus-point .preview {
+  position: relative;
+  float: none;
+}
+.fusion-image-focus-point .preview img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 4px;
+  background-image: linear-gradient(45deg, #c4c4c4 25%, transparent 25%, transparent 75%, #c4c4c4 75%, #c4c4c4), linear-gradient(45deg, #c4c4c4 25%, transparent 25%, transparent 75%, #c4c4c4 75%, #c4c4c4);
+  background-position: 0 0, 10px 10px;
+  background-size: 20px 20px;
+}
+.fusion-image-focus-point .preview .point {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #198fd9;
+  border-radius: 50%;
+  box-shadow: 2px 2px 4px #0000008f;
+  margin: -10px -10px -10px -10px;
+  cursor: grab;
+  cursor: -webkit-grab;
+  z-index: 10;
+}
+.fusion-image-focus-point .no-image-holder {
+  display: flex;
+  height: 170px;
+  width: 100%;
+  min-width: 300px;
+  border: 2px dashed #e0e3e7;
+  align-items: center;
+  justify-content: center;
+  font-size: 130px;
+  color: #e0e3e7;
+}
+.fusion-image-focus-point.mode-position .preview {
+  height: 200px;
+  width: 260px;
+  border: 2px solid #198fd9;
+}
+.fusion-image-focus-point.mode-position .position-point {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  position: absolute;
+  border: 1px solid #198fd9;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.fusion-image-focus-point.mode-position .position-point.top-left {
+  top: 0;
+  left: 0;
+}
+.fusion-image-focus-point.mode-position .position-point.top-center {
+  left: 50%;
+}
+.fusion-image-focus-point.mode-position .position-point.top-right {
+  left: 100%;
+}
+.fusion-image-focus-point.mode-position .position-point.center-left {
+  top: 50%;
+  left: 0;
+}
+.fusion-image-focus-point.mode-position .position-point.center-center {
+  top: 50%;
+  left: 50%;
+}
+.fusion-image-focus-point.mode-position .position-point.center-right {
+  top: 50%;
+  left: 100%;
+}
+.fusion-image-focus-point.mode-position .position-point.bottom-left {
+  top: 100%;
+  left: 0;
+}
+.fusion-image-focus-point.mode-position .position-point.bottom-center {
+  top: 100%;
+  left: 50%;
+}
+.fusion-image-focus-point.mode-position .position-point.bottom-right {
+  top: 100%;
+  left: 100%;
+}
+.fusion-image-focus-point.mode-position .point {
+  border-radius: 0;
+  width: 12px;
+  height: 12px;
+  box-shadow: none;
+  margin: -6px;
+}
+.fusion-image-focus-point.mode-position .position-axis {
+  position: absolute;
+  border-color: #198fd9;
+  border-style: dashed;
+  opacity: 0.6;
+  border-width: 0;
+}
+.fusion-image-focus-point.mode-position .position-axis.axis-y {
+  height: 100%;
+  border-left-width: 1px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.fusion-image-focus-point.mode-position .position-axis.axis-x {
+  width: 100%;
+  border-top-width: 1px;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+@media all and (max-width: 1340px) {
+  .awb-import-options .awb-import-options-group .awb-import-option label {
+    display: none;
+  }
+  .fusion-builder-layouts-tab .studio-wrapper .awb-import-options .fusion-studio-preview-back {
+    min-width: 140px;
+  }
 }

@@ -127,7 +127,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 			 * @return string          HTML output
 			 */
 			public function render( $args, $content = '' ) {
-				if ( ! is_object( WC()->cart ) || ( WC()->cart->is_empty() && ! fusion_is_preview_frame() ) ) {
+				if ( ! wc_coupons_enabled() || ! is_object( WC()->cart ) || ( WC()->cart->is_empty() && ! fusion_is_preview_frame() ) ) {
 					return;
 				}
 				$this->defaults = self::get_element_defaults();
@@ -135,11 +135,9 @@ if ( class_exists( 'WooCommerce' ) ) {
 
 				ob_start();
 				?>
-				<?php if ( wc_coupons_enabled() ) : ?>
-					<div <?php echo FusionBuilder::attributes( 'woo-cart-coupons-shortcode' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-						<?php echo $this->generate_element_content(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-				<?php endif; ?>
+				<div <?php echo FusionBuilder::attributes( 'woo-cart-coupons-shortcode' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+					<?php echo $this->generate_element_content(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
 				<?php
 				$html = ob_get_clean();
 				if ( is_checkout() ) {
@@ -166,6 +164,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 				ob_start();
 				?>
 					<div class="avada-coupon-fields">
+						<label for="avada_coupon_code"><?php esc_attr_e( 'Coupon code', 'woocommerce' ); ?></label>
 						<input type="text" name="coupon_code" class="input-text" id="avada_coupon_code" value="" placeholder="<?php esc_attr_e( 'Coupon code', 'woocommerce' ); ?>" />
 						<button type="submit" class="fusion-button button-default fusion-button-default-size button<?php echo $submit_button_class; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?></button>
 					</div>
@@ -215,7 +214,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 				if ( ! $this->is_default( 'field_text_color' ) ) {
 					$this->add_css_property( $inputs, 'color', $this->args['field_text_color'] );
 
-					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$placeholder_inputs = [
 						$this->base_selector . ' input::placeholder',
 						$this->base_selector . ' textarea::placeholder',
@@ -228,7 +227,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 				}
 
 				if ( ! $this->is_default( 'field_border_focus_color' ) ) {
-					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$hover_inputs = [
 						$this->base_selector . ' input:hover',
 						$this->base_selector . ' select:hover',

@@ -207,6 +207,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				self.layouts[ layoutSettings.cid ] 	= layoutSettings;
 				$layouts.append( view.render().el );
 			} );
+
+			setTimeout( function() {
+				if ( jQuery( '.awb-layout-highlight' ).length ) {
+					jQuery( 'html, body' ).animate( {
+						scrollTop: jQuery( '.awb-layout-highlight' ).offset().top - jQuery( '#wpadminbar' ).height() - jQuery( '.avada-db-menu-sticky' ).height() - 15
+					}, 250 );
+				}
+			}, 100 );
 		}
 	} );
 

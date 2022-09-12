@@ -10,31 +10,6 @@
 <script type="text/template" id="fusion-builder-container-template">
 	<div class="fusion-droppable fusion-droppable-horizontal target-before fusion-container-target"></div>
 
-	<div class="fusion-builder-section-header">
-		<input type="text" class="fusion-builder-section-name" name="admin_label" placeholder="Container" value="{{ admin_label }}">
-		<div class="fusion-builder-module-controls-container fusion-builder-module-controls-type-container">
-			<div class="fusion-builder-controls fusion-builder-module-controls">
-				<a href="#" class="fusion-builder-container-settings fusion-builder-module-control"><span class="fusiona-pen"></span></a>
-				<a href="#" class="fusion-builder-container-clone fusion-builder-module-control"><span class="fusiona-file-add"></span></a>
-				<a href="#" class="fusion-builder-container-save fusion-builder-module-control" data-focus="#fusion-builder-save-element-input" data-target="#fusion-builder-layouts-sections" ><span class="fusiona-drive"></span></a>
-				<a href="#" class="fusion-builder-container-remove fusion-builder-module-control"><span class="fusiona-trash-o"></span></a>
-				<a href="#" class="fusion-builder-container-drag fusion-builder-module-control"><span class="fusiona-icon-move"></span></a>
-				<a href="#" class="fusion-builder-toggle fusion-builder-module-control" title="{{ fusionBuilderText.click_to_toggle }}"><span class="fusiona-caret-up"></span></a>
-			</div>
-		</div>
-	</div>
-	<div class="fusion-builder-wireframe-utility-toolbar">
-	<# if ( 'undefined' !== typeof isGlobal && 'yes' === isGlobal ) { #>
-		<a href="#" class="fusion-builder-container-global fusion-builder-module-control fusion-builder-unglobal-tooltip" data-cid={{cid}}><span class="fusiona-globe"></span><span class="fusion-container-tooltip">{{{ fusionBuilderText.global_container }}}</span></a>
-	<# } #>
-	<# if ( 'published_until' === status || 'publish_after' === status ) { #>
-		<a href="#" class="fusion-builder-container-scheduled fusion-builder-module-control fusion-builder-publish-tooltip" data-cid={{cid}}><span class="fusiona-calendar-plus-o"></span><span class="fusion-container-tooltip">{{ fusionBuilderText.container_scheduled }}<br>{{ fusionBuilderText.container_publish }}</span></a>
-	<# } #>
-	<# if ( 'draft' === status) { #>
-		<a href="#" class="fusion-builder-container-draft fusion-builder-module-control fusion-builder-publish-tooltip" data-cid={{cid}}><span class="fusiona-calendar-alt-regular"></span><span class="fusion-container-tooltip">{{ fusionBuilderText.container_draft }}<br>{{ fusionBuilderText.container_publish }}</span></a>
-	<# } #>
-	</div>
-
 	<# if ( false === values.video_bg && values.background_image && 'none' !== values.background_parallax && 'fixed' !== values.background_parallax ) { #>
 		<div {{{ _.fusionGetAttributes( parallax ) }}} ></div>
 	<# } #>
@@ -44,6 +19,11 @@
 		<# if ( values.video_bg ) {
 			print( createVideoBackground() );
 		} #>
+
+		<#
+		print( patternBg );
+		print( maskBg );
+		#>
 
 		<# if ( 'yes' === values.fade && '' !== values.background_image && false === values.video_bg ) { #>
 			<div {{{ _.fusionGetAttributes( fadingBackground ) }}} ></div>

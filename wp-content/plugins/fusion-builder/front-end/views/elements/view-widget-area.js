@@ -59,6 +59,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			validateValues: function( values ) {
 				values = _.fusionGetPadding( values );
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -76,6 +81,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					cid = this.model.get( 'cid' );
 
 				attr[ 'class' ] += ' fusion-widget-area-cid' + cid;
+
+				if ( '' !== values.margin_top ) {
+					attr.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					attr.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					attr.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					attr.style += 'margin-left:' + values.margin_left + ';';
+				}
 
 				if ( '' !== values[ 'class' ] ) {
 					attr[ 'class' ] += ' ' + values[ 'class' ];

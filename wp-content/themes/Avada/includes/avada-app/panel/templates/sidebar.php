@@ -15,6 +15,7 @@ $po_name_array            = [
 	'default'           => __( 'Page Options', 'Avada' ),
 	'fusion_tb_section' => __( 'Layout Section Options', 'Avada' ),
 	'fusion_form'       => __( 'Form Options', 'Avada' ),
+	'awb_off_canvas'    => __( 'Off Canvas Options', 'Avada' ),
 ];
 
 $po_name = isset( $po_name_array[ $_post_type ] ) ? $po_name_array[ $_post_type ] : $po_name_array['default'];
@@ -40,8 +41,14 @@ $po_name = isset( $po_name_array[ $_post_type ] ) ? $po_name_array[ $_post_type 
 							</a>
 						<?php endif; ?>
 						<a href="#fusion-builder-sections-eo">
-							<span class="icon fusiona-pen"></span>
-							<span class="label"><?php esc_html_e( 'Element Options', 'Avada' ); ?></span>
+							<span class="icon fusiona-navigator"></span>
+							<span class="icon fusiona-pen hidden"></span>
+
+							<span class="label label-navigator">
+								<span class="awb-navigator-toggle-containers"><i class="fusiona-caret-down"></i></span>
+								<?php esc_html_e( 'Navigator', 'Avada' ); ?>
+							</span>
+							<span class="label label-options hidden"><?php esc_attr_e( 'Element Options', 'Avada' ); ?></span>
 						</a>
 					<?php endif; ?>
 				</div>
@@ -85,11 +92,24 @@ $po_name = isset( $po_name_array[ $_post_type ] ) ? $po_name_array[ $_post_type 
 						</div>
 					<?php endif; ?>
 					<div id="fusion-builder-sections-eo" style="display:none" class="fusion-sidebar-section">
-						<div class="fusion-empty-section">
-							<div class="fusion-centered-empty-contents">
-								<i class="fusiona-pen" aria-hidden="true"></i>
-								<h3><?php esc_html_e( 'Select an Element', 'Avada' ); ?></h3>
-								<p><?php esc_html_e( 'Choose an existing element on the right to edit.', 'Avada' ); ?></p>
+						<div class="awb-builder-nav-wrapper">
+							<div class="awb-builder-nav__loading-spinner-wrapper">
+								<div class="awb-builder-nav__loading-spinner">
+									<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 354.6 177.3" xml:space="preserve">
+										<linearGradient id="SVG-loader-gradient-nav" gradientUnits="userSpaceOnUse" x1="70.3187" y1="247.6187" x2="284.3375" y2="33.6">
+											<stop  offset="0.2079" style="stop-color:#FFFFFF;stop-opacity:0"/>
+											<stop  offset="0.2139" style="stop-color:#FCFCFC;stop-opacity:7.604718e-03"/>
+											<stop  offset="0.345" style="stop-color:#BABABA;stop-opacity:0.1731"/>
+											<stop  offset="0.474" style="stop-color:#818181;stop-opacity:0.336"/>
+											<stop  offset="0.5976" style="stop-color:#535353;stop-opacity:0.492"/>
+											<stop  offset="0.7148" style="stop-color:#2F2F2F;stop-opacity:0.64"/>
+											<stop  offset="0.8241" style="stop-color:#151515;stop-opacity:0.7779"/>
+											<stop  offset="0.9223" style="stop-color:#050505;stop-opacity:0.9018"/>
+											<stop  offset="1" style="stop-color:#000000"/>
+										</linearGradient>
+										<path d="M177.7,24.4c84.6,0,153.2,68.4,153.5,152.9h23.5C354.6,79.4,275.2,0,177.3,0S0,79.4,0,177.3h24.2C24.5,92.8,93.1,24.4,177.7,24.4z"/>
+									</svg>
+								</div>
 							</div>
 						</div>
 					</div>

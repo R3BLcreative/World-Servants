@@ -119,6 +119,10 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 
 				$defaults = FusionBuilder::set_shortcode_defaults(
 					[
+						'margin_top'            => '',
+						'margin_right'          => '',
+						'margin_bottom'         => '',
+						'margin_left'           => '',
 						'hide_on_mobile'        => fusion_builder_default_visibility( 'string' ),
 						'class'                 => '',
 						'id'                    => '',
@@ -228,6 +232,11 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 
 				$this->args = $defaults;
 
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
+
 				$styles = $this->get_style_tag();
 
 				$html = '<div ' . FusionBuilder::attributes( 'login-shortcode' ) . '>' . $styles;
@@ -245,8 +254,8 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 
 					$html       .= '<div class="fusion-login-fields">';
 					$html       .= '<div class="fusion-login-input-wrapper">';
-					$html       .= '<label class="' . $label_class . '" for="user_login-' . $this->login_counter . '">' . esc_html__( 'Username', 'fusion-builder' ) . '</label>';
-					$placeholder = ( 'yes' === $show_placeholders ) ? ' placeholder="' . esc_attr__( 'Username', 'fusion-builder' ) . '"' : '';
+					$html       .= '<label class="' . $label_class . '" for="user_login-' . $this->login_counter . '">' . esc_html__( 'Username or Email', 'fusion-builder' ) . '</label>';
+					$placeholder = ( 'yes' === $show_placeholders ) ? ' placeholder="' . esc_attr__( 'Username or Email', 'fusion-builder' ) . '"' : '';
 					$html       .= '<input type="text" name="log"' . $placeholder . ' value="' . esc_attr( $user_login ) . '" size="20" class="fusion-login-username input-text" id="user_login-' . $this->login_counter . '" />';
 					$html       .= '</div>';
 
@@ -334,6 +343,11 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 				extract( $defaults );
 
 				$this->args = $defaults;
+
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
 
 				$styles = $this->get_style_tag();
 
@@ -436,6 +450,11 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 				extract( $defaults );
 
 				$this->args = $defaults;
+
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
 
 				$styles = $this->get_style_tag();
 
@@ -1182,8 +1201,11 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 					$this->args['hide_on_mobile'],
 					[
 						'class' => 'fusion-login-box fusion-login-box-' . $this->login_counter . ' fusion-login-box-' . $this->args['action'] . ' fusion-login-align-' . $this->args['text_align'] . ' fusion-login-field-layout-' . $this->args['form_field_layout'],
+						'style' => '',
 					]
 				);
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( $this->args['class'] ) {
 					$attr['class'] .= ' ' . $this->args['class'];
@@ -1213,7 +1235,7 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 				if ( $this->args['form_background_color'] ) {
 					$attr['style'] = 'background-color:' . $this->args['form_background_color'] . ';';
 
-					if ( fusion_is_color_transparent( $this->args['form_background_color'] ) ) {
+					if ( Fusion_Color::new_color( $this->args['form_background_color'] )->is_color_transparent() ) {
 						$attr['style'] .= 'padding:0;';
 					}
 				}
@@ -1376,7 +1398,7 @@ if ( fusion_is_element_enabled( 'fusion_login' ) ||
 								'label'       => esc_html__( 'User Login Form Background Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the form background.', 'fusion-builder' ),
 								'id'          => 'user_login_form_background_color',
-								'default'     => '#f9f9fb',
+								'default'     => 'var(--awb-color2)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -1438,7 +1460,7 @@ function fusion_element_login() {
 				'description' => esc_html__( 'Enter some content for this block', 'fusion-builder' ),
 				'shortcode'   => 'fusion_login',
 				'icon'        => 'fusiona-calendar-check-o',
-				'help_url'    => 'https://theme-fusion.com/documentation/fusion-builder/elements/user-login-element/',
+				'help_url'    => 'https://theme-fusion.com/documentation/avada/elements/user-login-element/',
 				'params'      => [
 					[
 						'type'        => 'radio_button_set',
@@ -1573,25 +1595,58 @@ function fusion_element_login() {
 						'default'     => '',
 					],
 					[
-						'type'        => 'link_selector',
-						'heading'     => esc_attr__( 'Redirection Link', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add the url to which a user should redirected after form submission. Leave empty to use the same page.', 'fusion-builder' ),
-						'param_name'  => 'redirection_link',
-						'value'       => '',
+						'type'         => 'link_selector',
+						'heading'      => esc_attr__( 'Redirection Link', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add the url to which a user should redirected after form submission. Leave empty to use the same page.', 'fusion-builder' ),
+						'param_name'   => 'redirection_link',
+						'value'        => '',
+						'dynamic_data' => true,
 					],
 					[
-						'type'        => 'link_selector',
-						'heading'     => esc_attr__( 'Register Link', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add the url the "Register" link should open.', 'fusion-builder' ),
-						'param_name'  => 'register_link',
-						'value'       => '',
+						'type'         => 'link_selector',
+						'heading'      => esc_attr__( 'Register Link', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add the url the "Register" link should open.', 'fusion-builder' ),
+						'param_name'   => 'register_link',
+						'value'        => '',
+						'dynamic_data' => true,
 					],
 					[
-						'type'        => 'link_selector',
-						'heading'     => esc_attr__( 'Lost Password Link', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add the url the "Lost Password" link should open.', 'fusion-builder' ),
-						'param_name'  => 'lost_password_link',
-						'value'       => '',
+						'type'         => 'link_selector',
+						'heading'      => esc_attr__( 'Lost Password Link', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add the url the "Lost Password" link should open.', 'fusion-builder' ),
+						'param_name'   => 'lost_password_link',
+						'value'        => '',
+						'dynamic_data' => true,
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',
@@ -1639,7 +1694,7 @@ function fusion_element_lost_password() {
 				'name'      => esc_html__( 'User Lost Password', 'fusion-builder' ),
 				'shortcode' => 'fusion_lost_password',
 				'icon'      => 'fusiona-calendar-check-o',
-				'help_url'  => 'https://theme-fusion.com/documentation/fusion-builder/elements/user-lost-password-element/',
+				'help_url'  => 'https://theme-fusion.com/documentation/avada/elements/user-lost-password-element/',
 				'params'    => [
 					[
 						'type'        => 'radio_button_set',
@@ -1756,6 +1811,16 @@ function fusion_element_lost_password() {
 						'param_name'  => 'redirection_link',
 						'value'       => '',
 					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
+					],
 					[
 						'type'        => 'checkbox_button_set',
 						'heading'     => esc_attr__( 'Element Visibility', 'fusion-builder' ),
@@ -1802,7 +1867,7 @@ function fusion_element_register() {
 				'name'      => esc_html__( 'User Register', 'fusion-builder' ),
 				'shortcode' => 'fusion_register',
 				'icon'      => 'fusiona-calendar-check-o',
-				'help_url'  => 'https://theme-fusion.com/documentation/fusion-builder/elements/user-register-element/',
+				'help_url'  => 'https://theme-fusion.com/documentation/avada/elements/user-register-element/',
 				'params'    => [
 					[
 						'type'        => 'radio_button_set',
@@ -1937,6 +2002,16 @@ function fusion_element_register() {
 						'description' => esc_attr__( 'Add the url to which a user should redirected after form submission. Leave empty to use the same page.', 'fusion-builder' ),
 						'param_name'  => 'redirection_link',
 						'value'       => '',
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

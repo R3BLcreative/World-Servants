@@ -505,7 +505,7 @@ class AWB_Critical_CSS {
 	}
 
 	/**
-	 * Insert purchase code info.
+	 * Insert critical css code.
 	 *
 	 * @param array $args An array of arguments for the query.
 	 * @return array      An array of submissions.

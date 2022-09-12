@@ -118,12 +118,17 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		 * @return {Object} this.
 		 */
 		render: function() {
-			var attributes = _.extend( {}, this.model.get( 'data' ) );
+			var attributes = _.extend( {}, this.model.get( 'data' ) ),
+				urlParams      = new URLSearchParams( window.location.search );
 
 			attributes.id		  = this.model.get( 'id' );
 			attributes.title      = this.model.get( 'title' );
 			attributes.terms 	  = this.model.getAssignedTemplates();
 			attributes.conditions = this.model.getConditions();
+
+			if ( urlParams.has( 'layout' ) && String( attributes.id ) === urlParams.get( 'layout' ) ) {
+				attributes.highlight = true;
+			}
 
 			this.$el.html( this.template( attributes ) );
 			return this;

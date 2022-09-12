@@ -17,12 +17,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_action( 'wp_head', 'avada_set_post_views' );
 add_action( 'wp_head', 'avada_set_today_post_views' );
 
+add_action( 'wp_ajax_avada_set_ajax_post_views', 'avada_set_ajax_post_views' );
+add_action( 'wp_ajax_nopriv_avada_set_ajax_post_views', 'avada_set_ajax_post_views' );
+
 if ( ! function_exists( 'avada_set_post_views' ) ) {
 	/**
 	 * Post views inc.
 	 */
 	function avada_set_post_views() {
 		global $post;
+
+		$fusion_settings = awb_get_fusion_settings();
+		if ( 'page_load' !== $fusion_settings->get( 'post_views' ) ) {
+			return;
+		}
+
 		$is_builder = ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() );
 		if ( ! is_singular() || is_preview() || $is_builder ) {
 			return;
@@ -33,21 +42,25 @@ if ( ! function_exists( 'avada_set_post_views' ) ) {
 			return;
 		}
 
-		$count = avada_get_post_views( $post );
-		$count++;
-		update_post_meta( $post_id, 'avada_post_views_count', $count );
+		avada_increase_post_views( $post_id );
 	}
 }
 
 if ( ! function_exists( 'avada_set_today_post_views' ) ) {
 
 	/**
-	 * Increase the today post views, and the today date if necessary.
+	 * Function that triggers at action to increase today views.
 	 *
 	 * @since 7.5
 	 */
 	function avada_set_today_post_views() {
 		global $post;
+
+		$fusion_settings = awb_get_fusion_settings();
+		if ( 'page_load' !== $fusion_settings->get( 'post_views' ) ) {
+			return;
+		}
+
 		$is_builder = ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() );
 		if ( ! is_singular() || is_preview() || $is_builder ) {
 			return;
@@ -58,14 +71,106 @@ if ( ! function_exists( 'avada_set_today_post_views' ) ) {
 			return;
 		}
 
-		$today_views = avada_get_today_post_views( $post );
+		avada_increase_today_post_views( $post_id );
+	}
+}
+
+if ( ! function_exists( 'avada_set_ajax_post_views' ) ) {
+
+	/**
+	 * Function that triggers at action to increase post views.
+	 */
+	function avada_set_ajax_post_views() {
+		$fusion_settings = awb_get_fusion_settings();
+		if ( 'ajax' !== $fusion_settings->get( 'post_views' ) ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['postId'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification
+			return;
+		}
+
+		$post_id = intval( wp_unslash( $_POST['postId'] ) ); //phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! ( $post_id > 0 ) ) {
+			return;
+		}
+
+		avada_increase_post_views( $post_id );
+		avada_increase_today_post_views( $post_id );
+	}
+}
+
+if ( ! function_exists( 'avada_increase_post_views' ) ) {
+
+	/**
+	 * For a given post_id, increase the views.
+	 *
+	 * @param int $post_id Post id.
+	 * @return void
+	 */
+	function avada_increase_post_views( $post_id ) {
+		if ( ! $post_id || ! avada_can_increase_post_views() ) {
+			return;
+		}
+
+		$count = avada_get_post_views( $post_id );
+		$count++;
+		update_post_meta( $post_id, 'avada_post_views_count', $count );
+	}
+}
+
+if ( ! function_exists( 'avada_increase_today_post_views' ) ) {
+
+	/**
+	 * For a given post_id, increase the today views.
+	 *
+	 * @param int $post_id Post id.
+	 * @return void
+	 */
+	function avada_increase_today_post_views( $post_id ) {
+		if ( ! $post_id || ! avada_can_increase_post_views() ) {
+			return;
+		}
+
+		$today_views = avada_get_today_post_views( $post_id );
 		$today_views++;
 		update_post_meta( $post_id, 'avada_today_post_views_count', $today_views );
 
 		// Check if also it's needed to update the today date, and update if necessary.
-		if ( ! avada_are_post_views_stored_from_today( $post ) ) {
+		if ( ! avada_are_post_views_stored_from_today( $post_id ) ) {
 			update_post_meta( $post_id, 'avada_post_views_count_today_date', date( 'd-m-Y' ) );
 		}
+	}
+}
+
+if ( ! function_exists( 'avada_can_increase_post_views' ) ) {
+
+	/**
+	 * Check if post views can be increased.
+	 *
+	 * @return bool
+	 */
+	function avada_can_increase_post_views() {
+		$fusion_settings        = awb_get_fusion_settings();
+		$increase_views_setting = $fusion_settings->get( 'post_views_counting' );
+
+		$can_increase_views = false;
+
+		if ( 'all' === $increase_views_setting ) {
+			$can_increase_views = true;
+		}
+
+		if ( 'logged_out' === $increase_views_setting && ! is_user_logged_in() ) {
+			$can_increase_views = true;
+		}
+
+		if ( 'non_admins' === $increase_views_setting && ! current_user_can( 'manage_options' ) ) {
+			$can_increase_views = true;
+		}
+
+		$can_increase_views = apply_filters( 'avada_can_increase_post_views', $can_increase_views );
+
+		return $can_increase_views;
 	}
 }
 
@@ -79,6 +184,10 @@ if ( ! function_exists( 'avada_get_post_views' ) ) {
 	 * @return int
 	 */
 	function avada_get_post_views( $post = null ) {
+		if ( intval( $post ) === -99 ) {
+			return 100;
+		}
+
 		$post = get_post( $post );
 		if ( ! $post ) {
 			return 0;
@@ -106,6 +215,10 @@ if ( ! function_exists( 'avada_get_today_post_views' ) ) {
 	 * @return int
 	 */
 	function avada_get_today_post_views( $post = null ) {
+		if ( intval( $post ) === -99 ) {
+			return 20;
+		}
+
 		$post = get_post( $post );
 		if ( ! $post ) {
 			return 0;
@@ -184,10 +297,6 @@ if ( ! function_exists( 'avada_slider' ) ) {
 
 		$slider_type = Avada_Helper::get_slider_type( $post_id, $is_archive );
 		$slider      = avada_get_slider( $post_id, $slider_type, $is_archive );
-
-		if ( wp_is_mobile() && ! in_array( 'small-visibility', $visibility_values, true ) ) {
-			return;
-		}
 
 		if ( $slider ) {
 			$slider_name = Avada_Helper::slider_name( $slider_type );

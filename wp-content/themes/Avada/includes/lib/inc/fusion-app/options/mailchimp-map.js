@@ -6,7 +6,7 @@ function fusionMailchimpMapOption( $element ) {
 	var self = this;
 
 	// Cut off check.
-	if ( 'object' !== typeof FusionApp.data.mailchimp || 'undefined' === typeof FusionApp.data.mailchimp.fields || 'undefined' === typeof FusionApp.data.fusionPageOptions.form_submission.fields.mailchimp_lists ) {
+	if ( 'object' !== typeof FusionApp.data.mailchimp || 'undefined' === typeof FusionApp.data.mailchimp.fields || 'undefined' === typeof FusionApp.data.fusionPageOptions.form_submission.fields.mailchimp_options || 'undefined' === typeof FusionApp.data.fusionPageOptions.form_submission.fields.mailchimp_options.fields.mailchimp_lists ) {
 		return;
 	}
 
@@ -14,7 +14,7 @@ function fusionMailchimpMapOption( $element ) {
 	this.fields  = FusionApp.data.mailchimp.fields;
 	this.$el     = $element.find( '.mailchimp_map .fusion-mapping' );
 	this.options = false;
-	this.$input  = $element.find( '#mailchimp_map' );
+	this.$input  = $element.find( 'input#mailchimp_map' );
 	this.values  = {};
 
 	try {
@@ -44,7 +44,11 @@ fusionMailchimpMapOption.prototype.updateValues  = function() {
 	} );
 
 	this.values = values;
-	this.$input.val( JSON.stringify( values ) ).change();
+
+	this.$input.val( JSON.stringify( values ) );
+	setTimeout( () => {
+		this.$input.trigger( 'change' );
+	}, 10 );
 };
 
 fusionMailchimpMapOption.prototype.updateMap  = function() {
@@ -94,7 +98,7 @@ fusionMailchimpMapOption.prototype.updateMap  = function() {
 fusionMailchimpMapOption.prototype.getOptions = function() {
 	var options       = '',
 		selection     = '',
-		defaultVal    = Object.keys( FusionApp.data.fusionPageOptions.form_submission.fields.mailchimp_lists.choices )[ 0 ],
+		defaultVal    = Object.keys( FusionApp.data.fusionPageOptions.form_submission.fields.mailchimp_options.fields.mailchimp_lists.choices )[ 0 ],
 		otherOptions  = '',
 		commonOptions = '',
 		common        = [

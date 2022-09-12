@@ -137,9 +137,10 @@ class Fusion_Social_Sharing extends Fusion_Social_Icon {
 		$social_sharing_links_output  = [];
 		$enabled_social_networks      = fusion_library()->get_option( 'social_sharing' );
 		$social_sharing_links_base    = $this->get_social_sharing_links_base();
+		$args['title']                = html_entity_decode( $args['title'], ENT_COMPAT, 'UTF-8' );
 		$social_sharing_links_content = [
 			'facebook'  => rawurlencode( $args['link'] ) . '&t=' . rawurlencode( $args['title'] ),
-			'twitter'   => rawurlencode( $args['link'] ) . '&text=' . rawurlencode( html_entity_decode( $args['title'], ENT_COMPAT, 'UTF-8' ) ),
+			'twitter'   => rawurlencode( $args['link'] ) . '&text=' . rawurlencode( $args['title'] ),
 			'linkedin'  => rawurlencode( $args['link'] ) . '&title=' . rawurlencode( $args['title'] ) . '&summary=' . rawurlencode( mb_substr( html_entity_decode( $args['description'], ENT_QUOTES, 'UTF-8' ), 0, 256 ) ),
 			'reddit'    => $args['link'] . '&amp;title=' . rawurlencode( $args['title'] ),
 			'whatsapp'  => rawurlencode( $args['link'] ),

@@ -1,8 +1,8 @@
 <?php
 /**
- * Allow management of licenses.
+ * Allow management of critical css.
  *
- * @package Avada-Server
+ * @package fusion-builder
  */
 
 // Do not allow directly accessing this file.
@@ -37,6 +37,14 @@ class AWB_Critical_CSS_Table extends WP_List_Table {
 	public $url = '';
 
 	/**
+	 * CSS Key Label.
+	 *
+	 * @since 3.6.1
+	 * @var array
+	 */
+	public $css_key_labels = [];
+
+	/**
 	 * Class constructor.
 	 *
 	 * @since 1.0
@@ -45,14 +53,19 @@ class AWB_Critical_CSS_Table extends WP_List_Table {
 	public function __construct() {
 		parent::__construct(
 			[
-				'singular' => esc_html__( 'Purchase Code', 'fusion-builder' ), // Singular name of the listed records.
-				'plural'   => esc_html__( 'Purchase Codes', 'fusion-builder' ), // Plural name of the listed records.
+				'singular' => esc_html__( 'Critical CSS', 'fusion-builder' ), // Singular name of the listed records.
+				'plural'   => esc_html__( 'Critical CSS', 'fusion-builder' ), // Plural name of the listed records.
 				'ajax'     => false, // This table doesn't support ajax.
-				'class'    => 'avada-license-table',
+				'class'    => 'avada-critical-css-table',
 			]
 		);
 
-		$this->columns = $this->get_columns();
+		$this->columns        = $this->get_columns();
+		$this->css_key_labels = [
+			'global_post'            => esc_html__( 'Global Single Post', 'fusion-builder' ),
+			'global_avada_portfolio' => esc_html__( 'Global Single Portfolio', 'fusion-builder' ),
+			'global_product'         => esc_html__( 'Global Single Product', 'fusion-builder' ),
+		];
 
 		// Actions which need to removed from the URL after page reloads.
 		$remove_actions = [ 'action', 'action2', 'post' ];
@@ -235,6 +248,8 @@ class AWB_Critical_CSS_Table extends WP_List_Table {
 			$markup = '<a href="' . get_permalink( (int) $item['css_key'] ) . '" target="_blank" rel="noopener">' . get_the_title( (int) $item['css_key'] ) . '</a>';
 		} elseif ( 'homepage' === $item['css_key'] ) {
 			$markup = '<a href="' . get_home_url() . '" target="_blank" rel="noopener">' . esc_html__( 'Homepage', 'fusion-builder' ) . '</a>';
+		} elseif ( false !== strpos( $item['css_key'], 'global_' ) ) {
+			$markup = '<a href="' . admin_url( 'edit.php?post_type=' . str_replace( 'global_', '', $item['css_key'] ) ) . '" target="_blank" rel="noopener">' . $this->css_key_labels[ $item['css_key'] ] . '</a>';
 		}
 		$actions['delete'] = sprintf( '<a href="' . $this->url . '&action=%s&post=%s">' . esc_html__( 'Delete', 'fusion-builder' ) . '</a>', 'delete_css', esc_attr( $item['id'] ) );
 

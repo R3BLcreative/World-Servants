@@ -1,3 +1,4 @@
+/* global fusionBuilderText, FusionApp */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function() {
@@ -20,6 +21,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				templateVariables.cid = this.model.get( 'cid' );
 
 				// Attributes for our wrapping element.
+				templateVariables.isDisabled        = 'disabled' === FusionApp.settings.post_views;
+				templateVariables.isDisabledText    = fusionBuilderText.post_views_counter_disabled;
 				templateVariables.wrapperAttributes = this.buildWrapperAtts( atts.values );
 				templateVariables.contentAttributes = this.buildContentAtts( atts.values );
 				templateVariables.mainContent       = this.getViewsText( atts.values, atts.extras );

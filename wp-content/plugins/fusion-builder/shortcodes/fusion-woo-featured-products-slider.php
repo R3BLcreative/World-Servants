@@ -51,6 +51,10 @@ if ( fusion_is_element_enabled( 'fusion_featured_products_slider' ) && class_exi
 			 */
 			public static function get_element_defaults() {
 				return [
+					'margin_top'      => '',
+					'margin_right'    => '',
+					'margin_bottom'   => '',
+					'margin_left'     => '',
 					'hide_on_mobile'  => fusion_builder_default_visibility( 'string' ),
 					'class'           => '',
 					'id'              => '',
@@ -193,16 +197,18 @@ if ( fusion_is_element_enabled( 'fusion_featured_products_slider' ) && class_exi
 					];
 				}
 
-				if ( ! $live_request ) {
-					return fusion_cached_query( $defaults );
+				if ( $live_request ) {
+					// Ajax returns protected posts, but we just want published.
+					$defaults['post_status'] = 'publish';
 				}
-
-				// Ajax returns protected posts, but we just want published.
-				$defaults['post_status'] = 'publish';
 
 				$products = fusion_cached_query( $defaults );
 
-				fusion_library()->woocommerce->remove_post_clauses( $args['orderby'], $args['order'] );
+				fusion_library()->woocommerce->remove_post_clauses( $defaults['orderby'], $defaults['order'] );
+
+				if ( ! $live_request ) {
+					return $products;
+				}
 
 				if ( ! $products->have_posts() ) {
 					$return_data['placeholder'] = fusion_builder_placeholder( 'product', 'products' );
@@ -266,9 +272,14 @@ if ( fusion_is_element_enabled( 'fusion_featured_products_slider' ) && class_exi
 
 					$this->args = $defaults;
 
+					$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+					$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+					$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+					$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
+
 					$design_class = 'fusion-' . $fusion_settings->get( 'woocommerce_product_box_design', false, 'classic' ) . '-product-image-wrapper';
 
-					$featured_image_size = ( 'fixed' === $picture_size ) ? 'shop_single' : 'full';
+					$featured_image_size = ( 'fixed' === $picture_size ) ? 'woocommerce_single' : 'full';
 
 					if ( ! $products->have_posts() ) {
 						return fusion_builder_placeholder( 'product', 'products' );
@@ -289,7 +300,8 @@ if ( fusion_is_element_enabled( 'fusion_featured_products_slider' ) && class_exi
 								'post_featured_image_size' => $featured_image_size,
 								'post_permalink'           => get_permalink( get_the_ID() ),
 								'display_placeholder_image' => true,
-								'display_woo_sale'         => $show_sale,
+								'display_woo_sale'         => 'yes' === $show_sale ? true : false,
+								'display_woo_outofstock'   => 'include' === $out_of_stock ? true : false,
 								'display_woo_buttons'      => $show_buttons,
 							];
 
@@ -372,7 +384,7 @@ if ( fusion_is_element_enabled( 'fusion_featured_products_slider' ) && class_exi
 					$html .= '</ul>';
 					// Check if navigation should be shown.
 					if ( 'yes' === $show_nav ) {
-						$html .= '<div ' . FusionBuilder::attributes( 'fusion-carousel-nav' ) . '><span ' . FusionBuilder::attributes( 'fusion-nav-prev' ) . '></span><span ' . FusionBuilder::attributes( 'fusion-nav-next' ) . '></span></div>';
+						$html .= awb_get_carousel_nav();
 					}
 					$html .= '</div>';
 					$html .= '</div>';
@@ -399,8 +411,11 @@ if ( fusion_is_element_enabled( 'fusion_featured_products_slider' ) && class_exi
 					$this->args['hide_on_mobile'],
 					[
 						'class' => 'fusion-woo-featured-products-slider fusion-woo-slider',
+						'style' => '',
 					]
 				);
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( $this->args['class'] ) {
 					$attr['class'] .= ' ' . $this->args['class'];
@@ -488,7 +503,7 @@ function fusion_element_featured_products_slider() {
 					'name'      => esc_attr__( 'Woo Featured Products Slider', 'fusion-builder' ),
 					'shortcode' => 'fusion_featured_products_slider',
 					'icon'      => 'fusiona-star-empty',
-					'help_url'  => 'https://theme-fusion.com/documentation/fusion-builder/elements/woocommerce-featured-products-slider-element/',
+					'help_url'  => 'https://theme-fusion.com/documentation/avada/elements/woocommerce-featured-products-slider-element/',
 					'params'    => [
 						[
 							'type'        => 'radio_button_set',
@@ -720,6 +735,16 @@ function fusion_element_featured_products_slider() {
 								'no'  => esc_attr__( 'No', 'fusion-builder' ),
 							],
 							'default'     => 'yes',
+						],
+						'fusion_margin_placeholder' => [
+							'param_name' => 'margin',
+							'group'      => esc_attr__( 'General', 'fusion-builder' ),
+							'value'      => [
+								'margin_top'    => '',
+								'margin_right'  => '',
+								'margin_bottom' => '',
+								'margin_left'   => '',
+							],
 						],
 						[
 							'type'        => 'checkbox_button_set',

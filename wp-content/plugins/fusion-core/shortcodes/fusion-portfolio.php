@@ -125,6 +125,10 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 						'exclude_cats'                   => '',
 						'exclude_tags'                   => '',
 						'filters'                        => 'yes',
+						'margin_top'                     => '',
+						'margin_right'                   => '',
+						'margin_bottom'                  => '',
+						'margin_left'                    => '',
 						'hide_on_mobile'                 => fusion_builder_default_visibility( 'string' ),
 						'hide_url_params'                => 'off',
 						'id'                             => '',
@@ -471,7 +475,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 						if ( ! has_post_thumbnail() && fusion_get_page_option( 'video', $id ) ) {
 							$thumbnail_type        = 'video';
 							$image_size_dimensions = avada_get_image_size_dimensions( $image_size );
-							$video                 = fusion_get_page_option( 'video', $id );
+							$video                 = apply_filters( 'privacy_iframe_embed', fusion_get_page_option( 'video', $id ) );
 						} elseif ( $fusion_settings->get( 'featured_image_placeholder' ) || has_post_thumbnail() ) {
 							$thumbnail_type       = 'image';
 							$featured_image_sizes = [ 'portfolio-two', 'portfolio-three', 'portfolio-five', 'portfolio-six', 'blog-medium', 'full' ];
@@ -1033,7 +1037,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 					// Check if navigation should be shown.
 					$navigation = '';
 					if ( 'yes' === $show_nav ) {
-						$navigation = '<div ' . FusionBuilder::attributes( 'fusion-carousel-nav' ) . '><span ' . FusionBuilder::attributes( 'fusion-nav-prev' ) . '></span><span ' . FusionBuilder::attributes( 'fusion-nav-next' ) . '></span></div>';
+						$navigation = function_exists( 'awb_get_carousel_nav' ) ? awb_get_carousel_nav() : '';
 					}
 
 					$html = '<div ' . FusionBuilder::attributes( 'portfolio-shortcode' ) . '><div ' . FusionBuilder::attributes( 'portfolio-shortcode-carousel' ) . '><div ' . FusionBuilder::attributes( 'fusion-carousel-positioner' ) . '>' . $main_carousel . $navigation . '</div></div></div>';
@@ -1218,13 +1222,14 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 
 				$fusion_settings = awb_get_fusion_settings();
 
-				$attr = fusion_builder_visibility_atts(
+				$attr            = fusion_builder_visibility_atts(
 					self::$args['hide_on_mobile'],
 					[
 						'class' => 'fusion-recent-works fusion-portfolio-element fusion-portfolio fusion-portfolio-' . $this->portfolio_counter . ' fusion-portfolio-' . self::$args['layout'] . ' fusion-portfolio-paging-' . self::$args['pagination_type'],
+						'style' => '',
 					]
 				);
-
+				$attr['style']   = Fusion_Builder_Margin_Helper::get_margins_style( self::$args );
 				$attr['data-id'] = '-rw-' . $this->portfolio_counter;
 
 				// Add classes for carousel layout.
@@ -1352,9 +1357,10 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 						$attr['style'] .= 'right:0px;';
 					}
 					$color     = Fusion_Color::new_color( self::$args['grid_box_color'] );
-					$color_css = $color->to_css( 'rgba' );
+					$color_css = $color->to_css_var_or_rgba();
 					if ( 0 === $color->alpha ) {
-						$color_css = $color->to_css( 'rgb' );
+						$color_css = $color->get_new( 'alpha', 1 );
+						$color_css = $color->to_css_var_or_rgba();
 					}
 					$attr['style'] .= 'background-color:' . $color_css . ';';
 					$attr['style'] .= 'z-index:1;';
@@ -1363,7 +1369,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 
 				} elseif ( 'grid' === self::$args['layout'] && 'boxed' === self::$args['text_layout'] ) {
 					$color          = Fusion_Color::new_color( self::$args['grid_box_color'] );
-					$color_css      = $color->to_css( 'rgba' );
+					$color_css      = $color->to_css_var_or_rgba();
 					$attr['style'] .= 'background-color:' . $color_css . ';';
 				}
 
@@ -1395,7 +1401,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 
 				if ( 'grid' === self::$args['layout'] && 'boxed' === self::$args['text_layout'] ) {
 					$color          = Fusion_Color::new_color( self::$args['grid_box_color'] );
-					$color_css      = $color->to_css( 'rgba' );
+					$color_css      = $color->to_css_var_or_rgba();
 					$attr['style'] .= 'background-color:' . $color_css . ';';
 				}
 
@@ -1752,7 +1758,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 								'label'       => esc_attr__( 'Load More Posts Button Background Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the background color of the load more button for ajax post loading for portfolio elements.', 'fusion-core' ),
 								'id'          => 'portfolio_element_load_more_posts_button_bg_color',
-								'default'     => 'rgba(242,243,245,0.7)',
+								'default'     => 'var(--awb-color7)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -1766,7 +1772,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 								'label'       => esc_attr__( 'Load More Posts Button Text Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the text color of the load more button for ajax post loading for portfolio elements.', 'fusion-core' ),
 								'id'          => 'portfolio_element_load_more_posts_button_text_color',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -1780,7 +1786,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 								'label'       => esc_attr__( 'Load More Posts Button Hover Background Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the hover background color of the load more button for ajax post loading for portfolio elements.', 'fusion-core' ),
 								'id'          => 'portfolio_element_load_more_posts_hover_button_bg_color',
-								'default'     => '#f2f3f5',
+								'default'     => 'var(--awb-color5)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -1794,7 +1800,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 								'label'       => esc_attr__( 'Load More Posts Hover Button Text Color', 'fusion-core' ),
 								'description' => esc_attr__( 'Controls the hover text color of the load more button for ajax post loading for portfolio elements.', 'fusion-core' ),
 								'id'          => 'portfolio_element_load_more_posts_hover_button_text_color',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -2671,6 +2677,16 @@ function fusion_element_portfolio() {
 					],
 					'fusion_animation_placeholder' => [
 						'preview_selector' => '.fusion-portfolio',
+					],
+					'fusion_margin_placeholder'    => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-core' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

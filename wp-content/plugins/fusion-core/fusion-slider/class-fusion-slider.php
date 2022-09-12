@@ -74,7 +74,9 @@ if ( ! class_exists( 'Fusion_Slider' ) ) {
 		 */
 		public function change_slide_labels( $labels ) {
 			foreach ( $labels as $index => $label ) {
-				$labels->$index = str_replace( [ 'Categories', 'Category', 'categories', 'category' ], [ 'Slides', 'Slides', 'slides', 'slide' ], $label );
+				if ( null !== $label ) {
+					$labels->$index = str_replace( [ 'Categories', 'Category', 'categories', 'category' ], [ 'Slides', 'Slides', 'slides', 'slide' ], $label );
+				}
 			}
 
 			return $labels;
@@ -294,10 +296,10 @@ if ( ! class_exists( 'Fusion_Slider' ) ) {
 
 			// Admin role menu entry.
 			if ( current_user_can( 'switch_themes' ) ) {
-				$sliders = add_submenu_page( 'avada', esc_html__( 'Avada Sliders', 'fusion-core' ), esc_html__( 'Sliders', 'fusion-core' ), 'manage_options', 'avada_sliders', null, 7 );
+				$sliders = add_submenu_page( 'avada', esc_html__( 'Avada Sliders', 'fusion-core' ), esc_html__( 'Sliders', 'fusion-core' ), 'manage_options', 'avada_sliders', null, 9 );
 			} else { // Editor role menu entry.
 				$sliders     = add_menu_page( esc_html__( 'Avada Sliders', 'fusion-core' ), esc_html__( 'Avada Sliders', 'fusion-core' ), 'edit_pages', 'avada_sliders', '', 'dashicons-avada', '2.111111' );
-				$sliders_sub = add_submenu_page( 'avada_sliders', esc_html__( 'Avada Slides', 'fusion-core' ), esc_html__( 'Avada Slides', 'fusion-core' ), 'edit_pages', 'avada_slides', null, 1 );
+				$sliders_sub = add_submenu_page( 'avada_sliders', esc_html__( 'Avada Slides', 'fusion-core' ), esc_html__( 'Avada Slides', 'fusion-core' ), 'edit_pages', 'avada_slides', null, 29 );
 			}
 
 			add_submenu_page( 'avada', __( 'Export / Import', 'fusion-core' ), __( 'Export / Import', 'fusion-core' ), 'manage_options', 'avada_slider_export_import', [ $this, 'add_slider_import_export' ], 30 );
@@ -828,23 +830,27 @@ if ( ! class_exists( 'Fusion_Slider' ) ) {
 					include $wp_importer;
 				}
 
-				if ( ! class_exists( 'WXR_Importer' ) ) { // If WP importer doesn't exist.
+				if ( ! class_exists( 'WP_Importer_Logger' ) ) { // If WP importer doesn't exist.
 					include FUSION_LIBRARY_PATH . '/inc/importer/class-logger.php';
-					include FUSION_LIBRARY_PATH . '/inc/importer/class-logger-html.php';
+				}
 
-					$wp_import = FUSION_LIBRARY_PATH . '/inc/importer/class-wxr-importer.php';
-					include $wp_import;
+				if ( ! class_exists( 'AWB_Importer_Logger' ) ) { // If WP importer doesn't exist.
+					include FUSION_LIBRARY_PATH . '/inc/importer/class-awb-importer-logger.php';
+				}
+
+				if ( ! class_exists( 'WXR_Importer' ) ) { // If WP importer doesn't exist.
+					include FUSION_LIBRARY_PATH . '/inc/importer/class-wxr-importer.php';
 				}
 
 				if ( ! class_exists( 'Fusion_WXR_Importer' ) ) {
 					include FUSION_LIBRARY_PATH . '/inc/importer/class-fusion-wxr-importer.php';
 				}
 
-				if ( class_exists( 'WP_Importer' ) && class_exists( 'WXR_Importer' ) && class_exists( 'Fusion_WXR_Importer' ) ) { // Check for main import class and wp import class.
+				if ( class_exists( 'AWB_Importer_Logger' ) && class_exists( 'WP_Importer' ) && class_exists( 'WXR_Importer' ) && class_exists( 'Fusion_WXR_Importer' ) ) { // Check for main import class and wp import class.
 
 					$xml = $fs_dir . 'sliders.xml';
 
-					$logger = new WP_Importer_Logger_HTML();
+					$logger = new AWB_Importer_Logger();
 
 					// It's important to disable 'prefill_existing_posts'.
 					// In case GUID of importing post matches GUID of an existing post it won't be imported.

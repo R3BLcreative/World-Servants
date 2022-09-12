@@ -131,7 +131,7 @@ function avada_dynamic_css_array( $original_css = [] ) {
 	}
 
 	if ( class_exists( 'WooCommerce' ) ) {
-		$css['global']['.woocommerce-invalid:after']['content'] = "'" . esc_attr__( 'Please enter correct details for this required field.', 'Avada' ) . "'";
+		$css['global']['.woocommerce-invalid:after']['content'] = "'" . wp_strip_all_tags( __( 'Please enter correct details for this required field.', 'Avada' ), true ) . "'";
 	}
 
 	if ( is_page_template( 'contact.php' ) && Avada()->settings->get( 'gmap_address' ) && Avada()->settings->get( 'status_gmap' ) ) {

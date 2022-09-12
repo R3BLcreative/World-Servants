@@ -51,12 +51,12 @@ if ( ! $thumb_image && function_exists( 'wc_placeholder_img_src' ) && wc_placeho
 	$thumb_image = wc_placeholder_img( $size );
 }
 
-$classes = 'featured-image';
+$classes = apply_filters( 'awb_crossfade_image_classes', [ 'featured-image' ], $attachment_image );
 if ( $attachment_image ) {
-	$classes = 'crossfade-images';
+	$classes[] = 'crossfade-images';
 }
 ?>
-<div class="<?php echo esc_attr( $classes ); ?>">
+<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>">
 	<?php echo $attachment_image; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 	<?php echo $thumb_image; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 

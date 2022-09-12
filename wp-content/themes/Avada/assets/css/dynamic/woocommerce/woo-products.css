@@ -268,7 +268,7 @@ ul.products .product {
 .fusion-clean-product-image-wrapper {
   position: relative;
 }
-.fusion-clean-product-image-wrapper .cart-loading {
+.fusion-clean-product-image-wrapper .fusion-rollover .cart-loading {
   position: relative;
   transform: none;
   top: auto;
@@ -284,17 +284,17 @@ ul.products .product {
   line-height: normal;
   text-transform: uppercase;
 }
-.fusion-clean-product-image-wrapper .cart-loading:hover {
+.fusion-clean-product-image-wrapper .fusion-rollover .cart-loading:hover {
   opacity: 0.6;
 }
-#wrapper .fusion-clean-product-image-wrapper .cart-loading {
+#wrapper .fusion-clean-product-image-wrapper .fusion-rollover .cart-loading {
   background-color: transparent;
 }
-.fusion-clean-product-image-wrapper .cart-loading i {
+.fusion-clean-product-image-wrapper .fusion-rollover .cart-loading i {
   font-size: 32px;
   line-height: 70px;
 }
-.fusion-clean-product-image-wrapper .cart-loading .view-cart {
+.fusion-clean-product-image-wrapper .fusion-rollover .cart-loading .view-cart {
   display: none;
 }
 .fusion-clean-product-image-wrapper.fusion-item-in-cart .cart-loading .view-cart {
@@ -678,4 +678,11 @@ li.outofstock .onsale {
 }
 .fusion-woo-product-design-clean .product.sale .onsale {
   z-index: 3;
+}
+.ywgc-message textarea {
+  border-style: solid;
+}
+.fusion-body .gift-cards-list .ywgc-amount-buttons {
+  padding-right: 0.5em;
+  padding-left: 0.5em;
 }

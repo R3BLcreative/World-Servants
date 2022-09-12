@@ -136,7 +136,10 @@ if ( ! class_exists( 'Fusion_Row_Element' ) ) {
 
 				// Not an inner row, check if we are nested though.
 				if ( ! $this->args['nested_container'] ) {
-					$this->args['nested_container'] = fusion_builder_container()->is_nested();
+					$nesting_depth = fusion_builder_container()->get_nesting_depth();
+					$override_name = function_exists( 'Fusion_Template_Builder' ) ? Fusion_Template_Builder()->get_current_override_name() : false;
+
+					$this->args['nested_container'] = ( 1 === $nesting_depth && 'content' === $override_name ) ? false : fusion_builder_container()->is_nested();
 				}
 			}
 

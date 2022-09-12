@@ -131,10 +131,6 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 			 */
 			public function preview_styles( $hook ) {
 				wp_enqueue_style( 'wp-mediaelement' );
-
-				if ( class_exists( 'Tribe__Events__Pro__Widgets' ) ) {
-					Tribe__Events__Pro__Widgets::enqueue_calendar_widget_styles();
-				}
 			}
 
 			/**
@@ -187,7 +183,13 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 						var js, fjs = d.getElementsByTagName(s)[0];
 						if (d.getElementById(id)) return;
 						js = d.createElement(s); js.id = id;
-						js.src = "https://connect.facebook.net/<?php echo esc_attr( get_locale() ); ?>/sdk.js#xfbml=1&version=v2.11&appId=";
+
+						let lang = 'en_US';
+						const el = document.querySelector('.fusion-facebook-page');
+						if ( el ) {
+							lang = el.dataset.language;
+						}
+						js.src = "https://connect.facebook.net/"+ lang +"/sdk.js#xfbml=1&version=v2.11&appId=";
 						fjs.parentNode.insertBefore(js, fjs);
 					}(document, 'script', 'facebook-jssdk'));
 				</script>
@@ -234,6 +236,8 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 				if ( $styles ) {
 					$attr['style'] = $styles;
 				}
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				return $attr;
 			}
@@ -324,8 +328,6 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 			public function events_pro_scripts( $classname ) {
 				$url = '';
 
-				add_action( 'tribe_events_pro_widget_render', [ 'Tribe__Events__Pro__Widgets', 'enqueue_calendar_widget_styles' ], 100 );
-
 				switch ( $classname ) {
 					case 'Tribe__Events__Pro__Countdown_Widget':
 						$url = tribe_events_pro_resource_url( 'widget-countdown.js' );
@@ -362,7 +364,7 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 				$widget    = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : '';
 				$params    = isset( $_POST['params'] ) ? stripslashes_deep( wp_unslash( $_POST['params'] ) ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 				$widget_id = isset( $_POST['widget_id'] ) ? sanitize_text_field( wp_unslash( $_POST['widget_id'] ) ) : random_int( 100, 1000 );
-				$prefix    = strtolower( $widget ) . '__';
+				$prefix    = str_replace( '\\', '_', strtolower( $widget ) ) . '__';
 
 				if ( 'default' === $widget ) {
 					echo wp_json_encode( '' );
@@ -370,7 +372,7 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 				}
 
 				foreach ( $params as $key => $param ) {
-					if ( strpos( $key, $prefix ) === 0 ) {
+					if ( 0 === strpos( $key, $prefix ) ) {
 						$instance[ substr( $key, strlen( $prefix ) ) ] = 'off' === $param ? '' : $param;
 					}
 				}
@@ -403,6 +405,10 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 			 */
 			public static function get_element_defaults() {
 				return [
+					'margin_top'            => '',
+					'margin_right'          => '',
+					'margin_bottom'         => '',
+					'margin_left'           => '',
 					'hide_on_mobile'        => fusion_builder_default_visibility( 'string' ),
 					'class'                 => '',
 					'id'                    => '',
@@ -501,6 +507,11 @@ if ( fusion_is_element_enabled( 'fusion_widget' ) ) {
 				extract( $defaults );
 
 				$this->args = $defaults;
+
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
 
 				$instance = [];
 
@@ -605,7 +616,7 @@ function fusion_element_widget() {
 				'front_end_custom_settings_view_js' => FUSION_BUILDER_PLUGIN_URL . 'inc/templates/custom/front-end/js/fusion-widget-settings.js',
 				'admin_enqueue_js'                  => FUSION_BUILDER_PLUGIN_URL . 'shortcodes/js/fusion-widget.js',
 				'on_save'                           => 'widgetShortcodeFilter',
-				'help_url'                          => 'https://theme-fusion.com/documentation/fusion-builder/elements/widget/',
+				'help_url'                          => 'https://theme-fusion.com/documentation/avada/elements/widget/',
 				'preview'                           => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-widget-preview.php',
 				'preview_id'                        => 'fusion-builder-block-module-widget-preview-template',
 				'params'                            => [
@@ -618,6 +629,16 @@ function fusion_element_widget() {
 						'default'     => 'default',
 						'callback'    => [
 							'function' => 'fusion_widget_changed',
+						],
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
 						],
 					],
 					[

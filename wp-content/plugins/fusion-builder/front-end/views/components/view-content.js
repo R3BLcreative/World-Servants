@@ -77,7 +77,11 @@ self = this;
 				} );
 
 				if ( !this.isDefault( 'line_height' ) ) {
-				  this.addCssProperty( this.baseSelector, 'line-height',  _.fusionGetValueWithUnit( this.values.line_height ) );
+				  this.addCssProperty( this.baseSelector, 'line-height', this.values.line_height );
+				}
+
+				if ( !this.isDefault( 'text_transform' ) ) {
+				  this.addCssProperty( this.baseSelector, 'text-transform', this.values.text_transform );
 				}
 
 				if ( !this.isDefault( 'letter_spacing' ) ) {
@@ -85,7 +89,7 @@ self = this;
 				}
 
 				if ( !this.isDefault( 'text_color' ) ) {
-				  this.addCssProperty( this.baseSelector, 'color',  _.fusionGetValueWithUnit( this.values.text_color ) );
+				  this.addCssProperty( this.baseSelector, 'color',  this.values.text_color );
 				}
 
 				css = this.parseCSS();

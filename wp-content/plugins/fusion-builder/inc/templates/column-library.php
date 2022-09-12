@@ -7,7 +7,7 @@
 
 ?>
 <script type="text/template" id="fusion-builder-column-library-template">
-	<div class="fusion-builder-modal-top-container">
+	<div class="fusion-builder-modal-top-container fusion-has-close-on-top">
 		<h2 class="fusion-builder-settings-heading">
 			<# if ( FusionPageBuilderApp.activeModal == 'container' ) { #>
 				{{ fusionBuilderText.insert_section }}
@@ -16,6 +16,7 @@
 			<# } #>
 			<input type="text" class="fusion-elements-filter" placeholder="{{ fusionBuilderText.search_containers }}" />
 		</h2>
+		<div class="fusion-builder-modal-close fusiona-plus2"></div>
 		<ul class="fusion-tabs-menu">
 
 			<# if ( FusionPageBuilderApp.activeModal !== 'container' ) { #>
@@ -61,9 +62,10 @@
 										<div class="fusion-builder-element-content fusion-loader"><span class="fusion-builder-loader"></span><span class="awb-studio-import-status"></span></div>
 										<ul class="studio-imports"></ul>
 									</section>
+									<?php AWB_Studio::studio_import_options_template(); ?>
 								</div>
 							<?php else : ?>
-								<h2><?php esc_html_e( 'You need to be registered to access the Avada Studio.', 'fusion-builder' ); ?></h2>
+								<h2 class="awb-studio-not-reg"><?php esc_html_e( 'The product needs to be registered to access the Avada Studio.', 'fusion-builder' ); ?></h2>
 							<?php endif; ?>
 						</div>
 					<# } #>
@@ -101,18 +103,15 @@
 										<div class="fusion-builder-element-content fusion-loader"><span class="fusion-builder-loader"></span><span class="awb-studio-import-status"></span></div>
 										<ul class="studio-imports"></ul>
 									</section>
+									<?php AWB_Studio::studio_import_options_template(); ?>
 								</div>
 							<?php else : ?>
-								<h2><?php esc_html_e( 'You need to be registered to access the Avada Studio.', 'fusion-builder' ); ?></h2>
+								<h2 class="awb-studio-not-reg"><?php esc_html_e( 'The product needs to be registered to access the Avada Studio.', 'fusion-builder' ); ?></h2>
 							<?php endif; ?>
 						</div>
 					<# } #>
 				<# } #>
 			</div>
 		</div>
-	</div>
-
-	<div class="fusion-builder-modal-bottom-container">
-		<a href="#" class="fusion-builder-modal-close"><span>{{ fusionBuilderText.cancel }}</span></a>
 	</div>
 </script>

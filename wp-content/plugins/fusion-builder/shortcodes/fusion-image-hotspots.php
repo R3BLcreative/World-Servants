@@ -693,6 +693,8 @@ if ( fusion_is_element_enabled( 'fusion_image_hotspots' ) ) {
  * @since 3.5
  */
 function fusion_element_image_hotspots() {
+	$fusion_settings = awb_get_fusion_settings();
+
 	fusion_builder_map(
 		fusion_builder_frontend_data(
 			'FusionSC_Image_Hotspots',
@@ -807,6 +809,7 @@ function fusion_element_image_hotspots() {
 						'description' => esc_html__( 'Controls the background color of the popover heading.', 'fusion-builder' ),
 						'param_name'  => 'popover_heading_background_color',
 						'value'       => '',
+						'default'     => $fusion_settings->get( 'popover_heading_bg_color' ),
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
@@ -815,6 +818,7 @@ function fusion_element_image_hotspots() {
 						'description' => esc_html__( 'Controls the background color of the popover content area.', 'fusion-builder' ),
 						'param_name'  => 'popover_content_background_color',
 						'value'       => '',
+						'default'     => $fusion_settings->get( 'popover_content_bg_color' ),
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
@@ -823,6 +827,7 @@ function fusion_element_image_hotspots() {
 						'description' => esc_html__( 'Controls the border color of the of the popover box.', 'fusion-builder' ),
 						'param_name'  => 'popover_border_color',
 						'value'       => '',
+						'default'     => $fusion_settings->get( 'popover_border_color' ),
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
@@ -831,6 +836,7 @@ function fusion_element_image_hotspots() {
 						'description' => esc_html__( 'Controls all the text color inside the popover box.', 'fusion-builder' ),
 						'param_name'  => 'popover_text_color',
 						'value'       => '',
+						'default'     => $fusion_settings->get( 'popover_text_color' ),
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					'fusion_margin_placeholder'    => [
@@ -884,24 +890,26 @@ function fusion_element_image_hotspot_point() {
 				],
 				'params'            => [
 					[
-						'type'        => 'range',
-						'heading'     => esc_attr__( 'Horizontal Position', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select the horizontal position of the hotspot. In percentage of the image width.', 'fusion-builder' ),
-						'param_name'  => 'pos_x',
-						'value'       => '25',
-						'min'         => '0',
-						'max'         => '100',
-						'step'        => '0.1',
+						'type'         => 'range',
+						'heading'      => esc_attr__( 'Horizontal Position', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Select the horizontal position of the hotspot. In percentage of the image width.', 'fusion-builder' ),
+						'param_name'   => 'pos_x',
+						'value'        => '25',
+						'min'          => '0',
+						'max'          => '100',
+						'step'         => '0.1',
+						'dynamic_data' => true,
 					],
 					[
-						'type'        => 'range',
-						'heading'     => esc_attr__( 'Vertical Position', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select the vertical position of the hotspot. In percentage of the image height.', 'fusion-builder' ),
-						'param_name'  => 'pos_y',
-						'value'       => '25',
-						'min'         => '0',
-						'max'         => '100',
-						'step'        => '0.1',
+						'type'         => 'range',
+						'heading'      => esc_attr__( 'Vertical Position', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Select the vertical position of the hotspot. In percentage of the image height.', 'fusion-builder' ),
+						'param_name'   => 'pos_y',
+						'value'        => '25',
+						'min'          => '0',
+						'max'          => '100',
+						'step'         => '0.1',
+						'dynamic_data' => true,
 					],
 					[
 						'type'        => 'iconpicker',
@@ -911,50 +919,54 @@ function fusion_element_image_hotspot_point() {
 						'value'       => '',
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Triggering Text', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the text to be displayed on the hotspot.', 'fusion-builder' ),
-						'param_name'  => 'title',
-						'value'       => '',
+						'type'         => 'textfield',
+						'heading'      => esc_attr__( 'Triggering Text', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Enter the text to be displayed on the hotspot.', 'fusion-builder' ),
+						'param_name'   => 'title',
+						'value'        => '',
+						'dynamic_data' => true,
 					],
 					[
-						'type'        => 'radio_button_set',
-						'heading'     => esc_attr__( 'Hotspot Trigger Action', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select the hotspot trigger action. This can be a popover or a link.' ),
-						'param_name'  => 'button_action',
-						'value'       => [
+						'type'         => 'radio_button_set',
+						'heading'      => esc_attr__( 'Hotspot Trigger Action', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Select the hotspot trigger action. This can be a popover or a link.' ),
+						'param_name'   => 'button_action',
+						'value'        => [
 							'popover' => esc_attr__( 'Popover', 'fusion-builder' ),
 							'link'    => esc_attr__( 'Link', 'fusion-builder' ),
 						],
-						'default'     => 'popover',
+						'default'      => 'popover',
+						'dynamic_data' => true,
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Popover Heading', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the popover heading.', 'fusion-builder' ),
-						'param_name'  => 'long_title',
-						'value'       => '',
-						'dependency'  => [
+						'type'         => 'textfield',
+						'heading'      => esc_attr__( 'Popover Heading', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Enter the popover heading.', 'fusion-builder' ),
+						'param_name'   => 'long_title',
+						'value'        => '',
+						'dependency'   => [
 							[
 								'element'  => 'button_action',
 								'value'    => 'popover',
 								'operator' => '==',
 							],
 						],
+						'dynamic_data' => true,
 					],
 					[
-						'type'        => 'raw_textarea',
-						'heading'     => esc_attr__( 'Popover Content', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the popover content.', 'fusion-builder' ),
-						'param_name'  => 'long_text',
-						'value'       => '',
-						'dependency'  => [
+						'type'         => 'raw_textarea',
+						'heading'      => esc_attr__( 'Popover Content', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Enter the popover content.', 'fusion-builder' ),
+						'param_name'   => 'long_text',
+						'value'        => '',
+						'dependency'   => [
 							[
 								'element'  => 'button_action',
 								'value'    => 'popover',
 								'operator' => '==',
 							],
 						],
+						'dynamic_data' => true,
 					],
 					[
 						'type'        => 'radio_button_set',
@@ -978,32 +990,34 @@ function fusion_element_image_hotspot_point() {
 						],
 					],
 					[
-						'type'        => 'link_selector',
-						'heading'     => esc_attr__( 'Link', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter or select a link for the triggering hotspot.', 'fusion-builder' ),
-						'param_name'  => 'link',
-						'default'     => '',
-						'dependency'  => [
+						'type'         => 'link_selector',
+						'heading'      => esc_attr__( 'Link', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Enter or select a link for the triggering hotspot.', 'fusion-builder' ),
+						'param_name'   => 'link',
+						'default'      => '',
+						'dependency'   => [
 							[
 								'element'  => 'button_action',
 								'value'    => 'link',
 								'operator' => '==',
 							],
 						],
+						'dynamic_data' => true,
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Link Title', 'fusion-builder' ),
-						'description' => esc_attr__( 'Set a link title that will be displayed, when the triggering hotspot is hovered.' ),
-						'param_name'  => 'link_title',
-						'default'     => '',
-						'dependency'  => [
+						'type'         => 'textfield',
+						'heading'      => esc_attr__( 'Link Title', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Set a link title that will be displayed, when the triggering hotspot is hovered.' ),
+						'param_name'   => 'link_title',
+						'default'      => '',
+						'dependency'   => [
 							[
 								'element'  => 'button_action',
 								'value'    => 'link',
 								'operator' => '==',
 							],
 						],
+						'dynamic_data' => true,
 					],
 					[
 						'type'        => 'radio_button_set',
@@ -1037,6 +1051,7 @@ function fusion_element_image_hotspot_point() {
 						'description' => esc_html__( 'Select the color of the text and the icon.', 'fusion-builder' ),
 						'param_name'  => 'hotspot_text_color',
 						'value'       => '',
+						'default'     => '#000000',
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
@@ -1045,6 +1060,7 @@ function fusion_element_image_hotspot_point() {
 						'description' => esc_html__( 'Select the background color of the hotspot.', 'fusion-builder' ),
 						'param_name'  => 'hotspot_background_color',
 						'value'       => '',
+						'default'     => '#ffffff',
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
@@ -1053,6 +1069,7 @@ function fusion_element_image_hotspot_point() {
 						'description' => esc_html__( 'Select the hover color of the text and the icon.', 'fusion-builder' ),
 						'param_name'  => 'hotspot_hover_text_color',
 						'value'       => '',
+						'default'     => '#000000',
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
@@ -1061,6 +1078,7 @@ function fusion_element_image_hotspot_point() {
 						'description' => esc_html__( 'Select the background hover color of the hotspot.', 'fusion-builder' ),
 						'param_name'  => 'hotspot_hover_background_color',
 						'value'       => '',
+						'default'     => 'rgb(226, 226, 226)',
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[

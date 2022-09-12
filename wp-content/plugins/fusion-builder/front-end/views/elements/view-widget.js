@@ -92,6 +92,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			filterTemplateAtts: function( atts ) {
 				var attributes = {};
 
+				// Validate values.
+				this.validateValues( atts.values );
+
 				// Create attribute objects
 				attributes.attr   	= this.buildAttr( atts.values );
 				attributes.styles 	= this.buildStyles( atts.values );
@@ -102,6 +105,20 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				attributes.placeholder = this.getWidgetPlaceholder();
 
 				return attributes;
+			},
+
+			/**
+			 * Modify the values.
+			 *
+			 * @since 2.0
+			 * @param {Object} values - The values object.
+			 * @return {void}
+			 */
+			validateValues: function( values ) {
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -143,6 +160,23 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( values.fusion_align_mobile ) {
 					attr[ 'class' ] += ' fusion-widget-mobile-align-' + values.fusion_align_mobile;
 				}
+
+				if ( '' !== values.margin_top ) {
+					attr.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					attr.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					attr.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					attr.style += 'margin-left:' + values.margin_left + ';';
+				}
+
 				return attr;
 			},
 
@@ -180,7 +214,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				styles += '}';
 
 				if ( 'no' === values.fusion_display_title ) {
-					styles += '.fusion-widget.fusion-widget-cid' + cid + ' .widget-title{display:none;}';
+					styles += '.fusion-widget.fusion-widget-cid' + cid + ' .widget-title, .fusion-widget.fusion-widget-cid' + cid + ' .tribe-events-widget-events-list__header{display:none;}';
 				}
 
 

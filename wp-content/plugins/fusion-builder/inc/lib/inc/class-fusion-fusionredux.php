@@ -499,11 +499,11 @@ class Fusion_FusionRedux {
 					/* translators: The description subtitle and an example value. */
 					$args['subtitle'] = sprintf( esc_html__( '%1$s Enter value including CSS unit (px, em, rem), ex: %2$s.', 'fusion-builder' ), $args['subtitle'], $field['default'] );
 				} elseif ( 'text_column_spacing' === $field['id'] ) {
-					/* translators: The description subtitle and an example value. */
-					$args['subtitle'] = sprintf( esc_html__( '%1$s Enter value including any valid CSS unit besides %% which does not work for inline columns, ex: %2$s.', 'fusion-builder' ), $args['subtitle'], $field['default'] );
+					/* translators: The description subtitle, percetange sign and an example value. */
+					$args['subtitle'] = sprintf( esc_html__( '%1$s Enter value including any valid CSS unit besides %2$s which does not work for inline columns, ex: %3$s.', 'fusion-builder' ), $args['subtitle'], '%', $field['default'] );
 				} elseif ( 'page_title_height' === $field['id'] || 'page_title_mobile_height' === $field['id'] ) {
-					/* translators: The description subtitle and an example value. */
-					$args['subtitle'] = sprintf( esc_html__( '%1$s Enter value including any valid CSS unit besides %% which does not work for page title bar, ex: %2$s.', 'fusion-builder' ), $args['subtitle'], $field['default'] );
+					/* translators: The description subtitle, percentage sign and an example value. */
+					$args['subtitle'] = sprintf( esc_html__( '%1$s Enter value including any valid CSS unit besides %2$s which does not work for page title bar, ex: %3$s.', 'fusion-builder' ), $args['subtitle'], '%', $field['default'] );
 				} else {
 					/* translators: The description subtitle and an example value. */
 					$args['subtitle'] = sprintf( esc_html__( '%1$s Enter value including any valid CSS unit, ex: %2$s.', 'fusion-builder' ), $args['subtitle'], $field['default'] );
@@ -527,6 +527,9 @@ class Fusion_FusionRedux {
 				$args['validate_callback'] = 'fusion_fusionredux_validate_dimensions';
 
 				$default = is_array( $field['default'] ) ? implode( ', ', $field['default'] ) : $field['default'];
+				if ( is_array( $field['default'] ) && empty( array_filter( $field['default'] ) ) ) {
+					$default = '10px, 1em';
+				}
 				/* translators: The description subtitle and an example value. */
 				$args['subtitle'] = sprintf( esc_html__( '%1$s Enter values including any valid CSS unit, ex: %2$s.', 'fusion-builder' ), $args['subtitle'], $default );
 				break;
@@ -603,6 +606,9 @@ class Fusion_FusionRedux {
 				break;
 			case 'color-palette':
 				$args['type'] = 'color_palette';
+				break;
+			case 'typography-sets':
+				$args['type'] = 'typography_sets';
 				break;
 			case 'preset':
 			case 'preset':
@@ -875,7 +881,6 @@ class Fusion_FusionRedux {
 		wp_localize_script( 'fusion-redux-custom-js', 'fusionFusionreduxVars', $vars );
 		wp_enqueue_script( 'fusion-redux-custom-js' );
 
-
 		wp_enqueue_script( 'fusion-redux-reset-caches', trailingslashit( FUSION_LIBRARY_URL ) . 'inc/redux/assets/fusion-reset-caches.js', [], time(), false );
 		wp_localize_script(
 			'fusion-redux-reset-caches',
@@ -893,6 +898,14 @@ class Fusion_FusionRedux {
 				'hubspot'   => [
 					'confirm' => esc_html__( 'Are you sure you want to reset all HubSpot caches?', 'fusion-builder' ),
 					'success' => esc_html__( 'All HubSpot caches have been reset.', 'fusion-builder' ),
+				],
+				'instagram' => [
+					'confirm' => esc_html__( 'Are you sure you want to reset all Instagram caches?', 'fusion-builder' ),
+					'success' => esc_html__( 'All Instagram caches have been reset.', 'fusion-builder' ),
+				],
+				'adobe'     => [
+					'confirm' => esc_html__( 'Are you sure you want to reset all Adobe caches?', 'fusion-builder' ),
+					'success' => esc_html__( 'All Adobe caches have been reset. Refresh the page to see the changes.', 'fusion-builder' ),
 				],
 			]
 		);
@@ -1426,8 +1439,8 @@ class Fusion_FusionRedux {
 			return;
 		}
 		?>
-		<div id="remote-media-found-in-fusion-options" class="notice notice-error avada-db-card avada-db-notice">
-			<h2><?php esc_html_e( 'Media fields using remote URLs were detected in your Global Options', 'fusion-builder' ); ?></h2>
+		<div id="remote-media-found-in-fusion-options" class="notice notice-error avada-db-card avada-db-notice settings-error" style="max-width: 1200px; box-sizing: border-box;">
+			<strong><span class="avada-db-settings-error-heading"><?php esc_html_e( 'Media fields using remote URLs were detected in your Global Options', 'fusion-builder' ); ?></span></strong>
 			<ul>
 				<?php foreach ( $this->media_fields as $field ) : ?>
 					<li><span><?php echo esc_html( $field['label'] ); ?></span></li>

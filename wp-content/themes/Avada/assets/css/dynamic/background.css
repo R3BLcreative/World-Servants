@@ -24,17 +24,6 @@ html:not(.avada-html-layout-boxed):not(.avada-html-layout-framed) body,
   background-blend-mode: var(--bg-color-overlay);
   background-image: var(--bg_image);
 }
-.avada-html-has-bg-image .layout-boxed-mode.layout-scroll-offset-framed.avada-has-bg-image-full .fusion-bottom-frame {
-  background-position: 0 calc((100vh - var(--margin_offset-bottom-no-percent)) * -1);
-}
-.avada-html-has-bg-image .layout-boxed-mode.layout-scroll-offset-framed.avada-has-bg-image-full.admin-bar .fusion-bottom-frame {
-  background-position: 0 calc((100vh - var(--margin_offset-bottom-no-percent) - 32px) * -1);
-}
-@media screen and (max-width: 782px) {
-  .avada-html-has-bg-image .layout-boxed-mode.layout-scroll-offset-framed.avada-has-bg-image-full.admin-bar .fusion-bottom-frame {
-    background-position: 0 calc((100vh - var(--margin_offset-bottom-no-percent) - 46px ) * -1);
-  }
-}
 body {
   background-image: var(--bg_image);
   background-repeat: var(--bg_repeat);
@@ -82,4 +71,7 @@ html.avada-has-page-background-pattern .layout-boxed-mode .fusion-sides-frame,
 html.avada-has-page-background-pattern .layout-boxed-mode .fusion-bottom-frame {
   background-image: var(--bg_pattern);
   background-repeat: repeat;
+}
+html.avada-has-page-background-pattern .layout-boxed-mode.layout-scroll-offset-framed:not(.avada-has-zero-margin-offset-top) {
+  background-attachment: fixed;
 }

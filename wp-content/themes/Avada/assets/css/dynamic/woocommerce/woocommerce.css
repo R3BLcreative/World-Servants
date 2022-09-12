@@ -242,25 +242,21 @@
   border-bottom: 0;
   padding: 0;
 }
-.widget_layered_nav li.chosen {
-  background-color: #65bc7b;
+.fusion-widget-area .widget_layered_nav_filters li.chosen {
+  display: inline-flex;
+  margin: 0.25em;
+  line-height: normal;
+  align-items: center;
+  position: relative;
 }
-.widget_layered_nav li.chosen a {
-  margin-left: 14px;
+.fusion-body .fusion-widget-area .widget_layered_nav_filters li.chosen {
+  padding: 0.25em 0.5em;
 }
-.widget_layered_nav li.chosen a:before,
-.widget_layered_nav_filters li.chosen a:before {
-  position: absolute;
+.fusion-widget-area .widget_layered_nav_filters li.chosen a:before {
+  display: inline-block;
   content: "\e61d";
-  margin-left: -17px;
   transform: rotate(45deg);
   font-family: "awb-icons";
-}
-.widget_layered_nav_filters li.chosen {
-  display: inline-block;
-  margin: 0 3px 3px 0;
-  padding: 2px 5px 2px 20px;
-  background-color: #65bc7b;
 }
 .product_list_widget li .amount,
 .product_list_widget li .quantity {
@@ -335,9 +331,7 @@
 }
 .fusion-body .price_slider_amount .button {
   float: left;
-  padding: 5px 6px;
-  font-weight: bold;
-  font-size: 13px;
+  padding: 0.5em 0.7em;
 }
 .wc-layered-nav-rating .star-rating {
   margin-right: 5px;
@@ -363,12 +357,15 @@
   position: relative;
   text-align: left;
 }
+.ui-slider.ui-slider-horizontal {
+  display: flex;
+  align-items: center;
+}
 .ui-slider .ui-slider-handle {
   position: absolute;
   z-index: 2;
   width: 12px;
   height: 12px;
-  top: -0.3em;
   outline: none;
 }
 .ui-slider .ui-slider-handle:before {
@@ -401,7 +398,7 @@
   z-index: 3;
 }
 .ui-slider .ui-slider-handle:last-child {
-  margin-left: -1em;
+  transform: translateX(-100%);
 }
 .ui-slider .ui-slider-range {
   position: absolute;
@@ -1660,6 +1657,12 @@ p.order-info mark {
 .widget_shopping_cart_content .total .amount,
 .widget_layered_nav li a:hover:before,
 .widget_product_categories li a:hover:before,
+.fusion-content-widget-area .widget_layered_nav li.chosen a,
+.fusion-content-widget-area .widget_layered_nav li.chosen a:before,
+.fusion-content-widget-area .widget_layered_nav li a:hover ~ .count,
+.fusion-content-widget-area .widget_layered_nav li.chosen .count,
+.fusion-content-widget-area .widget_layered_nav_filters li.chosen a,
+.fusion-content-widget-area .widget_layered_nav_filters li.chosen a:before,
 .my_account_orders .woocommerce-orders-table__cell-order-number a,
 .shop_table .product-subtotal .amount,
 .cart_totals .order-total .amount,
@@ -1670,6 +1673,15 @@ p.order-info mark {
 #wrapper .product-category a:hover h2.woocommerce-loop-category__title {
   color: var(--primary_color);
 }
+.fusion-content-widget-area .widget_layered_nav_filters li.chosen {
+  background-color: var(--primary_color);
+}
+.fusion-content-widget-area .widget_layered_nav_filters li.chosen a,
+.fusion-content-widget-area .widget_layered_nav_filters li.chosen a:before,
+.fusion-content-widget-area .widget_layered_nav_filters li.chosen a:hover,
+.fusion-content-widget-area .widget_layered_nav_filters li.chosen a:hover:before {
+  color: var(--button_accent_color);
+}
 .woocommerce-pagination .page-numbers.current,
 .woocommerce-pagination .page-numbers:hover,
 .woocommerce-pagination .current {
@@ -1677,9 +1689,7 @@ p.order-info mark {
 }
 .woocommerce-pagination .current,
 .price_slider_wrapper .ui-slider .ui-slider-range,
-p.woocommerce-store-notice,
-.fusion-content-widget-area .widget_layered_nav li.chosen,
-.fusion-content-widget-area .widget_layered_nav_filters li.chosen {
+p.woocommerce-store-notice {
   background-color: var(--primary_color);
 }
 .woocommerce-pagination .page-numbers,
@@ -1838,13 +1848,6 @@ body:not(.avada-woo-one-page-checkout) .woocommerce form.checkout #order_review 
   float: right;
   margin-top: 10px;
 }
-.fusion-content-widget-area .widget_layered_nav li.chosen a,
-.fusion-content-widget-area .widget_layered_nav li.chosen a:before,
-.fusion-content-widget-area .widget_layered_nav li.chosen .count,
-.fusion-content-widget-area .widget_layered_nav_filters li.chosen a,
-.fusion-content-widget-area .widget_layered_nav_filters li.chosen a:before {
-  color: var(--button_accent_color);
-}
 @keyframes mask {
   25% {
     transform: rotate(270deg);
@@ -1858,4 +1861,13 @@ body:not(.avada-woo-one-page-checkout) .woocommerce form.checkout #order_review 
   100% {
     transform: rotate(180deg);
   }
+}
+.opc_order_review td.product-name .product-remove {
+  width: auto;
+}
+.opc_order_review td.product-name .remove {
+  line-height: 1;
+}
+.opc_order_review td.product-total {
+  vertical-align: middle;
 }

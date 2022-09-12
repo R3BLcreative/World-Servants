@@ -463,17 +463,26 @@ if ( ! function_exists( 'avada_add_login_box_to_nav' ) ) {
 							$referer = fusion_get_referer();
 							$referer = ( $referer ) ? $referer : '';
 
+							$menu_id = '';
+							if ( $args->menu_id ) {
+								$menu_id = $args->menu_id;
+							} elseif ( is_string( $args->menu ) ) {
+								$menu_id = uniqid( $args->menu . '-' );
+							} elseif ( isset( $args->menu->slug ) ) {
+								$menu_id = uniqid( $args->menu->slug . '-' );
+							}
+
 							$items .= '<div class="fusion-custom-menu-item-contents">';
 							if ( isset( $_GET['login'] ) && 'failed' === $_GET['login'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 								$items .= '<p class="fusion-menu-login-box-error">' . esc_html__( 'Login failed, please try again.', 'Avada' ) . '</p>';
 							}
 							$items .= '<form action="' . esc_attr( site_url( 'wp-login.php', 'login_post' ) ) . '" name="loginform" method="post">';
-							$items .= '<p><input type="text" class="input-text" name="log" id="username" value="" placeholder="' . esc_html__( 'Username', 'Avada' ) . '" /></p>';
-							$items .= '<p><input type="password" class="input-text" name="pwd" id="password" value="" placeholder="' . esc_html__( 'Password', 'Avada' ) . '" /></p>';
-							$items .= '<p class="fusion-remember-checkbox"><label for="fusion-menu-login-box-rememberme"><input name="rememberme" type="checkbox" id="fusion-menu-login-box-rememberme" value="forever"> ' . esc_html__( 'Remember Me', 'Avada' ) . '</label></p>';
+							$items .= '<p><input type="text" class="input-text" name="log" id="username-' . esc_attr( $menu_id ) . '" value="" placeholder="' . esc_html__( 'Username', 'Avada' ) . '" /></p>';
+							$items .= '<p><input type="password" class="input-text" name="pwd" id="password-' . esc_attr( $menu_id ) . '" value="" placeholder="' . esc_html__( 'Password', 'Avada' ) . '" /></p>';
+							$items .= '<p class="fusion-remember-checkbox"><label for="fusion-menu-login-box-rememberme-' . esc_attr( $menu_id ) . '"><input name="rememberme" type="checkbox" id="fusion-menu-login-box-rememberme" value="forever"> ' . esc_html__( 'Remember Me', 'Avada' ) . '</label></p>';
 							$items .= '<input type="hidden" name="fusion_woo_login_box" value="true" />';
 							$items .= '<p class="fusion-login-box-submit">';
-							$items .= '<input type="submit" name="wp-submit" id="wp-submit" class="button button-small default comment-submit" value="' . esc_html__( 'Log In', 'Avada' ) . '">';
+							$items .= '<input type="submit" name="wp-submit" id="wp-submit-' . esc_attr( $menu_id ) . '" class="button button-small default comment-submit" value="' . esc_html__( 'Log In', 'Avada' ) . '">';
 							$items .= '<input type="hidden" name="redirect" value="' . esc_url( $referer ) . '">';
 							$items .= '</p>';
 							$items .= '</form>';
@@ -718,7 +727,7 @@ if ( ! function_exists( 'avada_add_sliding_bar_icon_to_main_nav' ) ) {
 					}
 
 					$items .= '<li class="fusion-custom-menu-item fusion-main-menu-sliding-bar" data-classes="fusion-main-menu-sliding-bar">';
-					$items .= '<a class="fusion-main-menu-icon fusion-icon-sliding-bar' . $highlight_class . '" href="#" aria-label="' . $sliding_bar_label . '" data-title="' . $sliding_bar_label . '" title="' . $sliding_bar_label . '"></a>';
+					$items .= '<a class="fusion-main-menu-icon awb-icon-sliding-bar' . $highlight_class . '" href="#" aria-label="' . $sliding_bar_label . '" data-title="' . $sliding_bar_label . '" title="' . $sliding_bar_label . '"></a>';
 					$items .= '</li>';
 				}
 			}

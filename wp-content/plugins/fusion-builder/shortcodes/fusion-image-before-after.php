@@ -84,6 +84,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					'handle_type'         => $fusion_settings->get( 'before_after_handle_type' ),
 					'handle_bg'           => $fusion_settings->get( 'before_after_handle_bg' ),
 					'handle_color'        => $fusion_settings->get( 'before_after_handle_color' ),
+					'alignment'           => '',
 					'transition_time'     => $fusion_settings->get( 'before_after_transition_time' ),
 					'offset'              => $fusion_settings->get( 'before_after_offset' ),
 					'orientation'         => $fusion_settings->get( 'before_after_orientation' ),
@@ -91,6 +92,10 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					'bordercolor'         => $fusion_settings->get( 'before_after_border_color' ),
 					'borderradius'        => intval( $fusion_settings->get( 'before_after_border_radius' ) ) . 'px',
 					'bordersize'          => $fusion_settings->get( 'before_after_border_size' ),
+					'margin_bottom'       => '',
+					'margin_left'         => '',
+					'margin_right'        => '',
+					'margin_top'          => '',
 					'hide_on_mobile'      => fusion_builder_default_visibility( 'string' ),
 					'animation_type'      => '',
 					'animation_direction' => 'left',
@@ -145,11 +150,15 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 				$defaults = FusionBuilder::set_shortcode_defaults( self::get_element_defaults(), $args, 'fusion_image_before_after' );
 				$content  = apply_filters( 'fusion_shortcode_content', $content, 'fusion_image_before_after', $args );
 
-				$defaults['offset']       = $defaults['offset'] / 100;
-				$defaults['font_size']    = FusionBuilder::validate_shortcode_attr_value( $defaults['font_size'], 'px' );
-				$defaults['max_width']    = FusionBuilder::validate_shortcode_attr_value( $defaults['max_width'], 'px' );
-				$defaults['bordersize']   = FusionBuilder::validate_shortcode_attr_value( $defaults['bordersize'], 'px' );
-				$defaults['borderradius'] = FusionBuilder::validate_shortcode_attr_value( $defaults['borderradius'], 'px' );
+				$defaults['offset']        = $defaults['offset'] / 100;
+				$defaults['font_size']     = FusionBuilder::validate_shortcode_attr_value( $defaults['font_size'], 'px' );
+				$defaults['max_width']     = FusionBuilder::validate_shortcode_attr_value( $defaults['max_width'], 'px' );
+				$defaults['bordersize']    = FusionBuilder::validate_shortcode_attr_value( $defaults['bordersize'], 'px' );
+				$defaults['borderradius']  = FusionBuilder::validate_shortcode_attr_value( $defaults['borderradius'], 'px' );
+				$defaults['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_bottom'], 'px' );
+				$defaults['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_left'], 'px' );
+				$defaults['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_right'], 'px' );
+				$defaults['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_top'], 'px' );
 
 				$this->args = $defaults;
 
@@ -178,7 +187,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 							$styles .= 'background:' . $color . ' !important;';
 							$styles .= '}';
 							$styles .= '.fusion-image-before-after-' . $this->before_after_counter . ' .fusion-image-before-after-handle-circle .fusion-image-before-after-left-arrow::before {';
-							$styles .= 'border-color:' . $color_obj->getNew( 'alpha', $color_obj->alpha * 0.6 )->toCSS( 'rgba' ) . ' !important;';
+							$styles .= 'border-color:' . $color_obj->getNew( 'alpha', $color_obj->alpha * 0.6 )->to_css_var_or_rgba() . ' !important;';
 							$styles .= '}';
 							$styles .= '.fusion-image-before-after-' . $this->before_after_counter . ' .fusion-image-before-after-handle-circle .fusion-image-before-after-left-arrow {';
 							$styles .= 'border-right-color:' . Fusion_Helper::fusion_auto_calculate_accent_color( $color ) . ' !important;';
@@ -205,7 +214,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 							$styles .= 'background:' . $color . ' !important;';
 							$styles .= '}';
 							$styles .= '.fusion-image-before-after-' . $this->before_after_counter . ' .fusion-image-before-after-handle-circle .fusion-image-before-after-down-arrow::before {';
-							$styles .= 'border-color:' . $color_obj->getNew( 'alpha', $color_obj->alpha * 0.6 )->toCSS( 'rgba' ) . ' !important;';
+							$styles .= 'border-color:' . $color_obj->getNew( 'alpha', $color_obj->alpha * 0.6 )->to_css_var_or_rgba() . ' !important;';
 							$styles .= '}';
 							$styles .= '.fusion-image-before-after-' . $this->before_after_counter . ' .fusion-image-before-after-handle-circle .fusion-image-before-after-up-arrow {';
 							$styles .= 'border-bottom-color:' . Fusion_Helper::fusion_auto_calculate_accent_color( $color ) . ' !important;';
@@ -271,7 +280,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					$styles .= '{';
 					$styles .= 'color:' . $color . ';';
 					if ( 'out-image-up-down' !== $this->args['label_placement'] ) {
-						$styles .= 'background:' . $color_obj->getNew( 'alpha', $color_obj->alpha * 0.15 )->toCSS( 'rgba' ) . ';';
+						$styles .= 'background:' . $color_obj->getNew( 'alpha', $color_obj->alpha * 0.15 )->to_css_var_or_rgba() . ';';
 					} else {
 						$styles .= 'background:transparent;';
 					}
@@ -284,13 +293,18 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					$styles .= '}';
 				}
 
-				if ( '0' !== $this->args['bordersize'] && 0 !== $this->args['bordersize'] && '0px' !== $this->args['bordersize'] ) {
+				$add_border_size   = ( '0' !== $this->args['bordersize'] && 0 !== $this->args['bordersize'] && '0px' !== $this->args['bordersize'] );
+				$add_border_radius = ( '0' !== $this->args['borderradius'] && 0 !== $this->args['borderradius'] && '0px' !== $this->args['borderradius'] );
+				if ( $add_border_size || $add_border_radius ) {
 					$styles .= '.fusion-image-before-after-' . $this->before_after_counter . ':not(.fusion-image-switch).initialized,';
 					$styles .= '.fusion-image-before-after-' . $this->before_after_counter . '.fusion-image-switch img{';
-					$styles .= 'border: ' . $this->args['bordersize'] . ' solid ' . $this->args['bordercolor'] . ';';
 
-					if ( '0' !== $this->args['borderradius'] && 0 !== $this->args['borderradius'] && '0px' !== $this->args['borderradius'] ) {
-						$styles .= '-webkit-border-radius:' . $this->args['borderradius'] . ';-moz-border-radius:' . $this->args['borderradius'] . ';border-radius:' . $this->args['borderradius'] . ';';
+					if ( $add_border_size ) {
+						$styles .= 'border: ' . $this->args['bordersize'] . ' solid ' . $this->args['bordercolor'] . ';';
+					}
+
+					if ( $add_border_radius ) {
+						$styles .= 'border-radius:' . $this->args['borderradius'] . ';';
 					}
 
 					$styles .= '}';
@@ -300,9 +314,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					$style_tag = '<style type="text/css">' . $styles . '</style>';
 				}
 
-				if ( 'before_after' === $this->args['type'] ) {
-					$html .= '<div ' . FusionBuilder::attributes( 'image-before-after-wrapper' ) . '>';
-				}
+				$html .= '<div ' . FusionBuilder::attributes( 'image-before-after-wrapper' ) . '>';
 
 				if ( is_rtl() && 'vertical' !== $this->args['orientation'] ) {
 					if ( '' !== $this->args['before_label'] && '' !== $this->args['after_label'] && 'before_after' === $this->args['type'] && 'out-image-up-down' === $this->args['label_placement'] ) {
@@ -372,9 +384,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					}
 				}
 
-				if ( 'before_after' === $this->args['type'] ) {
-					$html .= '</div>';
-				}
+				$html .= '</div>';
 
 				$this->before_after_counter++;
 
@@ -450,7 +460,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 
 				$image_data = fusion_library()->images->get_attachment_data_by_helper( $this->args['after_image_id'], $this->args['after_image'] );
 
-				$alt = ( isset( $image_data['alt'] ) && $image_data['alt'] ) ? $image_data['alt'] : $this->args['before_label'];
+				$alt = ( isset( $image_data['alt'] ) && $image_data['alt'] ) ? $image_data['alt'] : $this->args['after_label'];
 
 				if ( isset( $image_data['url'] ) ) {
 					$this->args['after_image'] = $image_data['url'];
@@ -508,8 +518,31 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					]
 				);
 
-				if ( $this->args['orientation'] ) {
+				if ( $this->args['animation_type'] ) {
+					$attr = Fusion_Builder_Animation_Helper::add_animation_attributes( $this->args, $attr );
+				}
+
+				$attr['style'] = Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
+
+				if ( $this->args['orientation'] && 'before_after' === $this->args['type'] ) {
 					$attr['class'] .= ' fusion-image-before-after-' . $this->args['orientation'];
+				}
+
+				if ( $this->args['type'] ) {
+					$attr['class'] .= ' type-' . $this->args['type'];
+				}
+
+				if ( $this->args['alignment'] ) {
+					$attr['class'] .= ' has-alignment';
+					$attr['class'] .= ' align-' . $this->args['alignment'];
+				}
+
+				if ( $this->args['class'] ) {
+					$attr['class'] .= ' ' . $this->args['class'];
+				}
+
+				if ( $this->args['id'] ) {
+					$attr['id'] = $this->args['id'];
 				}
 
 				$attr['class'] .= ' fusion-image-before-after-wrapper-' . $this->before_after_counter;
@@ -552,17 +585,8 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 					'style' => '',
 				];
 
-				if ( $this->args['animation_type'] ) {
-					$attr = Fusion_Builder_Animation_Helper::add_animation_attributes( $this->args, $attr );
-				}
-
 				if ( 'switch' === $this->args['type'] ) {
 					$attr['class'] .= ' fusion-image-switch';
-
-					$attr = fusion_builder_visibility_atts(
-						$this->args['hide_on_mobile'],
-						$attr
-					);
 				} elseif ( 'before_after' === $this->args['type'] ) {
 					$attr['class'] .= ' fusion-image-before-after fusion-image-before-after-container';
 
@@ -586,15 +610,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 				}
 
 				if ( $this->args['max_width'] ) {
-					$attr['style'] = 'width:100%;max-width:' . $this->args['max_width'] . ';';
-				}
-
-				if ( $this->args['class'] ) {
-					$attr['class'] .= ' ' . $this->args['class'];
-				}
-
-				if ( $this->args['id'] ) {
-					$attr['id'] = $this->args['id'];
+					$attr['style'] .= 'width:100%;max-width:' . $this->args['max_width'] . ';';
 				}
 
 				$attr['class'] .= ' fusion-image-before-after-' . $this->before_after_counter;
@@ -650,7 +666,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 								'label'           => esc_html__( 'Label Accent Color', 'fusion-builder' ),
 								'description'     => esc_html__( 'Controls the color of the label background and text. Text takes 100% of this color, background takes a % of it.', 'fusion-builder' ),
 								'id'              => 'before_after_accent_color',
-								'default'         => '#ffffff',
+								'default'         => 'var(--awb-color1)',
 								'type'            => 'color-alpha',
 								'transport'       => 'postMessage',
 								'soft_dependency' => true,
@@ -690,7 +706,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 								'label'           => esc_html__( 'Handle Color', 'fusion-builder' ),
 								'description'     => esc_html__( 'Controls the color of the before and after image handle line and arrows. ex: #ffffff.', 'fusion-builder' ),
 								'id'              => 'before_after_handle_color',
-								'default'         => '#ffffff',
+								'default'         => 'var(--awb-color1)',
 								'type'            => 'color-alpha',
 								'transport'       => 'postMessage',
 								'soft_dependency' => true,
@@ -776,7 +792,7 @@ if ( fusion_is_element_enabled( 'fusion_image_before_after' ) ) {
 								'label'           => esc_html__( 'Border Color', 'fusion-builder' ),
 								'description'     => esc_html__( 'Controls the border color of the image before & after element.', 'fusion-builder' ),
 								'id'              => 'before_after_border_color',
-								'default'         => '#e2e2e2',
+								'default'         => 'var(--awb-color3)',
 								'type'            => 'color-alpha',
 								'transport'       => 'postMessage',
 								'soft_dependency' => true,
@@ -858,7 +874,7 @@ function fusion_element_image_before_after() {
 				'icon'       => 'fusiona-object-ungroup',
 				'preview'    => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-image-before-after-preview.php',
 				'preview_id' => 'fusion-builder-block-module-image-before-after-preview-template',
-				'help_url'   => 'https://theme-fusion.com/documentation/fusion-builder/elements/image-before-after-element/',
+				'help_url'   => 'https://theme-fusion.com/documentation/avada/elements/image-before-after-element/',
 				'params'     => [
 					[
 						'type'        => 'radio_button_set',
@@ -873,11 +889,12 @@ function fusion_element_image_before_after() {
 						],
 					],
 					[
-						'type'        => 'upload',
-						'heading'     => esc_attr__( 'Before Image', 'fusion-builder' ),
-						'description' => esc_attr__( 'Upload a before image to display.', 'fusion-builder' ),
-						'param_name'  => 'before_image',
-						'value'       => '',
+						'type'         => 'upload',
+						'heading'      => esc_attr__( 'Before Image', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Upload a before image to display.', 'fusion-builder' ),
+						'param_name'   => 'before_image',
+						'value'        => '',
+						'dynamic_data' => true,
 					],
 					[
 						'type'        => 'textfield',
@@ -907,11 +924,12 @@ function fusion_element_image_before_after() {
 						],
 					],
 					[
-						'type'        => 'upload',
-						'heading'     => esc_attr__( 'After Image', 'fusion-builder' ),
-						'description' => esc_attr__( 'Upload an after image to display.', 'fusion-builder' ),
-						'param_name'  => 'after_image',
-						'value'       => '',
+						'type'         => 'upload',
+						'heading'      => esc_attr__( 'After Image', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Upload an after image to display.', 'fusion-builder' ),
+						'param_name'   => 'after_image',
+						'value'        => '',
+						'dynamic_data' => true,
 					],
 					[
 						'type'        => 'textfield',
@@ -945,6 +963,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Label Font Size', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the font size of the label text. In Pixels. Note: font family is controlled by body font in Global Options.', 'fusion-builder' ),
 						'param_name'  => 'font_size',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'default'     => intval( $fusion_settings->get( 'before_after_font_size' ) ),
 						'value'       => '',
 						'choices'     => [
@@ -985,6 +1004,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Label Accent Color', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the color of the label background and text. Text takes 100% of this color, background takes a % of it.', 'fusion-builder' ),
 						'param_name'  => 'accent_color',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'before_after_accent_color' ),
 						'dependency'  => [
@@ -1020,6 +1040,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Label Placement', 'fusion-builder' ),
 						'description' => esc_attr__( 'Choose if labels are on top of the image and centered, on top of the image up & down or outside of the image up & down.', 'fusion-builder' ),
 						'param_name'  => 'label_placement',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => [
 							''                  => __( 'Default', 'fusion-builder' ),
 							'image-centered'    => __( 'Image Centered', 'fusion-builder' ),
@@ -1059,6 +1080,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Image Fade Transition Speed', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the speed of the fade transition on mouse hover. In seconds.', 'fusion-builder' ),
 						'param_name'  => 'transition_time',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'before_after_transition_time' ),
 						'min'         => '0',
@@ -1136,6 +1158,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Handle Design Style', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the design of the handle used to change the before and after image.', 'fusion-builder' ),
 						'param_name'  => 'handle_type',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => [
 							''          => esc_attr__( 'Default', 'fusion-builder' ),
 							'default'   => esc_attr__( 'Circle With Arrows', 'fusion-builder' ),
@@ -1158,6 +1181,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Handle Color', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the color of the before and after image handle line and arrows. ex: #ffffff.', 'fusion-builder' ),
 						'param_name'  => 'handle_color',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'before_after_handle_color' ),
 						'dependency'  => [
@@ -1173,6 +1197,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Handle Background Color', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the background color of the before and after image handle switch. ex: #000000.', 'fusion-builder' ),
 						'param_name'  => 'handle_bg',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'before_after_handle_bg' ),
 						'dependency'  => [
@@ -1198,6 +1223,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Handle Offset', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls where the handle will be positioned on page load allowing you to control how much of each image displays by default. In percentage.', 'fusion-builder' ),
 						'param_name'  => 'offset',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'before_after_offset' ),
 						'min'         => '0',
@@ -1216,6 +1242,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Handle Orientation', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the position of the before and after image handle.', 'fusion-builder' ),
 						'param_name'  => 'orientation',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'default'     => '',
 						'value'       => [
 							''           => esc_attr__( 'Default', 'fusion-builder' ),
@@ -1235,6 +1262,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Handle Movement Control', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls how the viewer interacts with the image handler. The image handle can use Drag & Click, Drag Only, or Hover.', 'fusion-builder' ),
 						'param_name'  => 'handle_movement',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'default'     => '',
 						'value'       => [
 							''           => esc_attr__( 'Default', 'fusion-builder' ),
@@ -1255,13 +1283,29 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Max Width', 'fusion-builder' ),
 						'description' => esc_attr__( 'Set the maximum width the element should take up. Enter value including any valid CSS unit, ex: 200px. Leave empty to use full image width.', 'fusion-builder' ),
 						'param_name'  => 'max_width',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Alignment', 'fusion-builder' ),
+						'description' => esc_attr__( 'Choose how to align the image.', 'fusion-builder' ),
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+						'param_name'  => 'alignment',
+						'value'       => [
+							''       => esc_attr__( 'Text Flow', 'fusion-builder' ),
+							'left'   => esc_attr__( 'Left', 'fusion-builder' ),
+							'right'  => esc_attr__( 'Right', 'fusion-builder' ),
+							'center' => esc_attr__( 'Center', 'fusion-builder' ),
+						],
+						'default'     => '',
 					],
 					[
 						'type'        => 'range',
 						'heading'     => esc_attr__( 'Border Size', 'fusion-builder' ),
 						'description' => esc_attr__( 'In pixels.', 'fusion-builder' ),
 						'param_name'  => 'bordersize',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
 						'min'         => '0',
 						'max'         => '50',
@@ -1273,6 +1317,7 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Border Color', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the border color. ', 'fusion-builder' ),
 						'param_name'  => 'bordercolor',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'before_after_border_color' ),
 						'dependency'  => [
@@ -1288,13 +1333,17 @@ function fusion_element_image_before_after() {
 						'heading'     => esc_attr__( 'Border Radius', 'fusion-builder' ),
 						'description' => esc_attr__( 'Controls the image border radius. In pixels (px), ex: 1px, or "round". ', 'fusion-builder' ),
 						'param_name'  => 'borderradius',
+						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 						'value'       => '',
-						'dependency'  => [
-							[
-								'element'  => 'bordersize',
-								'value'    => 0,
-								'operator' => '!=',
-							],
+					],
+					'fusion_margin_placeholder'    => [
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'param_name' => 'margin',
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
 						],
 					],
 					'fusion_animation_placeholder' => [

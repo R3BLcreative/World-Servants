@@ -207,16 +207,7 @@ class Fusion_Form_Builder {
 		}
 
 		if ( '' !== $form_id ) {
-			if ( $this->can_increase_views_count( $form_id ) ) {
-				$fusion_forms = new Fusion_Form_DB_Forms();
-				$fusion_forms->insert(
-					[
-						'form_id' => $form_id,
-						'views'   => 0,
-					]
-				);
-				$fusion_forms->increment_views( $form_id );
-			}
+			$this->increase_view_count( $form_id );
 		}
 
 		// Send back nonce field.
@@ -252,6 +243,26 @@ class Fusion_Form_Builder {
 		$can_increase_views = apply_filters( 'fusion_forms_can_increase_views', $can_increase_views, $form_id );
 
 		return $can_increase_views;
+	}
+
+	/**
+	 * Increase form view count.
+	 *
+	 * @since 3.7
+	 * @param string|int $form_id The form id.
+	 * @return void
+	 */
+	public function increase_view_count( $form_id ) {
+		if ( $this->can_increase_views_count( $form_id ) ) {
+			$fusion_forms = new Fusion_Form_DB_Forms();
+			$fusion_forms->insert(
+				[
+					'form_id' => $form_id,
+					'views'   => 0,
+				]
+			);
+			$fusion_forms->increment_views( $form_id );
+		}
 	}
 
 	/**
@@ -465,7 +476,7 @@ class Fusion_Form_Builder {
 		}
 
 		// Just redirect to back-end editor.  In future tie it to default editor option.
-		wp_safe_redirect( get_edit_post_link( $set_id, false ) );
+		wp_safe_redirect( awb_get_new_post_edit_link( $set_id ) );
 		die();
 	}
 
@@ -703,9 +714,9 @@ class Fusion_Form_Builder {
 				preg_match_all( '/\[fusion_form_[^\]]*\slabel=\"([^\"]*)\"/', $form_post_content, $matches );
 				$field_labels = isset( $matches[1] ) ? $matches[1] : [];
 
-				// If (some) labels are missing use name instead.
-				if ( count( $field_names ) !== count( $field_labels ) ) {
-					$field_labels = $field_names;
+				// If (some) labels are missing or empty use name instead.
+				if ( count( $field_names ) !== count( array_filter( $field_labels ) ) || count( array_unique( $field_labels ) ) !== count( $field_labels ) ) {
+					$field_labels = map_deep( $field_names, 'Fusion_Builder_Form_Helper::fusion_name_to_label' );
 				}
 			}
 

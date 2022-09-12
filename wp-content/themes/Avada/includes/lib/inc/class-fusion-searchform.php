@@ -78,7 +78,7 @@ class Fusion_Searchform {
 						<?php if ( $is_live_search ) : ?>
 							<input type="search" class="s fusion-live-search-input" name="s" id="fusion-live-search-input-<?php echo $args['counter']; // phpcs:ignore WordPress.Security.EscapeOutput ?>" autocomplete="off" placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>" required aria-required="true" aria-label="<?php echo esc_attr( $args['placeholder'] ); ?>"/>
 						<?php else : ?>
-							<input type="search" value="<?php echo isset( $_GET['awb-studio-content'] ) && isset( $_GET['search'] ) ? esc_attr( get_query_var( 'search' ) ) : get_search_query(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>" name="s" class="s" placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>" required aria-required="true" aria-label="<?php echo esc_attr( $args['placeholder'] ); ?>"/>
+							<input type="search" value="<?php echo get_search_query(); ?>" name="s" class="s" placeholder="<?php echo esc_attr( $args['placeholder'] ); ?>" required aria-required="true" aria-label="<?php echo esc_attr( $args['placeholder'] ); ?>"/>
 						<?php endif; ?>
 					</label>
 				</div>

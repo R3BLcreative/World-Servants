@@ -89,7 +89,10 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				 * @return array $defaults Updated params array.
 				 */
 				public function archives_type( $defaults ) {
-					return Fusion_Template_Builder()->archives_type( $defaults );
+					$defaults = Fusion_Template_Builder()->archives_type( $defaults );
+
+					// Check for taxonomy type.
+					return Fusion_Template_Builder()->taxonomy_type( $defaults );
 				}
 
 				/**
@@ -156,6 +159,31 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 					$this->args['post_card_archives'] = true;
 
+					if ( 'terms' === $this->args['source'] ) {
+						$queried                          = get_queried_object();
+						$this->args['post_card_archives'] = false;
+						if ( 'WP_Term' === get_class( $queried ) ) {
+							$terms = get_terms(
+								[
+									'taxonomy'   => $queried->taxonomy,
+									'hide_empty' => false,
+									'parent'     => $queried->term_id,
+									'fields'     => 'ids',
+									'number'     => max( (int) $this->args['number_posts'], 0 ),
+								]
+							);
+							if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+								$this->args[ 'include_term_' . $queried->taxonomy ] = implode( ',', $terms );
+								$this->args = wp_parse_args(
+									[
+										'terms_by' => $queried->taxonomy,
+									],
+									$this->args
+								);
+							}
+						}
+					}
+
 					return call_user_func( $shortcode_tags['fusion_post_cards'], $this->args, '', 'fusion_post_cards' );
 				}
 
@@ -170,6 +198,10 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				public function fusion_post_cards_shortcode_query_override( $query ) {
 					global $wp_query;
 
+					// If post card display = terms then don't override the query.
+					if ( 'terms' === $this->args['source'] ) {
+						return $query;
+					}
 					return $wp_query;
 				}
 
@@ -195,7 +227,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					if ( ! fusion_is_preview_frame() && ! $post ) {
 						$html .= apply_filters( 'fusion_shortcode_content', '<h2 class="fusion-nothing-found">' . $content . '</h2>', $this->shortcode_handle, $args );
 
-					} elseif ( fusion_is_preview_frame() && ! in_array( $option, [ 'search', 'archives' ], true ) ) {
+					} elseif ( fusion_is_preview_frame() && ! in_array( $option, [ 'search', 'archives', 'term' ], true ) ) {
 
 						// Invalid source selection, return empty so view placeholder shows.
 						return '';
@@ -289,8 +321,9 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 	function fusion_component_post_card_archives() {
 		$fusion_settings = awb_get_fusion_settings();
 
-		$editing = function_exists( 'is_fusion_editor' ) && is_fusion_editor();
-		$layouts = [
+		$editing           = function_exists( 'is_fusion_editor' ) && is_fusion_editor();
+		$layouts_permalink = [];
+		$layouts           = [
 			'0' => esc_attr__( 'None', 'fusion-builder' ),
 		];
 
@@ -315,7 +348,8 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 			if ( $post_cards ) {
 				foreach ( $post_cards as $post_card ) {
-					$layouts[ $post_card->ID ] = $post_card->post_title;
+					$layouts[ $post_card->ID ]           = $post_card->post_title;
+					$layouts_permalink[ $post_card->ID ] = $post_card->guid;
 				}
 			}
 		}
@@ -351,6 +385,11 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 								'action'   => 'get_fusion_tb_post_card_archives',
 								'ajax'     => true,
 							],
+							'quick_edit'  => [
+								'label' => esc_html__( 'Edit Post Card', 'fusion-builder' ),
+								'type'  => 'post_card',
+								'items' => $layouts_permalink,
+							],
 						],
 						[
 							'type'        => 'select',
@@ -367,6 +406,22 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 								'action'   => 'get_fusion_tb_post_card_archives',
 								'ajax'     => true,
 							],
+						],
+						[
+							'type'        => 'radio_button_set',
+							'heading'     => esc_attr__( 'Post Cards Display', 'fusion-builder' ),
+							'description' => esc_attr__( 'Choose what to display on post cards page.', 'fusion-builder' ),
+							'param_name'  => 'source',
+							'callback'    => [
+								'function' => 'fusion_ajax',
+								'action'   => 'get_fusion_tb_post_card_archives',
+								'ajax'     => true,
+							],
+							'value'       => [
+								'posts' => esc_attr__( 'Posts', 'fusion-builder' ),
+								'terms' => esc_attr__( 'Terms', 'fusion-builder' ),
+							],
+							'default'     => 'posts',
 						],
 						[
 							'type'        => 'range',
@@ -399,6 +454,13 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 								'infinite'         => esc_html__( 'Infinite Scroll', 'fusion-builder' ),
 								'load_more_button' => esc_html__( 'Load More Button', 'fusion-builder' ),
 							],
+							'dependency'  => [
+								[
+									'element'  => 'source',
+									'value'    => 'terms',
+									'operator' => '!=',
+								],
+							],
 						],
 						[
 							'type'         => 'tinymce',
@@ -408,6 +470,13 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							'value'        => esc_html__( 'Nothing Found', 'fusion-builder' ),
 							'placeholder'  => true,
 							'dynamic_data' => true,
+							'dependency'   => [
+								[
+									'element'  => 'source',
+									'value'    => 'terms',
+									'operator' => '!=',
+								],
+							],
 						],
 						[
 							'type'        => 'checkbox_button_set',
@@ -440,6 +509,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 								'grid'     => esc_attr__( 'Grid', 'fusion-builder' ),
 								'carousel' => esc_attr__( 'Carousel', 'fusion-builder' ),
 								'slider'   => esc_attr__( 'Slider', 'fusion-builder' ),
+								'masonry'  => esc_attr__( 'Masonry', 'fusion-builder' ),
 							],
 							'default'     => 'grid',
 							'group'       => esc_attr__( 'Design', 'fusion-builder' ),
@@ -478,7 +548,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							'heading'     => esc_attr__( 'Number of Columns', 'fusion-builder' ),
 							'description' => esc_attr__( 'Set the number of columns per row.', 'fusion-builder' ),
 							'param_name'  => 'columns',
-							'value'       => $fusion_settings->get( 'woocommerce_shop_page_columns' ),
+							'value'       => '4',
 							'min'         => '0',
 							'max'         => '6',
 							'step'        => '1',
@@ -507,7 +577,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							'heading'     => esc_attr__( 'Column Spacing', 'fusion-builder' ),
 							'description' => esc_attr__( "Insert the amount of horizontal spacing between items without 'px'. ex: 40.", 'fusion-builder' ),
 							'param_name'  => 'column_spacing',
-							'value'       => $fusion_settings->get( 'woocommerce_archive_grid_column_spacing' ),
+							'value'       => '40',
 							'min'         => '1',
 							'max'         => '300',
 							'step'        => '1',
@@ -530,7 +600,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							'heading'     => esc_attr__( 'Row Spacing', 'fusion-builder' ),
 							'description' => esc_attr__( "Insert the amount of vertical spacing between items without 'px'. ex: 40.", 'fusion-builder' ),
 							'param_name'  => 'row_spacing',
-							'value'       => $fusion_settings->get( 'woocommerce_archive_grid_column_spacing' ),
+							'value'       => '40',
 							'min'         => '1',
 							'max'         => '300',
 							'step'        => '1',
@@ -538,8 +608,13 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							'dependency'  => [
 								[
 									'element'  => 'layout',
-									'value'    => 'grid',
-									'operator' => '==',
+									'value'    => 'carousel',
+									'operator' => '!=',
+								],
+								[
+									'element'  => 'layout',
+									'value'    => 'slider',
+									'operator' => '!=',
 								],
 							],
 						],
@@ -697,6 +772,11 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 									'value'    => 'grid',
 									'operator' => '!=',
 								],
+								[
+									'element'  => 'layout',
+									'value'    => 'masonry',
+									'operator' => '!=',
+								],
 							],
 						],
 						[
@@ -729,6 +809,11 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 								[
 									'element'  => 'layout',
 									'value'    => 'grid',
+									'operator' => '!=',
+								],
+								[
+									'element'  => 'layout',
+									'value'    => 'masonry',
 									'operator' => '!=',
 								],
 							],

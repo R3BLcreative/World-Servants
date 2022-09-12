@@ -180,6 +180,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.addCssProperty( this.baseSelector + ' .woocommerce-tabs .panel', 'font-size',  _.fusionGetValueWithUnit( this.values.text_font_size ) );
 				}
 
+				if ( !this.isDefault( 'text_line_height' ) ) {
+					this.addCssProperty( this.baseSelector + ' .woocommerce-tabs .panel', 'line-height', this.values.text_line_height );
+				}
+
+				if ( !this.isDefault( 'text_text_transform' ) ) {
+					this.addCssProperty( this.baseSelector + ' .woocommerce-tabs .panel', 'text-transform', this.values.text_text_transform );
+				}
+
+				if ( !this.isDefault( 'text_letter_spacing' ) ) {
+					this.addCssProperty( this.baseSelector + ' .woocommerce-tabs .panel', 'letter-spacing',  _.fusionGetValueWithUnit( this.values.text_letter_spacing ) );
+				}
+
 				// Text typography styles.
 				textStyles = _.fusionGetFontStyle( 'text_font', values, 'object' );
 				jQuery.each( textStyles, function( rule, value ) {
@@ -197,6 +209,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( ! this.isDefault( 'title_font_size' ) ) {
 					this.addCssProperty( titleSelectors, 'font-size', _.fusionGetValueWithUnit( this.values.title_font_size ) );
+				}
+
+				if ( !this.isDefault( 'title_line_height' ) ) {
+					this.addCssProperty( titleSelectors, 'line-height', this.values.title_line_height );
+				}
+
+				if ( !this.isDefault( 'title_text_transform' ) ) {
+					this.addCssProperty( titleSelectors, 'text-transform', this.values.title_text_transform );
+				}
+
+				if ( !this.isDefault( 'title_letter_spacing' ) ) {
+					this.addCssProperty( titleSelectors, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.title_letter_spacing ) );
 				}
 
 				// Title typography styles.

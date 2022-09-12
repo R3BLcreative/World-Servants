@@ -71,6 +71,10 @@ if ( fusion_is_element_enabled( 'fusion_counters_box' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				$parent = [
+					'margin_top'       => '',
+					'margin_right'     => '',
+					'margin_bottom'    => '',
+					'margin_left'      => '',
 					'hide_on_mobile'   => fusion_builder_default_visibility( 'string' ),
 					'class'            => '',
 					'id'               => '',
@@ -217,6 +221,11 @@ if ( fusion_is_element_enabled( 'fusion_counters_box' ) ) {
 
 				$this->parent_args = $defaults;
 
+				$this->parent_args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_bottom'], 'px' );
+				$this->parent_args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_left'], 'px' );
+				$this->parent_args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_right'], 'px' );
+				$this->parent_args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_top'], 'px' );
+
 				$this->parent_args['columns'] = min( 6, $this->parent_args['columns'] );
 
 				$this->set_num_of_columns( $content );
@@ -244,8 +253,11 @@ if ( fusion_is_element_enabled( 'fusion_counters_box' ) ) {
 					$this->parent_args['hide_on_mobile'],
 					[
 						'class' => 'fusion-counters-box counters-box row fusion-clearfix fusion-columns-' . $this->parent_args['columns'],
+						'style' => '',
 					]
 				);
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->parent_args );
 
 				if ( $this->parent_args['class'] ) {
 					$attr['class'] .= ' ' . $this->parent_args['class'];
@@ -584,7 +596,7 @@ if ( fusion_is_element_enabled( 'fusion_counters_box' ) ) {
 								'label'       => esc_html__( 'Counter Boxes Value Font Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the counter values and icons.', 'fusion-builder' ),
 								'id'          => 'counter_box_color',
-								'default'     => '#65bc7b',
+								'default'     => 'var(--awb-color5)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -618,7 +630,7 @@ if ( fusion_is_element_enabled( 'fusion_counters_box' ) ) {
 								'label'       => esc_html__( 'Counter Boxes Body Font Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the counter boxes body text.', 'fusion-builder' ),
 								'id'          => 'counter_box_body_color',
-								'default'     => '#4a4e57',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -639,7 +651,7 @@ if ( fusion_is_element_enabled( 'fusion_counters_box' ) ) {
 								'label'       => esc_html__( 'Counter Boxes Border Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the counter boxes border.', 'fusion-builder' ),
 								'id'          => 'counter_box_border_color',
-								'default'     => '#e2e2e2',
+								'default'     => 'var(--awb-color3)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -686,7 +698,7 @@ function fusion_element_counters_box() {
 				'preview'       => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-counter-box-preview.php',
 				'preview_id'    => 'fusion-builder-block-module-counter-box-preview-template',
 				'child_ui'      => true,
-				'help_url'      => 'https://theme-fusion.com/documentation/fusion-builder/elements/counter-boxes-element/',
+				'help_url'      => 'https://theme-fusion.com/documentation/avada/elements/counter-boxes-element/',
 				'params'        => [
 					[
 						'type'        => 'tinymce',
@@ -793,6 +805,16 @@ function fusion_element_counters_box() {
 							'bottom-in-view'  => esc_attr__( 'Bottom of element enters viewport', 'fusion-builder' ),
 						],
 						'default'     => '',
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

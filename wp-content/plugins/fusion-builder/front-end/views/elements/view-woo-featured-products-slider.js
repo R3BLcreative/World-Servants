@@ -59,6 +59,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			validateValues: function( values ) {
 				values.column_spacing = _.fusionValidateAttrValue( values.column_spacing, '' );
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -72,8 +77,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// WooFeaturedProductsSliderShortcode attributes.
 				var wooFeaturedProductsSliderShortcode = _.fusionVisibilityAtts( values.hide_on_mobile, {
-					class: 'fusion-woo-featured-products-slider fusion-woo-slider'
+					class: 'fusion-woo-featured-products-slider fusion-woo-slider',
+					style: ''
 				} );
+
+				if ( '' !== values.margin_top ) {
+					wooFeaturedProductsSliderShortcode.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					wooFeaturedProductsSliderShortcode.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					wooFeaturedProductsSliderShortcode.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					wooFeaturedProductsSliderShortcode.style += 'margin-left:' + values.margin_left + ';';
+				}
 
 				if ( '' !== values[ 'class' ] ) {
 					wooFeaturedProductsSliderShortcode[ 'class' ] += ' ' + values[ 'class' ];

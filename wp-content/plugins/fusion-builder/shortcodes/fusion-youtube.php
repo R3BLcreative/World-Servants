@@ -61,18 +61,25 @@ if ( fusion_is_element_enabled( 'fusion_youtube' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				return [
-					'api_params'      => '',
-					'autoplay'        => 'false',
-					'alignment'       => '',
-					'center'          => 'no',
-					'class'           => '',
-					'css_id'          => '',
-					'height'          => 360,
-					'hide_on_mobile'  => fusion_builder_default_visibility( 'string' ),
-					'id'              => '',
-					'title_attribute' => '',
-					'width'           => 600,
-					'video_facade'    => $fusion_settings->get( 'video_facade' ),
+					'api_params'        => '',
+					'autoplay'          => 'false',
+					'alignment'         => '',
+					'center'            => 'no',
+					'class'             => '',
+					'css_id'            => '',
+					'height'            => 360,
+					'margin_top'        => '',
+					'margin_bottom'     => '',
+					'hide_on_mobile'    => fusion_builder_default_visibility( 'string' ),
+					'id'                => '',
+					'title_attribute'   => '',
+					'width'             => 600,
+					'video_facade'      => $fusion_settings->get( 'video_facade' ),
+					'structured_data'   => '',
+					'video_title'       => '',
+					'video_desc'        => '',
+					'video_duration'    => '',
+					'video_upload_date' => '',
 				];
 			}
 
@@ -106,6 +113,9 @@ if ( fusion_is_element_enabled( 'fusion_youtube' ) ) {
 
 				$this->args = $defaults;
 
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
+
 				// Make sure only the video ID is passed to the iFrame.
 				$pattern = '~(?:http|https|)(?::\/\/|)(?:www.|)(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/|\/user\S*[^\w\-\s]|\S*[^\w\-\s]))([\w\-]{11})[a-z0-9;:@#?&%=+\/\$_.-]*~i';
 				preg_match( $pattern, $id, $matches );
@@ -113,14 +123,42 @@ if ( fusion_is_element_enabled( 'fusion_youtube' ) ) {
 					$id = $matches[1];
 				}
 
-				$html  = '<div ' . FusionBuilder::attributes( 'youtube-shortcode' ) . '>';
+				// Structured Data attributes.
+				$ds_attr = '';
+				if ( 'on' === $this->args['structured_data'] ) {
+					$ds_attr = ' itemprop="video" itemscope itemtype="http://schema.org/VideoObject"';
+				}
+
+				$html = '<div ' . FusionBuilder::attributes( 'youtube-shortcode' ) . $ds_attr . '>';
+
+				// Structured Data.
+				if ( 'on' === $this->args['structured_data'] ) {
+					$video_duration = '' !== $this->args['video_duration'] ? $this->get_duration( $this->args['video_duration'] ) : '';
+					$html          .= $video_duration ? '<meta itemprop="duration" content="' . $video_duration . '" />' : '';
+
+					$html .= '' !== $this->args['video_title'] ? '<meta itemprop="name" content="' . $this->args['video_title'] . '" />' : '';
+					$html .= '' !== $this->args['video_desc'] ? '<meta itemprop="description" content="' . $this->args['video_desc'] . '" />' : '';
+					$html .= '' !== $this->args['video_upload_date'] ? '<meta itemprop="uploadDate" content="' . $this->args['video_upload_date'] . '" />' : '';
+					$html .= '<meta itemprop="thumbnailUrl" content="https://i3.ytimg.com/vi/' . $id . '/hqdefault.jpg" />';
+					$html .= '<meta itemprop="embedUrl" content="https://www.youtube.com/embed/' . $id . '" />';
+				}
+
 				$html .= '<div ' . FusionBuilder::attributes( 'youtube-shortcode-video-sc' ) . '>';
 				$title = $this->args['title_attribute'] ? $this->args['title_attribute'] : 'YouTube video player ' . $this->video_counter;
 
 				if ( 'on' === $this->args['video_facade'] ) {
-					$html .= '<lite-youtube videoid="' . $id . '" params="wmode=transparent&autoplay=1' . $api_params . '" title="' . esc_attr( $title ) . '"></lite-youtube>';
+					$api_params = false === strpos( $api_params, 'enablejsapi=1' ) ? $api_params . '&enablejsapi=1' : $api_params;
+					$html      .= '<lite-youtube videoid="' . $id . '" params="wmode=transparent&autoplay=1' . $api_params . '" title="' . esc_attr( $title ) . '"></lite-youtube>';
 				} else {
-					$html .= '<iframe title="' . esc_attr( $title ) . '" src="https://www.youtube.com/embed/' . $id . '?wmode=transparent&autoplay=0' . $api_params . '" width="' . $width . '" height="' . $height . '" allowfullscreen allow="autoplay; fullscreen"></iframe>';
+					$iframe = '<iframe title="' . esc_attr( $title ) . '" src="https://www.youtube.com/embed/' . $id . '?wmode=transparent&autoplay=0' . $api_params . '" width="' . $width . '" height="' . $height . '" allowfullscreen allow="autoplay; fullscreen"></iframe>';
+
+					if ( 0 < $defaults['height'] && 0 < $defaults['width'] ) {
+						$iframe = '<div class="fluid-width-video-wrapper" style="padding-top:' . round( $defaults['height'] / $defaults['width'] * 100, 2 ) . '%;" >' . $iframe . '</div>';
+					}
+
+					$html .= $iframe;
+
+					$html = fusion_library()->images->apply_global_selected_lazy_loading_to_iframe( $html );
 				}
 
 				$html .= '</div></div>';
@@ -146,6 +184,7 @@ if ( fusion_is_element_enabled( 'fusion_youtube' ) ) {
 					$this->args['hide_on_mobile'],
 					[
 						'class' => 'fusion-video fusion-youtube',
+						'style' => '',
 					]
 				);
 
@@ -172,12 +211,14 @@ if ( fusion_is_element_enabled( 'fusion_youtube' ) ) {
 					} else {
 						$attr['class'] .= ' fusion-align' . $this->args['alignment'];
 					}
-					$attr['style'] .= ' width:100%';
+					$attr['style'] .= ' width:100%;';
 				}
 
 				if ( 'true' === $this->args['autoplay'] || true === $this->args['autoplay'] || 'yes' === $this->args['autoplay'] ) {
 					$attr['data-autoplay'] = 1;
 				}
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( $this->args['class'] ) {
 					$attr['class'] .= ' ' . $this->args['class'];
@@ -209,6 +250,29 @@ if ( fusion_is_element_enabled( 'fusion_youtube' ) ) {
 				}
 
 				return $attr;
+
+			}
+
+			/**
+			 * The video duration in ISO 8601 format.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @param  array $duration The video duration.
+			 * @return array
+			 */
+			public function get_duration( $duration ) {
+				$time     = 'PT';
+				$duration = explode( ':', $duration );
+				$hours    = '00' !== $duration[0] ? $duration[0] : '';
+				$minutes  = '00' !== $duration[1] ? $duration[1] : '';
+				$seconds  = '00' !== $duration[2] ? $duration[2] : '';
+
+				$time .= $hours ? ltrim( $hours, '0' ) . 'H' : '';
+				$time .= $minutes ? ltrim( $minutes, '0' ) . 'M' : '';
+				$time .= $seconds ? ltrim( $seconds, '0' ) . 'S' : '';
+
+				return $time;
 
 			}
 
@@ -257,14 +321,15 @@ function fusion_element_youtube() {
 				'icon'       => 'fusiona-youtube',
 				'preview'    => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-youtube-preview.php',
 				'preview_id' => 'fusion-builder-block-module-youtube-preview-template',
-				'help_url'   => 'https://theme-fusion.com/documentation/fusion-builder/elements/youtube-element/',
+				'help_url'   => 'https://theme-fusion.com/documentation/avada/elements/youtube-element/',
 				'params'     => [
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Video ID', 'fusion-builder' ),
-						'description' => esc_attr__( 'For example the Video ID for https://www.youtube.com/watch?v=569TlvRLn90 is 569TlvRLn90.', 'fusion-builder' ),
-						'param_name'  => 'id',
-						'value'       => '',
+						'type'         => 'textfield',
+						'heading'      => esc_attr__( 'Video ID or Url', 'fusion-builder' ),
+						'description'  => esc_attr__( 'For example the Video ID for https://www.youtube.com/watch?v=CbOQqvQDrVQ is CbOQqvQDrVQ.', 'fusion-builder' ),
+						'param_name'   => 'id',
+						'dynamic_data' => true,
+						'value'        => '',
 					],
 					[
 						'type'        => 'radio_button_set',
@@ -327,6 +392,14 @@ function fusion_element_youtube() {
 							'off' => esc_attr__( 'Off', 'fusion-builder' ),
 						],
 					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_bottom' => '',
+						],
+					],
 					[
 						'type'        => 'checkbox_button_set',
 						'heading'     => esc_attr__( 'Element Visibility', 'fusion-builder' ),
@@ -348,6 +421,76 @@ function fusion_element_youtube() {
 						'description' => esc_attr__( 'Add an ID to the wrapping HTML element.', 'fusion-builder' ),
 						'param_name'  => 'css_id',
 						'value'       => '',
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Structured Data', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enable video structured data for better SEO.', 'fusion-builder' ),
+						'param_name'  => 'structured_data',
+						'default'     => 'off',
+						'value'       => [
+							'on'  => esc_attr__( 'On', 'fusion-builder' ),
+							'off' => esc_attr__( 'Off', 'fusion-builder' ),
+						],
+						'group'       => esc_attr__( 'Extras', 'fusion-builder' ),
+					],
+					[
+						'type'        => 'date_time_picker',
+						'heading'     => esc_attr__( 'Upload Date', 'fusion-builder' ),
+						'description' => esc_attr__( 'Select video upload date.', 'fusion-builder' ),
+						'param_name'  => 'video_upload_date',
+						'group'       => esc_attr__( 'Extras', 'fusion-builder' ),
+						'time'        => false,
+						'dependency'  => [
+							[
+								'element'  => 'structured_data',
+								'value'    => 'on',
+								'operator' => '==',
+							],
+						],
+					],
+					[
+						'type'        => 'date_time_picker',
+						'heading'     => esc_attr__( 'Video Duration', 'fusion-builder' ),
+						'description' => esc_attr__( 'Insert the video duration.', 'fusion-builder' ),
+						'param_name'  => 'video_duration',
+						'group'       => esc_attr__( 'Extras', 'fusion-builder' ),
+						'date'        => false,
+						'dependency'  => [
+							[
+								'element'  => 'structured_data',
+								'value'    => 'on',
+								'operator' => '==',
+							],
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Video Title', 'fusion-builder' ),
+						'description' => esc_attr__( 'Insert the video title.', 'fusion-builder' ),
+						'param_name'  => 'video_title',
+						'group'       => esc_attr__( 'Extras', 'fusion-builder' ),
+						'dependency'  => [
+							[
+								'element'  => 'structured_data',
+								'value'    => 'on',
+								'operator' => '==',
+							],
+						],
+					],
+					[
+						'type'        => 'textarea',
+						'heading'     => esc_attr__( 'Video Description', 'fusion-builder' ),
+						'description' => esc_attr__( 'Insert the video description.', 'fusion-builder' ),
+						'param_name'  => 'video_desc',
+						'group'       => esc_attr__( 'Extras', 'fusion-builder' ),
+						'dependency'  => [
+							[
+								'element'  => 'structured_data',
+								'value'    => 'on',
+								'operator' => '==',
+							],
+						],
 					],
 				],
 			]

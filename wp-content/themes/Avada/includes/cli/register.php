@@ -13,6 +13,7 @@
  */
 
 $fusion_register_cmd = function( $args, $assoc_args ) {
+	set_transient( 'awb_cli_activation', 1 );
 
 	// TODO: improve format check.
 	if ( empty( $assoc_args['purchase_code'] ) || 32 === strlen( $assoc_args['purchase_code'] ) ) {

@@ -108,6 +108,9 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_reviews' ) ) {
 					'fusion_font_family_text_font'  => '',
 					'fusion_font_variant_text_font' => '',
 					'text_font_size'                => '',
+					'text_text_transform'           => '',
+					'text_line_height'              => '',
+					'text_letter_spacing'           => '',
 
 					'stars_color'                   => '',
 					'rating_box_bg_color'           => '',
@@ -302,6 +305,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_reviews' ) ) {
 
 				if ( ! $this->is_default( 'text_font_size' ) ) {
 					$this->add_css_property( $this->base_selector, 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['text_font_size'] ) );
+				}
+
+				if ( ! $this->is_default( 'text_line_height' ) ) {
+					$this->add_css_property( $this->base_selector, 'line-height', $this->args['text_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'text_letter_spacing' ) ) {
+					$this->add_css_property( $this->base_selector, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['text_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'text_text_transform' ) ) {
+					$this->add_css_property( $this->base_selector, 'text-transform', $this->args['text_text_transform'] );
 				}
 
 				// Text typography styles.
@@ -511,6 +526,15 @@ function fusion_component_woo_reviews() {
 				'component'               => true,
 				'templates'               => [ 'content' ],
 				'components_per_template' => 1,
+				'subparam_map'            => [
+					'fusion_font_family_text_font'  => 'main_typography',
+					'fusion_font_variant_text_font' => 'main_typography',
+					'text_font_size'                => 'main_typography',
+					'text_text_transform'           => 'main_typography',
+					'text_line_height'              => 'main_typography',
+					'text_letter_spacing'           => 'main_typography',
+					'text_color'                    => 'main_typography',
+				],
 				'params'                  => [
 					[
 						'type'        => 'radio_button_set',
@@ -574,39 +598,31 @@ function fusion_component_woo_reviews() {
 						],
 					],
 					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Text Color', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the color of the text, ex: #000.' ),
-						'param_name'  => 'text_color',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Content Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'main_typography',
+						'choices'          => [
+							'font-family'    => 'text_font',
+							'font-size'      => 'text_font_size',
+							'text-transform' => 'text_text_transform',
+							'line-height'    => 'text_line_height',
+							'letter-spacing' => 'text_letter_spacing',
+							'color'          => 'text_color',
 						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Text Font Family', 'fusion-builder' ),
-						'description'      => esc_html__( 'Controls the font family of the text.', 'fusion-builder' ),
-						'param_name'       => 'text_font',
 						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '',
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => '',
 						],
+						'remove_from_atts' => true,
+						'global'           => true,
 						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'callback'         => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Content Text Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the content text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'text_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
 							'function' => 'fusion_style_block',
 						],
 					],

@@ -342,7 +342,7 @@ function avada_options_section_logo( $sections ) {
 						'label'       => esc_html__( 'Logo Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color for the logo.', 'Avada' ),
 						'id'          => 'logo_background_color',
-						'default'     => '#65bc7b',
+						'default'     => 'var(--awb-color4)',
 						'type'        => 'color-alpha',
 						'class'       => 'fusion-gutter-and-and-and-or-and-and',
 						'required'    => [
@@ -442,7 +442,7 @@ function avada_options_section_logo( $sections ) {
 						'label'           => esc_html__( 'Retina Default Logo', 'Avada' ),
 						'description'     => esc_html__( 'Select an image file for the retina version of the logo. It should be exactly 2x the size of the main logo.', 'Avada' ),
 						'id'              => 'logo_retina',
-						'default'         => '',
+						'default'         => Avada::$template_dir_url . '/assets/images/logo@2x.png',
 						'mod'             => 'min',
 						'type'            => 'media',
 						'mode'            => false,
@@ -633,103 +633,43 @@ function avada_options_section_logo( $sections ) {
 				'position'    => 'start',
 				'type'        => 'sub-section',
 				'fields'      => [
-					'favicon'            => [
+					'fav_icon'             => [
 						'label'       => esc_html__( 'Favicon', 'Avada' ),
 						'description' => esc_html__( 'Favicon for your website at 32px x 32px or 64px x 64px.', 'Avada' ),
-						'id'          => 'favicon',
+						'id'          => 'fav_icon',
 						'default'     => '',
 						'type'        => 'media',
 						'mode'        => false,
 						// No need to refresh the page.
 						'transport'   => 'postMessage',
 					],
-					'iphone_icon'        => [
-						'label'       => esc_html__( 'Apple iPhone Icon Upload', 'Avada' ),
-						'description' => esc_html__( 'Favicon for Apple iPhone at 120px x 120px.', 'Avada' ),
-						'id'          => 'iphone_icon',
+					'fav_icon_apple_touch' => [
+						'label'       => esc_html__( 'Apple Touch Icon', 'Avada' ),
+						'description' => esc_html__( 'Favicon for Apple iOS devices at 180px x 180px.', 'Avada' ),
+						'id'          => 'fav_icon_apple_touch',
 						'default'     => '',
 						'type'        => 'media',
 						'mode'        => false,
 						// No need to refresh the page.
 						'transport'   => 'postMessage',
 					],
-					'iphone_icon_retina' => [
-						'label'       => esc_html__( 'Apple iPhone Retina Icon Upload', 'Avada' ),
-						'description' => esc_html__( 'Favicon for Apple iPhone Retina Version at 180px x 180px.', 'Avada' ),
-						'id'          => 'iphone_icon_retina',
-						'default'     => '',
-						'type'        => 'media',
-						'mode'        => false,
-						'required'    => [
-							[
-								'setting'  => 'iphone_icon',
-								'operator' => '!=',
-								'value'    => '',
-							],
-							[
-								'setting'  => 'iphone_icon',
-								'operator' => '!=',
-								'value'    => [
-									'url' => '',
-								],
-							],
-							[
-								'setting'  => 'iphone_icon',
-								'operator' => '!=',
-								'value'    => [
-									'url'       => '',
-									'id'        => '',
-									'height'    => '',
-									'width'     => '',
-									'thumbnail' => '',
-								],
-							],
-						],
-						// No need to refresh the page.
-						'transport'   => 'postMessage',
-					],
-					'ipad_icon'          => [
-						'label'       => esc_html__( 'Apple iPad Icon Upload', 'Avada' ),
-						'description' => esc_html__( 'Favicon for Apple iPad at 152px x 152px.', 'Avada' ),
-						'id'          => 'ipad_icon',
+					'fav_icon_android'     => [
+						'label'       => esc_html__( 'Android Devices Icon', 'Avada' ),
+						'description' => esc_html__( 'Favicon for Android-based devices at 192px x 192px.', 'Avada' ),
+						'id'          => 'fav_icon_android',
 						'default'     => '',
 						'type'        => 'media',
 						'mode'        => false,
 						// No need to refresh the page.
 						'transport'   => 'postMessage',
 					],
-					'ipad_icon_retina'   => [
-						'label'       => esc_html__( 'Apple iPad Retina Icon Upload', 'Avada' ),
-						'description' => esc_html__( 'Favicon for Apple iPad Retina Version at 167px x 167px.', 'Avada' ),
-						'id'          => 'ipad_icon_retina',
+					'fav_icon_edge'        => [
+						'label'       => esc_html__( 'Microsoft Edge Icon', 'Avada' ),
+						'description' => esc_html__( 'Favicon for Microsoft Edge browsers at 270px x 270px.', 'Avada' ),
+						'id'          => 'fav_icon_edge',
 						'default'     => '',
 						'type'        => 'media',
 						'mode'        => false,
-						'required'    => [
-							[
-								'setting'  => 'ipad_icon',
-								'operator' => '!=',
-								'value'    => '',
-							],
-							[
-								'setting'  => 'ipad_icon',
-								'operator' => '!=',
-								'value'    => [
-									'url' => '',
-								],
-							],
-							[
-								'setting'  => 'ipad_icon',
-								'operator' => '!=',
-								'value'    => [
-									'url'       => '',
-									'id'        => '',
-									'height'    => '',
-									'width'     => '',
-									'thumbnail' => '',
-								],
-							],
-						],
 						// No need to refresh the page.
 						'transport'   => 'postMessage',
 					],

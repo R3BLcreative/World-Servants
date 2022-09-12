@@ -105,14 +105,6 @@
 						<?php esc_attr_e( 'Save as Template', 'fusion-builder' ); ?>
 					</a>
 				</li>
-
-				<li class="fusion-wireframe-holder">
-					<a href="#" class="fusion-builder-wireframe-toggle has-tooltip" aria-label="<?php esc_attr_e( 'Toggle Wireframe', 'fusion-builder' ); ?>">
-						<span>
-							<i class="fusiona-wireframe" aria-hidden="true"></i>
-						</span>
-					</a>
-				</li>
 			</ul>
 		</li>
 

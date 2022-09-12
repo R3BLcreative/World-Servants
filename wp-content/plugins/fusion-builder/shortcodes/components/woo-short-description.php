@@ -92,6 +92,9 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_short_description' ) ) {
 					'fusion_font_family_text_font'  => '',
 					'fusion_font_variant_text_font' => '',
 					'text_font_size'                => '',
+					'text_text_transform'           => '',
+					'text_line_height'              => '',
+					'text_letter_spacing'           => '',
 
 					'hide_on_mobile'                => fusion_builder_default_visibility( 'string' ),
 					'class'                         => '',
@@ -238,6 +241,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_short_description' ) ) {
 					$this->add_css_property( $this->base_selector . ' .woocommerce-product-details__short-description', 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['text_font_size'] ) );
 				}
 
+				if ( ! $this->is_default( 'text_line_height' ) ) {
+					$this->add_css_property( $this->base_selector . ' .woocommerce-product-details__short-description', 'line-height', $this->args['text_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'text_letter_spacing' ) ) {
+					$this->add_css_property( $this->base_selector . ' .woocommerce-product-details__short-description', 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['text_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'text_text_transform' ) ) {
+					$this->add_css_property( $this->base_selector . ' .woocommerce-product-details__short-description', 'text-transform', $this->args['text_text_transform'] );
+				}
+
 				// Text typography styles.
 				$text_styles = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'text_font', 'array' );
 				foreach ( $text_styles as $rule => $value ) {
@@ -306,12 +321,21 @@ function fusion_component_woo_short_description() {
 		fusion_builder_frontend_data(
 			'FusionTB_Woo_Short_Description',
 			[
-				'name'      => esc_attr__( 'Woo Short Description', 'fusion-builder' ),
-				'shortcode' => 'fusion_tb_woo_short_description',
-				'icon'      => 'fusiona-woo-short-description',
-				'component' => true,
-				'templates' => [ 'content', 'post_cards', 'page_title_bar' ],
-				'params'    => [
+				'name'         => esc_attr__( 'Woo Short Description', 'fusion-builder' ),
+				'shortcode'    => 'fusion_tb_woo_short_description',
+				'icon'         => 'fusiona-woo-short-description',
+				'component'    => true,
+				'templates'    => [ 'content', 'post_cards', 'page_title_bar' ],
+				'subparam_map' => [
+					'fusion_font_family_text_font'  => 'main_typography',
+					'fusion_font_variant_text_font' => 'main_typography',
+					'text_font_size'                => 'main_typography',
+					'text_text_transform'           => 'main_typography',
+					'text_line_height'              => 'main_typography',
+					'text_letter_spacing'           => 'main_typography',
+					'text_color'                    => 'main_typography',
+				],
+				'params'       => [
 					[
 						'type'             => 'dimension',
 						'remove_from_atts' => true,
@@ -337,39 +361,31 @@ function fusion_component_woo_short_description() {
 						],
 					],
 					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Text Color', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the color of the text, ex: #000.' ),
-						'param_name'  => 'text_color',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the description text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'main_typography',
+						'choices'          => [
+							'font-family'    => 'text_font',
+							'font-size'      => 'text_font_size',
+							'text-transform' => 'text_text_transform',
+							'line-height'    => 'text_line_height',
+							'letter-spacing' => 'text_letter_spacing',
+							'color'          => 'text_color',
 						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Text Font Family', 'fusion-builder' ),
-						'description'      => esc_html__( 'Controls the font family of the text.', 'fusion-builder' ),
-						'param_name'       => 'text_font',
 						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '',
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => '',
 						],
+						'remove_from_atts' => true,
+						'global'           => true,
 						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'callback'         => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Text Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the text. Enter value including any valid CSS unit, ex: 20px. Note: font size will be applied only to plain text.', 'fusion-builder' ),
-						'param_name'  => 'text_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
 							'function' => 'fusion_style_block',
 						],
 					],
@@ -399,7 +415,7 @@ function fusion_component_woo_short_description() {
 						'preview_selector' => '.fusion-woo-short-description-tb',
 					],
 				],
-				'callback'  => [
+				'callback'     => [
 					'function' => 'fusion_ajax',
 					'action'   => 'get_fusion_tb_woo_short_description',
 					'ajax'     => true,

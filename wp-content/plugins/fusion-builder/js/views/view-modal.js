@@ -164,8 +164,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				FusionPageBuilderApp.activeModal = '';
 
 				// Close colorpickers before saving
-				this.$el.find( '.wp-color-picker' ).each( function() {
-					$( this ).wpColorPicker( 'close' );
+				this.$el.find( '.awb-color-picker' ).each( function() {
+					$( this ).awbColorPicker( 'close' );
 				} );
 
 				// Destroy CodeMirror editor instance
@@ -302,8 +302,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 
 				// Close colorpickers before saving
-				this.$el.find( '.wp-color-picker' ).each( function() {
-					$( this ).wpColorPicker( 'close' );
+				this.$el.find( '.awb-color-picker' ).each( function() {
+					$( this ).awbColorPicker( 'close' );
 				} );
 
 				// Destroy CodeMirror editor instance
@@ -343,7 +343,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						settingValue              = self.getSettingValue( $thisEl, false );
 						attributes.params[ name ] = settingValue;
 					}
-
 				} );
 
 				// Get dynamic values and store.
@@ -546,6 +545,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					return;
 				}
 
+				if ( 'string' == typeof $thisEl.attr( 'data-subset' ) ) {
+					return $thisEl.attr( 'name' );
+				}
+
 				// Multi element
 				if ( $thisEl.is( '#generator_element_content' ) ||
 					$thisEl.is( '#fusion_builder_content_main' ) ||
@@ -594,8 +597,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					}
 				}
 
-				// Encode raw-textarea.
-				if ( $thisEl.hasClass( 'fusion-builder-raw-textarea' ) ) {
+				// Encode raw field.
+				if ( $thisEl.hasClass( 'fusion-builder-raw-textarea' ) || $thisEl.hasClass( 'fusion-builder-raw-text' ) ) {
 					settingValue = FusionPageBuilderApp.base64Encode( settingValue );
 				}
 

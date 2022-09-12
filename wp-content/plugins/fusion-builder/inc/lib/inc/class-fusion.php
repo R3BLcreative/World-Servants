@@ -169,6 +169,14 @@ class Fusion {
 		// Add needed action and filter to make sure queries with offset have correct pagination.
 		add_action( 'pre_get_posts', [ $this, 'query_offset' ], 1 );
 		add_filter( 'found_posts', [ $this, 'adjust_offset_pagination' ], 1, 2 );
+
+		add_action( 'wp_loaded', [ $this, 'clear_object_cache' ] );
+
+		// Rename default template.
+		add_filter( 'default_page_template_title', [ $this, 'default_page_template_title' ] );
+
+		// Set default template.
+		add_action( 'add_meta_boxes', [ $this, 'set_default_teamplte' ], 1 );
 	}
 
 	/**
@@ -415,6 +423,44 @@ class Fusion {
 
 		if ( apply_filters( 'avada_load_icomoon', true ) ) {
 			Fusion_Dynamic_CSS::enqueue_style( FUSION_LIBRARY_PATH . '/assets/css/icomoon.min.css', FUSION_LIBRARY_URL . '/assets/css/icomoon.min.css' );
+		}
+	}
+
+	/**
+	 * Clear the object cache ob post save and removal.
+	 *
+	 * @access public
+	 * @since 7.8
+	 * @return void
+	 */
+	public function clear_object_cache() {
+		if ( '1' === $this->get_option( 'clear_object_cache' ) ) {
+			add_action( 'save_post', 'wp_cache_flush' );
+			add_action( 'delete_post', 'wp_cache_flush' );
+		}
+	}
+
+	/**
+	 * Renames default page template title.
+	 *
+	 * @since 7.8
+	 * @return string
+	 */
+	public function default_page_template_title() {
+		return __( 'Site Width', 'fusion-builder' );
+	}
+
+	/**
+	 * Sets default template.
+	 *
+	 * @since 7.8
+	 * @return void
+	 */
+	public function set_default_teamplte() {
+		global $post;
+
+		if ( 'page' === $post->post_type && '' === $post->page_template && '100_width' === Avada()->settings->get( 'page_template' ) ) {
+			$post->page_template = '100-width.php';
 		}
 	}
 }

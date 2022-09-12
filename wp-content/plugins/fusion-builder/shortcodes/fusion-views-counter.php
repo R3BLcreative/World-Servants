@@ -163,7 +163,12 @@ if ( fusion_is_element_enabled( 'fusion_views_counter' ) ) {
 			 * @return string          HTML output.
 			 */
 			public function render( $args, $content = '' ) {
-				$this->args = FusionBuilder::set_shortcode_defaults( self::get_element_defaults(), $args, 'fusion_views_counter' );
+				$this->args      = FusionBuilder::set_shortcode_defaults( self::get_element_defaults(), $args, 'fusion_views_counter' );
+				$fusion_settings = awb_get_fusion_settings();
+
+				if ( 'disabled' === $fusion_settings->get( 'post_views' ) ) {
+					return '';
+				}
 
 				$html  = '<div ' . FusionBuilder::attributes( 'views-counter-wrapper' ) . '>';
 				$html .= $this->get_element_style();

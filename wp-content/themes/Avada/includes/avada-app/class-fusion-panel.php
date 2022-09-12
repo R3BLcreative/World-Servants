@@ -169,7 +169,6 @@ class Fusion_Panel {
 			add_filter( 'body_class', [ $this, 'body_class' ], 998 );
 		}
 		$this->add_hook_wrappers();
-		add_filter( 'fusion_replace_css_var_values', '__return_false', PHP_INT_MAX );
 	}
 
 	/**
@@ -182,7 +181,7 @@ class Fusion_Panel {
 	 */
 	public function add_panel_data( $data ) {
 		$data['postMeta']               = $this->page_values;
-		$data['fusionPageOptions']      = $this->page_options;
+		$data['fusionPageOptions']      = apply_filters( 'awb_metaboxes_sections', $this->page_options );
 		$data['fusionElementsOptions']  = $this->fusion_builder_options;
 		$data['singular']               = is_singular() || ( class_exists( 'WooCommerce' ) && is_shop() ) || ( is_home() && ! is_front_page() );
 		$data['featured_image_default'] = $this->get_featured_image_object();
@@ -352,8 +351,11 @@ class Fusion_Panel {
 	 * @return string
 	 */
 	public function body_class( $classes ) {
-
-		$classes[] = 'fusion-builder-panel-main fb-color-scheme-light';
+		$preferences = Fusion_App()->preferences->get_preferences();
+		if ( isset( $preferences['styling_mode'] ) && 'dark' === $preferences['styling_mode'] ) {
+			$classes[] = 'dark-mode';
+		}
+		$classes[] = 'fusion-builder-panel-main';
 		return $classes;
 	}
 
@@ -393,11 +395,16 @@ class Fusion_Panel {
 						foreach ( $meta_values as $key => $value ) {
 							if ( '_fusion' === $key ) {
 								foreach ( $value as $_fusion_k => $_fusion_v ) {
-									if ( '' === $_fusion_v || 'default' === $_fusion_v ) {
+									if ( ( '' === $_fusion_v || 'default' === $_fusion_v ) && 'form_type' !== $_fusion_k ) {
 										unset( $value[ $_fusion_k ] );
 									}
 								}
 							}
+
+							if ( '_fusion_builder_custom_css' === $key ) {
+								$value = wp_slash( str_replace( "\'", "'", $value ) );
+							}
+
 							update_post_meta( $post_id, $key, $value );
 						}
 						$app->add_save_data( 'page_options', true, esc_html__( 'The page options updated.', 'Avada' ) );
@@ -591,7 +598,7 @@ class Fusion_Panel {
 					}
 					break;
 				case 'color':
-					$options[ $key ] = Fusion_Sanitize::hex( $value );
+					$options[ $key ] = Fusion_Color::new_color( $value )->to_css( 'hex' );
 					break;
 				case 'text':
 					break;
@@ -812,9 +819,10 @@ class Fusion_Panel {
 		if ( is_post_type_hierarchical( $post_type ) ) {
 			$all_hierarchical_posts_in_post_type = get_posts(
 				[
-					'post_type'        => $post_type,
-					'suppress_filters' => false,
-					'numberposts'      => -1, // phpcs:ignore WPThemeReview.CoreFunctionality.PostsPerPage
+					'post_type'           => $post_type,
+					'suppress_filters'    => false,
+					'numberposts'         => -1, // phpcs:ignore WPThemeReview.CoreFunctionality.PostsPerPage
+					'post_parent__not_in' => [ $real_page_id ],
 				]
 			);
 			// Properly format the array.
@@ -923,6 +931,7 @@ class Fusion_Panel {
 
 		if ( $templates ) {
 			$template = get_post_meta( fusion_library()->get_page_id(), '_wp_page_template', true );
+			$template = 'page' === $post_type && '' === $template && '100_width' === Avada()->settings->get( 'page_template' ) ? '100-width.php' : $template;
 			$data['fusion_page_settings_section']['fields']['_wp_page_template'] = [
 				'id'       => '_wp_page_template',
 				'label'    => esc_html__( 'Template', 'fusion-builder' ),
@@ -1095,26 +1104,18 @@ class Fusion_Panel {
 			return;
 		}
 
-		$tabs = false;
-		if ( class_exists( 'PyreThemeFrameworkMetaboxes' ) ) {
-			$tabs = PyreThemeFrameworkMetaboxes::get_pagetype_tab( $post_type );
-		} elseif ( class_exists( 'Avada' ) ) {
+		if ( ! class_exists( 'PyreThemeFrameworkMetaboxes' ) ) {
 			$path = Avada::$template_dir_path . '/includes/metaboxes/metaboxes.php';
 			require_once wp_normalize_path( $path );
-			$tabs = PyreThemeFrameworkMetaboxes::get_pagetype_tab( $post_type );
 		}
 
-		if ( is_array( $tabs ) ) {
-			foreach ( $tabs as $tab_name ) {
-				if ( class_exists( 'Avada' ) ) {
-					$path = Avada::$template_dir_path . '/includes/metaboxes/tabs/tab_' . $tab_name . '.php';
-					require_once wp_normalize_path( $path );
-				}
-				if ( function_exists( 'avada_page_options_tab_' . $tab_name ) ) {
-					$sections = call_user_func( 'avada_page_options_tab_' . $tab_name, $sections );
-				}
-			}
+		// Parse sections.
+		$page_options = PyreThemeFrameworkMetaboxes::$instance;
+		if ( ! $page_options ) {
+			$page_options = new PyreThemeFrameworkMetaboxes();
 		}
+
+		$sections = $page_options->get_options();
 
 		// Library elements have no POs.
 		if ( 'fusion_element' !== $post_type ) {
@@ -1483,7 +1484,7 @@ class Fusion_Panel {
 			}
 		}
 
-		$demo_options = apply_filters( 'avada_builder_theme_options', [] );
+		$demo_options = apply_filters( 'awb_global_options', [] );
 
 		$sections['import_export'] = [
 			'label'    => esc_html__( 'Import/Export', 'Avada' ),
@@ -1494,7 +1495,7 @@ class Fusion_Panel {
 			'fields'   => [
 				'import_to' => [
 					'label'       => esc_html__( 'Import Global Options', 'Avada' ),
-					'description' => esc_html__( 'Import Global Options.  You can import via file, copy and paste or select an Avada demo.' ),
+					'description' => esc_html__( 'Import Global Options. You can import via file, copy and paste or select an Avada prebuilt website.' ),
 					'id'          => 'import_to',
 					'type'        => 'import',
 					'demos'       => $demo_options,
@@ -1502,7 +1503,7 @@ class Fusion_Panel {
 				],
 				'export_to' => [
 					'label'       => esc_html__( 'Export Global Options', 'Avada' ),
-					'description' => esc_html__( 'Export your Global Options.  You can either export as a file or copy the data.' ),
+					'description' => esc_html__( 'Export your Global Options. You can either export as a file or copy the data.' ),
 					'id'          => 'export_to',
 					'type'        => 'export',
 					'context'     => 'TO',

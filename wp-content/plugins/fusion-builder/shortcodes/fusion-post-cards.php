@@ -109,6 +109,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				add_filter( 'fusion_attr_post-cards-shortcode', [ $this, 'attr' ] );
 				add_filter( 'fusion_attr_post-cards-shortcode-pagination', [ $this, 'attr_pagination' ] );
 				add_filter( 'fusion_attr_post-cards-shortcode-posts', [ $this, 'attr_posts' ] );
+				add_filter( 'fusion_attr_post-cards-shortcode-filter-link', [ $this, 'filter_link_attr' ] );
 
 				add_shortcode( $this->shortcode_name, [ $this, 'render' ] );
 
@@ -145,57 +146,89 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 			public static function get_element_defaults() {
 				$fusion_settings = awb_get_fusion_settings();
 				return [
-					'animation_direction'   => 'left',
-					'animation_offset'      => $fusion_settings->get( 'animation_offset' ),
-					'animation_speed'       => '',
-					'animation_type'        => '',
-					'animation_delay'       => 0,
-					'hide_on_mobile'        => fusion_builder_default_visibility( 'string' ),
-					'class'                 => '',
-					'id'                    => '',
-					'columns'               => $fusion_settings->get( 'woocommerce_shop_page_columns' ),
-					'columns_medium'        => '0',
-					'columns_small'         => '0',
-					'column_spacing'        => $fusion_settings->get( 'woocommerce_archive_grid_column_spacing' ),
-					'row_spacing'           => $fusion_settings->get( 'woocommerce_archive_grid_column_spacing' ),
-					'layout'                => 'grid',
-					'margin_bottom'         => '',
-					'margin_left'           => '',
-					'margin_right'          => '',
-					'margin_top'            => '',
-					'number_posts'          => '0',
-					'offset'                => '',
-					'order'                 => 'DESC',
-					'orderby'               => 'date',
-					'orderby_term'          => 'name',
-					'post_card'             => '0',
-					'post_card_archives'    => false,
-					'post_card_list_view'   => '0',
-					'post_type'             => 'post',
-					'posts_by'              => 'all',
-					'scrolling'             => 'pagination',
-					'source'                => 'posts',
-					'terms_by'              => '',
-					'flex_align_items'      => 'flex-start',
-					'out_of_stock'          => 'include',
-					'show_hidden'           => 'no',
+					'animation_direction'              => 'left',
+					'animation_offset'                 => $fusion_settings->get( 'animation_offset' ),
+					'animation_speed'                  => '',
+					'animation_type'                   => '',
+					'animation_delay'                  => 0,
+					'hide_on_mobile'                   => fusion_builder_default_visibility( 'string' ),
+					'class'                            => '',
+					'id'                               => '',
+					'fusion_font_family_filters_font'  => '',
+					'fusion_font_variant_filters_font' => '',
+					'filters_font_size'                => '',
+					'filters_text_transform'           => 'none',
+					'filters_line_height'              => '',
+					'filters_letter_spacing'           => '',
+					'filters_color'                    => $fusion_settings->get( 'link_color' ),
+					'filters_height'                   => '',
+					'filters_border_top'               => '1px',
+					'filters_border_right'             => '0px',
+					'filters_border_bottom'            => '1px',
+					'filters_border_left'              => '0px',
+					'filters_border_color'             => $fusion_settings->get( 'sep_color' ),
+					'filters_alignment'                => 'flex-start',
+					'filters_alignment_medium'         => '',
+					'filters_alignment_small'          => '',
+					'filters_hover_color'              => $fusion_settings->get( 'primary_color' ),
+					'filters_active_color'             => $fusion_settings->get( 'primary_color' ),
+					'active_filter_border_size'        => '',
+					'active_filter_border_color'       => $fusion_settings->get( 'primary_color' ),
+					'columns'                          => '4',
+					'columns_medium'                   => '0',
+					'columns_small'                    => '0',
+					'column_spacing'                   => '40',
+					'row_spacing'                      => '40',
+					'layout'                           => 'grid',
+					'margin_bottom'                    => '',
+					'margin_left'                      => '',
+					'margin_right'                     => '',
+					'margin_top'                       => '',
+					'filters'                          => 'no',
+					'number_posts'                     => '0',
+					'offset'                           => '',
+					'order'                            => 'DESC',
+					'orderby'                          => 'date',
+					'orderby_term'                     => 'name',
+					'upcoming_events_only'             => 'yes',
+					'featured_events_only'             => 'no',
+					'post_card'                        => '0',
+					'post_card_archives'               => false,
+					'post_card_list_view'              => '0',
+					'post_type'                        => 'post',
+					'posts_by'                         => 'all',
+					'scrolling'                        => 'pagination',
+					'source'                           => 'posts',
+					'terms_by'                         => '',
+					'flex_align_items'                 => 'flex-start',
+					'out_of_stock'                     => 'include',
+					'show_hidden'                      => 'no',
+					'custom_field_name'                => '',
+					'custom_field_comparison'          => 'exists',
+					'custom_field_value'               => '',
+
+					// Load More button.
+					'load_more_btn_color'              => '',
+					'load_more_btn_bg_color'           => '',
+					'load_more_btn_hover_color'        => '',
+					'load_more_btn_hover_bg_color'     => '',
 
 					// Carousel.
-					'scroll_items'          => '',
-					'mouse_scroll'          => 'no',
-					'autoplay'              => 'no',
-					'show_nav'              => 'yes',
+					'scroll_items'                     => '',
+					'mouse_scroll'                     => 'no',
+					'autoplay'                         => 'no',
+					'show_nav'                         => 'yes',
 
 					// Slider.
-					'slider_animation'      => 'fade',
-					'nav_margin_top'        => '40px',
+					'slider_animation'                 => 'fade',
+					'nav_margin_top'                   => '40px',
 
 					// Separator styles.
-					'separator_style_type'  => 'none',
-					'separator_sep_color'   => '',
-					'separator_width'       => '',
-					'separator_alignment'   => '',
-					'separator_border_size' => '',
+					'separator_style_type'             => 'none',
+					'separator_sep_color'              => '',
+					'separator_width'                  => '',
+					'separator_alignment'              => '',
+					'separator_border_size'            => '',
 				];
 			}
 
@@ -303,7 +336,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				FusionBuilder()->set_global_shortcode_parent( $cid );
 
 				// Either we have terms or posts depending on what we want.
-				$have_posts = ( 'terms' === $defaults['source'] && ! empty( $posts ) ) || ( in_array( $defaults['source'], [ 'posts', 'related', 'up_sells', 'cross_sells' ], true ) && $posts->have_posts() );
+				$have_posts = ( 'terms' === $defaults['source'] && ! empty( $posts ) ) || ( in_array( $defaults['source'], [ 'posts', 'related', 'up_sells', 'cross_sells', 'featured_products' ], true ) && $posts->have_posts() );
 
 				if ( ! $have_posts ) {
 					$return_data['placeholder'] = $this->get_placeholder( 'empty' );
@@ -316,7 +349,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 				if ( $have_posts ) {
 
-					if ( in_array( $this->args['source'], [ 'posts', 'related', 'up_sells', 'cross_sells' ], true ) ) {
+					if ( in_array( $this->args['source'], [ 'posts', 'related', 'up_sells', 'cross_sells', 'featured_products' ], true ) ) {
 						ob_start();
 						while ( $posts->have_posts() ) {
 							$posts->the_post();
@@ -340,6 +373,8 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 						$this->term_id = '';
 					}
+
+					$return_data['filters'] = $this->post_cards_filters();
 				}
 
 				// Process children elements CSS.
@@ -392,6 +427,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				}
 
 				$args['post_cards_query'] = true;
+				$args                     = apply_filters( 'fusion_post_cards_shortcode_query_args', $args );
 
 				return get_terms( $args );
 			}
@@ -406,6 +442,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 			 * @return array|Object
 			 */
 			public function post_query( $defaults, $live_request = false ) {
+				global $avada_woocommerce;
 				$fusion_settings = awb_get_fusion_settings();
 
 				$is_builder  = ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) || ( function_exists( 'fusion_is_builder_frame' ) && fusion_is_builder_frame() );
@@ -425,12 +462,15 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 				$args['orderby'] = $defaults['orderby'];
 				$args['order']   = $defaults['order'];
+
 				if ( 'product' === $defaults['post_type'] ) {
 					$args['orderby'] = ( isset( $_GET['product_orderby'] ) ) ? sanitize_text_field( wp_unslash( $_GET['product_orderby'] ) ) : $defaults['orderby']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$args['order']   = ( isset( $_GET['product_order'] ) ) ? sanitize_text_field( wp_unslash( $_GET['product_order'] ) ) : $defaults['order']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 					if ( function_exists( 'WC' ) ) {
-						$ordering_args   = WC()->query->get_catalog_ordering_args( $args['orderby'], $args['order'] );
+						remove_filter( 'woocommerce_get_catalog_ordering_args', [ $avada_woocommerce, 'get_catalog_ordering_args' ], 20 );
+						$ordering_args = WC()->query->get_catalog_ordering_args( $args['orderby'], $args['order'] );
+						add_filter( 'woocommerce_get_catalog_ordering_args', [ $avada_woocommerce, 'get_catalog_ordering_args' ], 20 );
 						$args['orderby'] = $ordering_args['orderby'];
 						$args['order']   = $ordering_args['order'];
 
@@ -446,36 +486,55 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$args['offset'] = $defaults['offset'];
 				}
 
-				// Filter by taxonomy.
+				// Filter by taxonomy or meta.
 				if ( 'all' !== $defaults['posts_by'] ) {
-					$post_type_taxonomies = get_object_taxonomies( $defaults['post_type'], 'objects' );
-					$taxonomy             = $defaults['posts_by'];
+					// Filter by meta.
+					if ( 'posts' === $defaults['source'] && 'awb_custom_field' === $defaults['posts_by'] ) {
+						if ( ! empty( $defaults['custom_field_name'] ) ) {
+							$meta_query        = [];
+							$meta_query['key'] = $defaults['custom_field_name'];
 
-					// If taxonomy is used by post type, then lets filter for it.
-					if ( isset( $post_type_taxonomies[ $taxonomy ] ) ) {
-						foreach ( [ 'include', 'exclude' ] as $filter ) {
-							$option = $filter . '_' . $taxonomy;
-							$terms  = isset( $defaults[ $option ] ) && ! empty( $defaults[ $option ] ) ? $defaults[ $option ] : false;
+							if ( 'exists' === $defaults['custom_field_comparison'] ) {
+								$meta_query['compare'] = 'EXISTS';
+							} elseif ( 'not_exists' === $defaults['custom_field_comparison'] ) {
+								$meta_query['compare'] = 'NOT EXISTS';
+							} elseif ( 'equals' === $defaults['custom_field_comparison'] ) {
+								$meta_query['compare'] = '=';
+								$meta_query['value']   = $defaults['custom_field_value'];
+							}
 
-							if ( $terms ) {
-								if ( false !== strpos( $terms, ',' ) ) {
-									$terms = explode( ',', $terms );
-								} elseif ( false !== strpos( $terms, '|' ) ) {
-									$terms = explode( '|', $terms );
+							$args['meta_query'] = [ $meta_query ]; // phpcs:ignore WordPress.DB.SlowDBQuery
+						}
+					} else { // Filter by taxonomy.
+						$post_type_taxonomies = get_object_taxonomies( $defaults['post_type'], 'objects' );
+						$taxonomy             = $defaults['posts_by'];
+
+						// If taxonomy is used by post type, then lets filter for it.
+						if ( isset( $post_type_taxonomies[ $taxonomy ] ) ) {
+							foreach ( [ 'include', 'exclude' ] as $filter ) {
+								$option = $filter . '_' . $taxonomy;
+								$terms  = isset( $defaults[ $option ] ) && ! empty( $defaults[ $option ] ) ? $defaults[ $option ] : false;
+
+								if ( $terms ) {
+									if ( false !== strpos( $terms, ',' ) ) {
+										$terms = explode( ',', $terms );
+									} elseif ( false !== strpos( $terms, '|' ) ) {
+										$terms = explode( '|', $terms );
+									}
+
+									$terms = is_array( $terms ) ? $terms : [ $terms ];
+
+									$tax_args = [
+										'taxonomy' => $taxonomy,
+										'field'    => 'id',
+										'terms'    => apply_filters( 'avada_element_term_selection', $terms, $defaults['post_type'], $taxonomy ),
+									];
+
+									if ( 'exclude' === $filter ) {
+										$tax_args['operator'] = 'NOT IN';
+									}
+									$args['tax_query'][] = $tax_args;
 								}
-
-								$terms = is_array( $terms ) ? $terms : [ $terms ];
-
-								$tax_args = [
-									'taxonomy' => $taxonomy,
-									'field'    => 'id',
-									'terms'    => apply_filters( 'avada_element_term_selection', $terms, $defaults['post_type'], $taxonomy ),
-								];
-
-								if ( 'exclude' === $filter ) {
-									$tax_args['operator'] = 'NOT IN';
-								}
-								$args['tax_query'][] = $tax_args;
 							}
 						}
 					}
@@ -537,6 +596,30 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$args['post__in']     = $sells;
 				}
 
+				// Featured Products.
+				if ( 'featured_products' === $defaults['source'] && class_exists( 'WooCommerce' ) ) {
+					unset( $args['meta_query'] );
+					unset( $args['tax_query'] );
+
+					$args['post_type']   = 'product';
+					$args['tax_query'][] = [
+						'taxonomy' => 'product_visibility',
+						'field'    => 'name',
+						'terms'    => 'featured',
+						'operator' => 'IN',
+					];
+				}
+
+				if ( 'posts' === $defaults['source'] && 'tribe_events' === $defaults['post_type'] ) {
+					if ( 'yes' === $defaults['upcoming_events_only'] ) {
+						$args['ends_after'] = 'now';
+					}
+
+					if ( 'yes' === $defaults['featured_events_only'] ) {
+						$args['featured'] = true;
+					}
+				}
+
 				// Ajax returns protected posts, but we just want published.
 				if ( $live_request ) {
 					$args['post_status'] = 'publish';
@@ -544,7 +627,11 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 				$args['post_cards_query'] = true;
 
-				$query = fusion_cached_query( apply_filters( 'fusion_post_cards_shortcode_query_args', $args ) );
+				if ( 'posts' === $defaults['source'] && 'tribe_events' === $defaults['post_type'] && function_exists( 'tribe_get_events' ) ) {
+					$query = tribe_get_events( apply_filters( 'fusion_post_cards_shortcode_query_args', $args ), true );
+				} else {
+					$query = fusion_cached_query( apply_filters( 'fusion_post_cards_shortcode_query_args', $args ) );
+				}
 
 				if ( 'product' === $defaults['post_type'] ) {
 					fusion_library()->woocommerce->remove_post_clauses( $args['orderby'], $args['order'] );
@@ -582,6 +669,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				$html = '';
 
 				if ( 0 === (int) $this->args['post_card'] ) {
+					$this->element_counter++;
 					return $this->get_placeholder();
 				}
 
@@ -590,9 +678,10 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				$this->query = $posts;
 
 				// Either we have terms or posts depending on what we want.
-				$have_posts = ( 'terms' === $this->args['source'] && ! is_wp_error( $posts ) && ! empty( $posts ) ) || ( in_array( $this->args['source'], [ 'posts', 'related', 'up_sells', 'cross_sells' ], true ) && $posts->have_posts() );
+				$have_posts = ( 'terms' === $this->args['source'] && ! is_wp_error( $posts ) && ! empty( $posts ) ) || ( in_array( $this->args['source'], [ 'posts', 'related', 'up_sells', 'cross_sells', 'featured_products' ], true ) && $posts->have_posts() );
 
 				if ( ! $have_posts ) {
+					$this->element_counter++;
 					return $this->get_placeholder( 'empty' );
 				}
 
@@ -607,10 +696,12 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$original_is_tax            = $GLOBALS['wp_query']->is_tax;
 					$original_is_archive        = $GLOBALS['wp_query']->is_archive;
 					$original_is_category       = $GLOBALS['wp_query']->is_category;
+					$original_is_tag            = $GLOBALS['wp_query']->is_tag;
 					$original_is_singular       = $GLOBALS['wp_query']->is_singular;
 					$original_post_type_archive = $GLOBALS['wp_query']->is_post_type_archive;
 					$original_is_search         = $GLOBALS['wp_query']->is_search;
 					$original_is_404            = $GLOBALS['wp_query']->is_404;
+					$original_is_author         = $GLOBALS['wp_query']->is_author;
 					$original_is_date           = $GLOBALS['wp_query']->is_date;
 					$original_is_day            = $GLOBALS['wp_query']->is_day;
 					$original_is_month          = $GLOBALS['wp_query']->is_month;
@@ -621,10 +712,12 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 						$GLOBALS['wp_query']->is_tax               = false;
 						$GLOBALS['wp_query']->is_archive           = false;
 						$GLOBALS['wp_query']->is_category          = false;
+						$GLOBALS['wp_query']->is_tag               = false;
 						$GLOBALS['wp_query']->is_singular          = true;
 						$GLOBALS['wp_query']->is_post_type_archive = false;
 						$GLOBALS['wp_query']->is_search            = false;
 						$GLOBALS['wp_query']->is_404               = false;
+						$GLOBALS['wp_query']->is_author            = false;
 						$GLOBALS['wp_query']->is_date              = false;
 						$GLOBALS['wp_query']->is_day               = false;
 						$GLOBALS['wp_query']->is_month             = false;
@@ -666,11 +759,13 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$GLOBALS['wp_query']->is_tax               = $original_is_tax; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_archive           = $original_is_archive; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_category          = $original_is_category; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					$GLOBALS['wp_query']->is_tag               = $original_is_tag; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_singular          = $original_is_singular; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->queried_object       = $original_queried_object; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_post_type_archive = $original_post_type_archive; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_search            = $original_is_search; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_404               = $original_is_404; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					$GLOBALS['wp_query']->is_author            = $original_is_author; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_date              = $original_is_date; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_day               = $original_is_day; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					$GLOBALS['wp_query']->is_month             = $original_is_month; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -680,18 +775,13 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 				if ( 'carousel' === $this->args['layout'] ) {
 					if ( 'yes' === $this->args['show_nav'] ) {
-						$post_list .= sprintf(
-							'<div %s><span %s></span><span %s></span></div>',
-							FusionBuilder::attributes( 'fusion-carousel-nav' ),
-							FusionBuilder::attributes( 'fusion-nav-prev' ),
-							FusionBuilder::attributes( 'fusion-nav-next' )
-						);
+						$post_list .= awb_get_carousel_nav();
 					}
 
 					$post_list = '<div ' . FusionBuilder::attributes( 'fusion-carousel-positioner' ) . '>' . $post_list . '</div>';
 				}
 
-				if ( 'no' !== $this->args['scrolling'] && 'terms' !== $this->args['source'] && 'grid' === $this->args['layout'] ) {
+				if ( 'no' !== $this->args['scrolling'] && 'terms' !== $this->args['source'] && ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) ) {
 					$post_list .= $this->pagination( $this->query->max_num_pages, $fusion_settings->get( 'pagination_range' ), $this->query );
 				}
 
@@ -699,10 +789,11 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				wp_reset_postdata();
 
 				$html  = '<div ' . FusionBuilder::attributes( 'post-cards-shortcode' ) . '>';
+				$html .= $this->post_cards_filters();
 				$html .= $post_list;
 
 				// If infinite scroll with "load more" button is used.
-				if ( 'load_more_button' === $this->args['scrolling'] && 1 < $posts->max_num_pages && 'terms' !== $this->args['source'] && 'grid' === $this->args['layout'] ) {
+				if ( 'load_more_button' === $this->args['scrolling'] && 1 < $posts->max_num_pages && 'terms' !== $this->args['source'] && ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) ) {
 					$post_type_obj = get_post_type_object( $this->args['post_type'] );
 					$html         .= '<button class="fusion-load-more-button fusion-product-button fusion-clearfix">';
 					/* translators: The name. */
@@ -724,6 +815,52 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 			}
 
 			/**
+			 * Fires on render.
+			 *
+			 * @access protected
+			 * @since 3.8.1
+			 */
+			protected function on_render() {
+				if ( ! $this->has_rendered ) {
+					$this->on_first_render();
+					$this->has_rendered = true;
+
+					if ( function_exists( 'wc_enqueue_js' ) && 'product' === $this->args['post_type'] && 'posts' === $this->args['source'] ) {
+						wc_enqueue_js(
+							"
+							jQuery( '.fusion-post-cards-" . ( $this->element_counter - 1 ) . "' ).on( 'change', '.variation_id', function( e ) {
+								if ( '' !== jQuery( this ).val() ) {
+									jQuery( this ).parent().find( '.add_to_cart_button' ).attr( 'data-product_id', jQuery(this).val() );
+								}
+								if ( jQuery.trim( jQuery( e.currentTarget ).closest( 'form' ).find( '.avada-variation' ).text() ).length ) {
+									jQuery( e.currentTarget ).closest( 'form' ).find( '.avada-variation' ).closest( 'tr' ).removeClass( 'awb-hide-element' );
+								}
+							} ).on( 'hide_variation', '.variations_form', function( e ) {
+								jQuery( e.currentTarget ).find( '.add_to_cart_button' ).removeClass( 'wc-variation-is-unavailable' ).addClass( 'disabled wc-variation-selection-needed' );
+								jQuery( e.currentTarget ).find( '.add_to_cart_button' ).attr( 'data-product_id', jQuery( e.currentTarget ).find( '[name=\"product_id\"]' ).val() );
+								jQuery( e.currentTarget ).find( '.avada-variation' ).closest( 'tr' ).addClass( 'awb-hide-element' );
+							} ).on( 'show_variation', '.variations_form', function( e ) {
+								jQuery( e.currentTarget ).find( '.add_to_cart_button' ).removeClass( 'disabled wc-variation-selection-needed wc-variation-is-unavailable' );
+							} );
+							jQuery( document.body ).on( 'adding_to_cart', function(e, \$thisbutton, data ) {
+								if ( \$thisbutton.is('.disabled') ) {
+									e.preventDefault();
+						
+									if ( \$thisbutton.is('.wc-variation-is-unavailable') ) {
+										window.alert( wc_add_to_cart_variation_params.i18n_unavailable_text );
+									} else if ( \$thisbutton.is('.wc-variation-selection-needed') ) {
+										window.alert( wc_add_to_cart_variation_params.i18n_make_a_selection_text );
+									}
+									return true;
+								}
+							} );
+						"
+						);
+					}
+				}
+			}
+
+			/**
 			 * Change args to valid values based on other options.
 			 *
 			 * @access public
@@ -737,14 +874,100 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$this->args['columns'] = 1;
 				}
 
-				if ( 1 === (int) $this->args['columns'] && 'grid' === $this->args['layout'] ) {
-					$this->args['column_spacing'] = '0px';
+				if ( 1 === (int) $this->args['columns'] && ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) ) {
+					$this->args['column_spacing'] = '0';
 				}
 
 				// No delay offering for carousels and sliders.
 				if ( 'grid' !== $this->args['layout'] ) {
 					$this->args['animation_delay'] = 0;
 				}
+			}
+
+			/**
+			 * Render filters.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @return string
+			 */
+			public function post_cards_filters() {
+
+				// Setup the filters, if enabled.
+				$filter_wrapper = '';
+
+				if ( 'no' !== $this->args['filters'] && ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) && 'posts' === $this->args['source'] ) {
+					$post_type_taxonomies = get_object_taxonomies( $this->args['post_type'], 'objects' );
+					$taxonomy             = $this->args['posts_by'];
+					$taxonomy             = isset( $post_type_taxonomies[ $taxonomy ] ) ? $taxonomy : array_key_first( $post_type_taxonomies );
+					$included             = ! empty( $this->args[ 'include_' . $taxonomy ] ) ? explode( ',', $this->args[ 'include_' . $taxonomy ] ) : [];
+					$excluded             = ! empty( $this->args[ 'exclude_' . $taxonomy ] ) ? explode( ',', $this->args[ 'exclude_' . $taxonomy ] ) : [];
+					$first_filter         = true;
+
+					// Get terms.
+					$terms = get_terms( $taxonomy );
+					$terms = is_array( $terms ) && 0 < count( $terms ) ? $terms : [];
+
+					if ( 'yes-without-all' !== $this->args['filters'] ) {
+						$filter       = '<li role="menuitem" ' . FusionBuilder::attributes( 'fusion-filter fusion-filter-all fusion-active' ) . '><a ' . FusionBuilder::attributes(
+							'post-cards-shortcode-filter-link',
+							[
+								'data-filter' => '*',
+							]
+						) . '>' . esc_attr__( 'All', 'fusion-builder' ) . '</a></li>';
+						$first_filter = false;
+					}
+
+					foreach ( $terms as $term ) {
+
+						// Only display filters of non excluded terms.
+						if ( ! in_array( $term->term_id, $excluded ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
+
+							// Check if terms have been chosen.
+							if ( ! empty( $included ) ) {
+
+								// Only display filters for explicitly included terms.
+								if ( in_array( urldecode( $term->term_id ), $included, true ) ) {
+									// Set the first terms filter to active, if the all filter isn't shown.
+									$active_class = '';
+									if ( $first_filter ) {
+										$active_class = ' fusion-active';
+										$first_filter = false;
+									}
+
+									$filter .= '<li role="menuitem" ' . FusionBuilder::attributes( 'fusion-filter fusion-hidden' . $active_class ) . '><a ' . FusionBuilder::attributes(
+										'post-cards-shortcode-filter-link',
+										[
+											'data-filter' => '.' . urldecode( $term->slug ),
+										]
+									) . '>' . $term->name . '</a></li>';
+								}
+							} else {
+
+								// Display all terms.
+								// Set the first term filter to active, if the all filter isn't shown.
+								$active_class = '';
+								if ( $first_filter ) {
+									$active_class = ' fusion-active';
+									$first_filter = false;
+								}
+
+								$filter .= '<li role="menuitem" ' . FusionBuilder::attributes( 'fusion-filter fusion-hidden' . $active_class ) . '><a ' . FusionBuilder::attributes(
+									'post-cards-shortcode-filter-link',
+									[
+										'data-filter' => '.' . urldecode( $term->slug ),
+									]
+								) . '>' . $term->name . '</a></li>';
+							}
+						}
+					}
+
+					$filter_wrapper  = '<div role="menubar">';
+					$filter_wrapper .= '<ul ' . FusionBuilder::attributes( 'fusion-filters' ) . ' role="menu" aria-label="filters">' . $filter . '</ul>';
+					$filter_wrapper .= '</div>';
+				}
+
+				return $filter_wrapper;
 			}
 
 			/**
@@ -898,23 +1121,33 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					return $attr;
 				}
 
-				// replace column class for live editor.
-				if ( $this->live_request ) {
-					$attr['class'] = preg_replace( '/fusion-builder-column-[0-9]+/', '', $attr['class'] );
-				}
-
 				// No need this class for carousel & slider.
-				if ( 'grid' !== $this->args['layout'] ) {
+				if ( 'grid' !== $this->args['layout'] && 'masonry' !== $this->args['layout'] ) {
 					$attr['class'] = preg_replace( '/fusion-layout-column\s/', '', $attr['class'] );
 				}
 
 				$attr['class'] .= ' post-card';
-				if ( 'grid' === $this->args['layout'] ) {
+				if ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) {
 					$attr['class'] .= ' fusion-grid-column fusion-post-cards-grid-column';
+					$attr['class'] .= 'masonry' === $this->args['layout'] ? ' fusion-post-card-masonry' : '';
 
 					if ( 'product' === $this->args['post_type'] && 'posts' === $this->args['source'] ) {
 						$product_view   = $this->get_product_view();
 						$attr['class'] .= ' product-' . $product_view . '-view';
+					}
+
+					// Data for filters.
+					if ( 'no' !== $this->args['filters'] && 'posts' === $this->args['source'] ) {
+						$post_type_taxonomies = get_object_taxonomies( $this->args['post_type'], 'objects' );
+						$taxonomy             = $this->args['posts_by'];
+						$taxonomy             = isset( $post_type_taxonomies[ $taxonomy ] ) ? $taxonomy : array_key_first( $post_type_taxonomies );
+						$terms                = get_the_terms( get_the_ID(), $taxonomy );
+
+						if ( $terms ) {
+							foreach ( $terms as $terms ) {
+								$attr['class'] .= ' ' . urldecode( $terms->slug );
+							}
+						}
 					}
 				} elseif ( 'carousel' === $this->args['layout'] ) {
 					$attr['class'] .= ' fusion-carousel-item';
@@ -1020,8 +1253,9 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$attr['data-touchscroll']   = $this->args['mouse_scroll'];
 					$attr['data-imagesize']     = 'auto';
 					$attr['data-scrollitems']   = $this->args['scroll_items'];
-				} elseif ( 'grid' === $this->args['layout'] && 'terms' !== $this->args['source'] ) {
+				} elseif ( ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) && 'terms' !== $this->args['source'] ) {
 					$attr['class'] .= ' fusion-grid-archive';
+					$attr['class'] .= 'masonry' === $this->args['layout'] ? ' fusion-post-cards-masonry' : '';
 				}
 
 				if ( $this->args['class'] ) {
@@ -1098,8 +1332,8 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					'class' => '',
 				];
 
-				if ( 'grid' === $this->args['layout'] ) {
-					$attr['class'] .= 'fusion-grid fusion-grid-' . $this->args['columns'] . ' fusion-flex-align-items-' . $this->args['flex_align_items'];
+				if ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) {
+					$attr['class'] .= 'fusion-grid fusion-grid-' . $this->args['columns'] . ' fusion-flex-align-items-' . $this->args['flex_align_items'] . ' fusion-' . $this->args['layout'] . '-posts-cards';
 				} elseif ( 'slider' === $this->args['layout'] ) {
 					$attr['class'] .= 'slides';
 				} elseif ( 'carousel' === $this->args['layout'] ) {
@@ -1120,6 +1354,28 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 			}
 
 			/**
+			 * Builds the filter-link attributes array.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @param array $args The arguments array.
+			 * @return array
+			 */
+			public function filter_link_attr( $args ) {
+
+				$attr = [
+					'href' => '#',
+				];
+
+				if ( $args['data-filter'] ) {
+					$attr['data-filter'] = $args['data-filter'];
+				}
+
+				return $attr;
+
+			}
+
+			/**
 			 * Sets the necessary scripts.
 			 *
 			 * @access public
@@ -1136,10 +1392,15 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				if ( $this->args ) {
 					$post_type_obj = get_post_type_object( $this->args['post_type'] );
 
+					if ( is_null( $post_type_obj ) ) {
+						return;
+					}
+
 					Fusion_Dynamic_JS::enqueue_script( 'fusion-carousel' );
+					Fusion_Dynamic_JS::enqueue_script( 'fusion-flexslider' );
 
 					if ( 'product' === $post_type_obj->name ) {
-						if ( class_exists( 'Avada' ) ) {
+						if ( class_exists( 'Avada' ) && class_exists( 'WooCommerce' ) ) {
 							global $avada_woocommerce;
 
 							$js_folder_suffix = FUSION_BUILDER_DEV_MODE ? '/assets/js' : '/assets/min/js';
@@ -1168,7 +1429,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 						'fusion-js-' . $this->shortcode_name,
 						FusionBuilder::$js_folder_url . '/general/fusion-post-cards.js',
 						FusionBuilder::$js_folder_path . '/general/fusion-post-cards.js',
-						[ 'jquery', 'jquery-infinite-scroll' ],
+						[ 'jquery', 'isotope', 'packery', 'jquery-infinite-scroll' ],
 						'3.2',
 						true
 					);
@@ -1182,12 +1443,14 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							/* translators: The name. */
 							'infinite_text'         => '<em>' . sprintf( __( 'Loading the next set of %s...', 'fusion-builder' ), $label ) . '</em>',
 							'infinite_finished_msg' => '<em>' . __( 'All items displayed.', 'fusion-builder' ) . '</em>',
+							'lightbox_behavior'     => fusion_library()->get_option( 'lightbox_behavior' ) ? fusion_library()->get_option( 'lightbox_behavior' ) : false,
 							'pagination_type'       => $this->args['scrolling'],
 						]
 					);
 				} else {
 					// Just load everything on Avada Studio site.
 					Fusion_Dynamic_JS::enqueue_script( 'fusion-carousel' );
+					Fusion_Dynamic_JS::enqueue_script( 'fusion-flexslider' );
 
 					// Add Woo scripts just in case.
 					if ( class_exists( 'Avada' ) && class_exists( 'WooCommerce' ) ) {
@@ -1231,10 +1494,25 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							/* translators: The name. */
 							'infinite_text'         => '<em>' . sprintf( __( 'Loading the next set of %s...', 'fusion-builder' ), $label ) . '</em>',
 							'infinite_finished_msg' => '<em>' . __( 'All items displayed.', 'fusion-builder' ) . '</em>',
+							'lightbox_behavior'     => fusion_library()->get_option( 'lightbox_behavior' ) ? fusion_library()->get_option( 'lightbox_behavior' ) : false,
 							'pagination_type'       => 'pagination',
 						]
 					);
 				}
+			}
+
+			/**
+			 * Builds the dynamic styling.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @return array
+			 */
+			public function add_styling() {
+				global $content_media_query;
+				$css[ $content_media_query ]['.fusion-post-cards .fusion-filters']['display'] = 'block !important';
+
+				return $css;
 			}
 
 			/**
@@ -1262,7 +1540,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 			 * @return boolean
 			 */
 			public function is_load_more() {
-				return in_array( $this->args['scrolling'], [ 'infinite', 'load_more_button' ], true );
+				return in_array( $this->args['scrolling'], [ 'infinite', 'load_more_button' ], true ) && ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] );
 			}
 
 			/**
@@ -1273,16 +1551,17 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 			 * @return string
 			 */
 			protected function get_placeholder( $type = 'card' ) {
+
 				if ( ! current_user_can( 'manage_options' ) ) {
-					return '';
+					$msg = '';
+				} elseif ( 'card' === $type ) {
+					$msg = sprintf( '<a href="%s" target="_blank" class="fusion-builder-placeholder">%s</a>', admin_url( 'admin.php?page=avada-library' ), esc_html__( 'Please select post card design to display here.', 'fusion-builder' ) );
+				} else {
+					$msg = in_array( $this->args['source'], [ 'posts', 'related', 'up_sells', 'cross_sells', 'featured_products' ], true ) ? esc_html__( 'No posts found.', 'fusion-builder' ) : esc_html__( 'No terms found.', 'fusion-builder' );
+					$msg = sprintf( '<div class="fusion-builder-placeholder">%s</div>', $msg );
 				}
 
-				if ( 'card' === $type ) {
-					return sprintf( '<a href="%s" target="_blank" class="fusion-builder-placeholder">%s</a>', admin_url( 'admin.php?page=avada-library' ), esc_html__( 'Please select post card design to display here.', 'fusion-builder' ) );
-				} else {
-					$msg = in_array( $this->args['source'], [ 'posts', 'related', 'up_sells', 'cross_sells' ], true ) ? esc_html__( 'No posts found.', 'fusion-builder' ) : esc_html__( 'No terms found.', 'fusion-builder' );
-					return sprintf( '<div class="fusion-builder-placeholder">%s</div>', $msg );
-				}
+				return apply_filters( 'awb_post_cards_placeholder_message', $msg, $type, $this->args );
 			}
 
 			/**
@@ -1310,13 +1589,105 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				$this->base_selector = '.fusion-post-cards.fusion-post-cards-' . $this->element_counter;
 				$this->dynamic_css   = [];
 
+				// Add filters styles if active.
+				if ( 'no' !== $this->args['filters'] && ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) && 'posts' === $this->args['source'] ) {
+
+					$selectors = [
+						$this->base_selector . ' ul.fusion-filters li a',
+					];
+
+					$text_styles = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'filters_font', 'array' );
+
+					foreach ( $text_styles as $rule => $value ) {
+						$this->add_css_property( $selectors, $rule, $value );
+					}
+
+					if ( ! $this->is_default( 'filters_font_size' ) ) {
+						$this->add_css_property( $selectors, 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['filters_font_size'] ) );
+					}
+
+					if ( ! $this->is_default( 'filters_line_height' ) ) {
+						$this->add_css_property( $selectors, 'line-height', $this->args['filters_line_height'] );
+					}
+
+					if ( ! $this->is_default( 'filters_letter_spacing' ) ) {
+						$this->add_css_property( $selectors, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['filters_letter_spacing'] ) );
+					}
+
+					if ( ! $this->is_default( 'filters_text_transform' ) ) {
+						$this->add_css_property( $selectors, 'text-transform', $this->args['filters_text_transform'] );
+					}
+
+					if ( ! $this->is_default( 'filters_color' ) ) {
+						$this->add_css_property( $selectors, 'color', fusion_library()->sanitize->color( $this->args['filters_color'] ) );
+					}
+
+					$selectors = [
+						$this->base_selector . ' ul.fusion-filters li a:hover',
+					];
+
+					if ( '' !== $this->args['filters_hover_color'] ) {
+						$this->add_css_property( $selectors, 'color', fusion_library()->sanitize->color( $this->args['filters_hover_color'] ) );
+					}
+
+					$selectors = [
+						$this->base_selector . ' ul.fusion-filters li.fusion-active a',
+					];
+
+					if ( '' !== $this->args['filters_active_color'] ) {
+						$this->add_css_property( $selectors, 'color', fusion_library()->sanitize->color( $this->args['filters_active_color'] ) );
+					}
+
+					if ( ! $this->is_default( 'active_filter_border_size' ) ) {
+						$this->add_css_property( $selectors, 'border-top-width', fusion_library()->sanitize->get_value_with_unit( $this->args['active_filter_border_size'] ) );
+					}
+
+					if ( ! $this->is_default( 'active_filter_border_color' ) ) {
+						$this->add_css_property( $selectors, 'border-color', fusion_library()->sanitize->color( $this->args['active_filter_border_color'] ) );
+					}
+
+					$selectors = [
+						$this->base_selector . ' ul.fusion-filters',
+					];
+
+					if ( ! $this->is_default( 'filters_border_bottom' ) ) {
+						$this->add_css_property( $selectors, 'border-bottom-width', fusion_library()->sanitize->get_value_with_unit( $this->args['filters_border_bottom'] ) );
+					}
+
+					if ( ! $this->is_default( 'filters_border_top' ) ) {
+						$this->add_css_property( $selectors, 'border-top-width', fusion_library()->sanitize->get_value_with_unit( $this->args['filters_border_top'] ) );
+					}
+
+					if ( ! $this->is_default( 'filters_border_left' ) ) {
+						$this->add_css_property( $selectors, 'border-left-width', fusion_library()->sanitize->get_value_with_unit( $this->args['filters_border_left'] ) );
+						$this->add_css_property( $selectors, 'border-left-style', 'solid' );
+					}
+
+					if ( ! $this->is_default( 'filters_border_right' ) ) {
+						$this->add_css_property( $selectors, 'border-right-width', fusion_library()->sanitize->get_value_with_unit( $this->args['filters_border_right'] ) );
+						$this->add_css_property( $selectors, 'border-right-style', 'solid' );
+					}
+
+					if ( ! $this->is_default( 'filters_border_color' ) ) {
+						$this->add_css_property( $selectors, 'border-color', fusion_library()->sanitize->color( $this->args['filters_border_color'] ) );
+					}
+
+					if ( ! $this->is_default( 'filters_height' ) ) {
+						$this->add_css_property( $selectors, 'min-height', fusion_library()->sanitize->get_value_with_unit( $this->args['filters_height'] ) );
+					}
+
+					if ( ! $this->is_default( 'filters_alignment' ) ) {
+						$this->add_css_property( $selectors, 'justify-content', $this->args['filters_alignment'] );
+					}
+				}
+
 				$selectors = [
 					$this->base_selector . ' .infinite-scroll-hide',
 				];
 				if ( $this->is_load_more() ) {
 					$this->add_css_property( $selectors, 'display', 'none' );
 				}
-				if ( '1' !== $this->args['columns'] ) {
+				if ( '1' !== $this->args['columns'] && '0' !== $this->args['column_spacing'] ) {
 					$column_spacing = fusion_library()->sanitize->get_value_with_unit( $this->args['column_spacing'] );
 
 					$selectors = [
@@ -1338,7 +1709,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$this->add_css_property( $selectors, 'margin-right', 'calc((' . $column_spacing . ')/ 2)' );
 				}
 
-				if ( 'grid' === $this->args['layout'] ) {
+				if ( ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) && '0' !== $this->args['row_spacing'] ) {
 					$row_spacing = fusion_library()->sanitize->get_value_with_unit( $this->args['row_spacing'] );
 
 					$selectors = [
@@ -1380,12 +1751,36 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$this->add_css_property( $selectors, 'bottom', fusion_library()->sanitize->get_value_with_unit( $this->get_reverse_num( $this->args['nav_margin_top'] ) ) );
 				}
 
+				if ( 'load_more_button' === $this->args['scrolling'] ) {
+					$button_css_selector       = $this->base_selector . ' .fusion-load-more-button';
+					$button_hover_css_selector = [
+						$this->base_selector . ' .fusion-load-more-button:hover',
+						$this->base_selector . ' .fusion-load-more-button:focus',
+					];
+
+					if ( ! empty( $this->args['load_more_btn_color'] ) ) {
+						$this->add_css_property( $button_css_selector, 'color', fusion_library()->sanitize->color( $this->args['load_more_btn_color'] ) );
+					}
+
+					if ( ! empty( $this->args['load_more_btn_bg_color'] ) ) {
+						$this->add_css_property( $button_css_selector, 'background-color', fusion_library()->sanitize->color( $this->args['load_more_btn_bg_color'] ) );
+					}
+
+					if ( ! empty( $this->args['load_more_btn_hover_color'] ) ) {
+						$this->add_css_property( $button_hover_css_selector, 'color', fusion_library()->sanitize->color( $this->args['load_more_btn_hover_color'] ) );
+					}
+
+					if ( ! empty( $this->args['load_more_btn_hover_bg_color'] ) ) {
+						$this->add_css_property( $button_hover_css_selector, 'background-color', fusion_library()->sanitize->color( $this->args['load_more_btn_hover_bg_color'] ) );
+					}
+				}
+
 				// Process children elements CSS.
 				$this->add_elements_css_properties();
 
 				$css = $this->parse_css();
 
-				if ( 'grid' === $this->args['layout'] ) {
+				if ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) {
 					$responsive_style = '';
 
 					// Responsive options.
@@ -1411,6 +1806,23 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 					$css .= $responsive_style;
 				}
 
+				// Responsive Filters Alignment.
+				if ( 'no' !== $this->args['filters'] && ( 'grid' === $this->args['layout'] || 'masonry' === $this->args['layout'] ) && 'posts' === $this->args['source'] ) {
+
+					foreach ( [ 'medium', 'small' ] as $size ) {
+						$key   = 'filters_alignment_' . $size;
+						$media = sprintf( '@media only screen and (max-width:%spx)', $fusion_settings->get( 'visibility_' . $size ) );
+
+						if ( '' === $this->args[ $key ] ) {
+							continue;
+						}
+
+						$this->dynamic_css = [];
+						$this->add_css_property( $this->base_selector . ' ul.fusion-filters', 'justify-content', $this->args[ $key ] );
+						$css .= sprintf( '%s { %s }', $media, $this->parse_css() );
+					}
+				}
+
 				return $css ? '<style>' . $css . '</style>' : '';
 			}
 
@@ -1423,7 +1835,7 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 			 * @return  void
 			 */
 			public function alter_shop_loop( $query ) {
-				if ( ! is_admin() && $query->is_main_query() && $query->is_post_type_archive( 'product' ) && 'no' === fusion_get_option( 'show_wc_shop_loop' ) ) {
+				if ( ! is_admin() && $query->is_main_query() && ! $query->is_search && $query->is_post_type_archive( 'product' ) && 'no' === fusion_get_option( 'show_wc_shop_loop' ) ) {
 					$search_override        = get_post( wc_get_page_id( 'shop' ) );
 					$has_archives_component = $search_override && has_shortcode( $search_override->post_content, 'fusion_post_cards' );
 
@@ -1509,6 +1921,8 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							}
 							$this->taxonomy_map[ $post_type->name ][] = $new_taxonomy->name;
 						}
+
+						$this->taxonomy_map[ $post_type->name ][] = 'awb_custom_field';
 					}
 				}
 
@@ -1596,6 +2010,11 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 							'value'    => 'cross_sells',
 							'operator' => '!=',
 						],
+						[
+							'element'  => 'source',
+							'value'    => 'featured_products',
+							'operator' => '!=',
+						],
 					],
 					'callback'    => [
 						'function' => 'fusion_ajax',
@@ -1626,6 +2045,8 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 				foreach ( $taxonomies as $taxonomy ) {
 					$taxonomy_options[ $taxonomy->name ] = ucwords( esc_html( $taxonomy->label ) );
 				}
+
+				$taxonomy_options['awb_custom_field'] = esc_html__( 'Custom Field', 'fusion-builder' );
 
 				return [
 					'type'        => 'select',
@@ -1780,6 +2201,103 @@ if ( fusion_is_element_enabled( 'fusion_post_cards' ) ) {
 
 				return $options;
 			}
+
+			/**
+			 * Fetch post meta options.
+			 *
+			 * @return array
+			 */
+			public function fetch_post_meta_options() {
+				$options   = [];
+				$options[] = [
+					'type'         => 'textfield',
+					'heading'      => esc_attr__( 'Custom Field - Name', 'fusion-builder' ),
+					'description'  => esc_attr__( 'Enter the custom field(or meta) name.', 'fusion-builder' ),
+					'param_name'   => 'custom_field_name',
+					'default'      => '',
+					'dynamic_data' => true,
+					'callback'     => [
+						'function' => 'fusion_ajax',
+						'action'   => 'get_fusion_post_cards',
+						'ajax'     => true,
+					],
+					'dependency'   => [
+						[
+							'element'  => 'posts_by',
+							'value'    => 'awb_custom_field',
+							'operator' => '==',
+						],
+						[
+							'element'  => 'source',
+							'value'    => 'posts',
+							'operator' => '==',
+						],
+					],
+				];
+
+				$options[] = [
+					'type'        => 'radio_button_set',
+					'heading'     => esc_attr__( 'Custom Field - Value Comparison', 'fusion-builder' ),
+					'description' => esc_attr__( ' Select the custom field(or meta) comparison type.', 'fusion-builder' ),
+					'param_name'  => 'custom_field_comparison',
+					'default'     => 'exists',
+					'callback'    => [
+						'function' => 'fusion_ajax',
+						'action'   => 'get_fusion_post_cards',
+						'ajax'     => true,
+					],
+					'value'       => [
+						'exists'     => esc_html__( 'Exists', 'fusion-builder' ),
+						'not_exists' => esc_html__( 'Not Exists', 'fusion-builder' ),
+						'equals'     => esc_html__( 'Equals', 'fusion-builder' ),
+					],
+					'dependency'  => [
+						[
+							'element'  => 'posts_by',
+							'value'    => 'awb_custom_field',
+							'operator' => '==',
+						],
+						[
+							'element'  => 'source',
+							'value'    => 'posts',
+							'operator' => '==',
+						],
+					],
+				];
+
+				$options[] = [
+					'type'         => 'textfield',
+					'heading'      => esc_attr__( 'Custom Field - Value', 'fusion-builder' ),
+					'description'  => esc_attr__( 'Enter the custom field(or meta) value.', 'fusion-builder' ),
+					'param_name'   => 'custom_field_value',
+					'default'      => '',
+					'dynamic_data' => true,
+					'callback'     => [
+						'function' => 'fusion_ajax',
+						'action'   => 'get_fusion_post_cards',
+						'ajax'     => true,
+					],
+					'dependency'   => [
+						[
+							'element'  => 'posts_by',
+							'value'    => 'awb_custom_field',
+							'operator' => '==',
+						],
+						[
+							'element'  => 'source',
+							'value'    => 'posts',
+							'operator' => '==',
+						],
+						[
+							'element'  => 'custom_field_comparison',
+							'value'    => 'equals',
+							'operator' => '==',
+						],
+					],
+				];
+
+				return $options;
+			}
 		}
 	}
 
@@ -1807,7 +2325,9 @@ function fusion_element_post_cards() {
 	$post_type_options = [];
 	$taxonomy_options  = [];
 	$filter_option     = [];
+	$meta_options      = [];
 	$post_terms_option = [];
+	$layouts_permalink = [];
 	$layouts           = [
 		'0' => esc_attr__( 'None', 'fusion-builder' ),
 	];
@@ -1833,7 +2353,8 @@ function fusion_element_post_cards() {
 
 		if ( $post_cards ) {
 			foreach ( $post_cards as $post_card ) {
-				$layouts[ $post_card->ID ] = $post_card->post_title;
+				$layouts[ $post_card->ID ]           = $post_card->post_title;
+				$layouts_permalink[ $post_card->ID ] = $post_card->guid;
 			}
 		}
 
@@ -1844,6 +2365,7 @@ function fusion_element_post_cards() {
 			$post_terms_option = $post_cards->fetch_post_terms_option();
 			$filter_option     = $post_cards->fetch_post_filter_option();
 			$taxonomy_options  = $post_cards->fetch_post_taxonomy_options();
+			$meta_options      = $post_cards->fetch_post_meta_options();
 		}
 	}
 
@@ -1855,8 +2377,9 @@ function fusion_element_post_cards() {
 
 	if ( class_exists( 'WooCommerce' ) ) {
 		$woo_sources = [
-			'up_sells'    => esc_attr__( 'Upsells', 'fusion-builder' ),
-			'cross_sells' => esc_attr__( 'Cross-sells', 'fusion-builder' ),
+			'up_sells'          => esc_attr__( 'Upsells', 'fusion-builder' ),
+			'cross_sells'       => esc_attr__( 'Cross-sells', 'fusion-builder' ),
+			'featured_products' => esc_attr__( 'Featured Products', 'fusion-builder' ),
 		];
 
 		$source_values = array_merge( $source_values, $woo_sources );
@@ -1879,6 +2402,11 @@ function fusion_element_post_cards() {
 				'function' => 'fusion_ajax',
 				'action'   => 'get_fusion_post_cards',
 				'ajax'     => true,
+			],
+			'quick_edit'  => [
+				'label' => esc_html__( 'Edit Post Card', 'fusion-builder' ),
+				'type'  => 'post_card',
+				'items' => $layouts_permalink,
 			],
 		],
 		[
@@ -1912,7 +2440,7 @@ function fusion_element_post_cards() {
 		[
 			'type'        => 'radio_button_set',
 			'heading'     => esc_attr__( 'Content Source', 'fusion-builder' ),
-			'description' => __( 'Select the type of content you would like to show. <strong>Note:</strong> The related option will fetch items related to the post that it is placed on based on taxonomy selection.', 'fusion-builder' ),
+			'description' => __( 'Select the type of content you would like to show. <strong>NOTE:</strong> The related option will fetch items related to the post that it is placed on based on taxonomy selection.', 'fusion-builder' ),
 			'param_name'  => 'source',
 			'default'     => 'posts',
 			'value'       => $source_values,
@@ -1929,6 +2457,10 @@ function fusion_element_post_cards() {
 
 	foreach ( $taxonomy_options as $taxonomy_option ) {
 		$params[] = $taxonomy_option;
+	}
+
+	foreach ( $meta_options as $meta_option ) {
+		$params[] = $meta_option;
 	}
 
 	$params[] = [
@@ -1990,11 +2522,45 @@ function fusion_element_post_cards() {
 	];
 
 	$params[] = [
+		'type'        => 'radio_button_set',
+		'heading'     => esc_attr__( 'Show Filters', 'fusion-builder' ),
+		'description' => esc_attr__( 'Choose to show or hide the filters.', 'fusion-builder' ),
+		'param_name'  => 'filters',
+		'value'       => [
+			'yes'             => esc_attr__( 'Yes', 'fusion-builder' ),
+			'yes-without-all' => __( 'Yes without "All"', 'fusion-builder' ),
+			'no'              => esc_attr__( 'No', 'fusion-builder' ),
+		],
+		'default'     => 'no',
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_ajax',
+			'action'   => 'get_fusion_post_cards',
+			'ajax'     => true,
+		],
+	];
+	$params[] = [
 		'type'        => 'range',
 		'heading'     => esc_attr__( 'Number of Posts', 'fusion-builder' ),
 		'description' => sprintf(
 			/* translators: %1$s: Portfolio Link. %2$s: Products Link. */
-			esc_attr__( 'Select number of posts per page.  Set to -1 to display all. Set to 0 to use the post type default number of posts. For %1$s and %2$s this comes from the global options. For all others Settings > Reading.', 'fusion-builder' ),
+			esc_attr__( 'Select number of posts per page. Set to -1 to display all. Set to 0 to use the post type default number of posts. For %1$s and %2$s this comes from the global options. For all others Settings > Reading.', 'fusion-builder' ),
 			'<a href="' . admin_url( 'themes.php?page=avada_options#portfolio_archive_items' ) . '" target="_blank">' . esc_attr__( 'portfolio', 'fusion-builder' ) . '</a>',
 			'<a href="' . admin_url( 'themes.php?page=avada_options#woo_items' ) . '" target="_blank">' . esc_attr__( 'products', 'fusion-builder' ) . '</a>'
 		),
@@ -2027,7 +2593,7 @@ function fusion_element_post_cards() {
 	$params[] = [
 		'type'        => 'select',
 		'heading'     => esc_attr__( 'Order By', 'fusion-builder' ),
-		'description' => __( 'Defines how posts should be ordered. <strong>Note:</strong> (Price|Popularity|Rating) options only work for product-related queries.', 'fusion-builder' ),
+		'description' => __( 'Defines how posts should be ordered. <strong>NOTE:</strong> (Price|Popularity|Rating) options only work for product-related queries.', 'fusion-builder' ),
 		'param_name'  => 'orderby',
 		'default'     => 'date',
 		'value'       => [
@@ -2042,6 +2608,7 @@ function fusion_element_post_cards() {
 			'price'         => esc_attr__( 'Price', 'fusion-builder' ),
 			'popularity'    => esc_attr__( 'Popularity (sales)', 'fusion-builder' ),
 			'rating'        => esc_attr__( 'Average Rating', 'fusion-builder' ),
+			'event_date'    => esc_attr__( 'Event Date', 'fusion-builder' ),
 		],
 		'dependency'  => [
 			[
@@ -2083,7 +2650,6 @@ function fusion_element_post_cards() {
 			'ajax'     => true,
 		],
 	];
-
 	$params[] = [
 		'type'        => 'radio_button_set',
 		'heading'     => esc_attr__( 'Order', 'fusion-builder' ),
@@ -2107,6 +2673,64 @@ function fusion_element_post_cards() {
 			'ajax'     => true,
 		],
 	];
+
+	$params[] = [
+		'type'        => 'radio_button_set',
+		'heading'     => esc_attr__( 'Show Only Upcoming Events', 'fusion-builder' ),
+		'description' => __( 'Whether or not the events displayed will be only from the current date.', 'fusion-builder' ),
+		'param_name'  => 'upcoming_events_only',
+		'default'     => 'yes',
+		'value'       => [
+			'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
+			'no'  => esc_attr__( 'No', 'fusion-builder' ),
+		],
+		'dependency'  => [
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'post_type',
+				'value'    => 'tribe_events',
+				'operator' => '==',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_ajax',
+			'action'   => 'get_fusion_post_cards',
+			'ajax'     => true,
+		],
+	];
+	$params[] = [
+		'type'        => 'radio_button_set',
+		'heading'     => esc_attr__( 'Show Only Featured Events', 'fusion-builder' ),
+		'description' => __( 'Whether or not to display only events that are featured.', 'fusion-builder' ),
+		'param_name'  => 'featured_events_only',
+		'default'     => 'no',
+		'value'       => [
+			'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
+			'no'  => esc_attr__( 'No', 'fusion-builder' ),
+		],
+		'dependency'  => [
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'post_type',
+				'value'    => 'tribe_events',
+				'operator' => '==',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_ajax',
+			'action'   => 'get_fusion_post_cards',
+			'ajax'     => true,
+		],
+	];
+
 	$params[] = [
 		'type'        => 'radio_button_set',
 		'heading'     => esc_attr__( 'Pagination Type', 'fusion-builder' ),
@@ -2122,8 +2746,13 @@ function fusion_element_post_cards() {
 		'dependency'  => [
 			[
 				'element'  => 'layout',
-				'value'    => 'grid',
-				'operator' => '==',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
 			],
 			[
 				'element'  => 'source',
@@ -2163,9 +2792,365 @@ function fusion_element_post_cards() {
 			'grid'     => esc_attr__( 'Grid', 'fusion-builder' ),
 			'carousel' => esc_attr__( 'Carousel', 'fusion-builder' ),
 			'slider'   => esc_attr__( 'Slider', 'fusion-builder' ),
+			'masonry'  => esc_attr__( 'Masonry', 'fusion-builder' ),
 		],
 		'default'     => 'grid',
 		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+	];
+	$params[] = [
+		'type'             => 'typography',
+		'heading'          => esc_attr__( 'Filters Typography', 'fusion-builder' ),
+		'description'      => esc_html__( 'Controls the typography of the filters content. Leave empty for the global font family.', 'fusion-builder' ),
+		'param_name'       => 'filters_fonts',
+		'choices'          => [
+			'font-family'    => 'filters_font',
+			'font-size'      => 'filters_font_size',
+			'text-transform' => 'filters_text_transform',
+			'line-height'    => 'filters_line_height',
+			'letter-spacing' => 'filters_letter_spacing',
+			'color'          => 'filters_color',
+		],
+		'default'          => [
+			'font-family'    => '',
+			'variant'        => '400',
+			'font-size'      => '',
+			'text-transform' => '',
+			'line-height'    => '',
+			'letter-spacing' => '',
+			'color'          => $fusion_settings->get( 'link_color' ),
+		],
+		'remove_from_atts' => true,
+		'global'           => true,
+		'group'            => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'       => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'         => [
+			'function' => 'fusion_style_block',
+		],
+	];
+	$params[] = [
+		'type'        => 'range',
+		'heading'     => esc_attr__( 'Filters Container Height', 'fusion-builder' ),
+		'description' => esc_attr__( 'Controls the filters container height. In pixels.', 'fusion-builder' ),
+		'param_name'  => 'filters_height',
+		'value'       => '36',
+		'min'         => '0',
+		'max'         => '500',
+		'step'        => '1',
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_style_block',
+		],
+	];
+	$params[] = [
+		'type'             => 'dimension',
+		'remove_from_atts' => true,
+		'heading'          => esc_attr__( 'Filters Container Border Size', 'fusion-builder' ),
+		'description'      => esc_attr__( 'Controls the border size of the filters container. In pixels or percentage, ex: 10px or 10%.', 'fusion-builder' ),
+		'param_name'       => 'border_sizes',
+		'value'            => [
+			'filters_border_top'    => '',
+			'filters_border_right'  => '',
+			'filters_border_bottom' => '',
+			'filters_border_left'   => '',
+		],
+		'group'            => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'       => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'         => [
+			'function' => 'fusion_style_block',
+			'args'     => [
+				'dimension' => true,
+			],
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Filters Container Border Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Controls the border color of the filters container.', 'fusion-builder' ),
+		'param_name'  => 'filters_border_color',
+		'value'       => '',
+		'default'     => $fusion_settings->get( 'sep_color' ),
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_style_block',
+		],
+	];
+	$params[] = [
+		'type'        => 'radio_button_set',
+		'heading'     => esc_attr__( 'Filters Alignment', 'fusion-builder' ),
+		'description' => esc_attr__( 'Select the filters content alignment.', 'fusion-builder' ),
+		'param_name'  => 'filters_alignment',
+		'default'     => 'flex-start',
+		'grid_layout' => true,
+		'back_icons'  => true,
+		'icons'       => [
+			'flex-start'    => '<span class="fusiona-horizontal-flex-start"></span>',
+			'center'        => '<span class="fusiona-horizontal-flex-center"></span>',
+			'flex-end'      => '<span class="fusiona-horizontal-flex-end"></span>',
+			'space-between' => '<span class="fusiona-horizontal-space-between"></span>',
+			'space-around'  => '<span class="fusiona-horizontal-space-around"></span>',
+			'space-evenly'  => '<span class="fusiona-horizontal-space-evenly"></span>',
+		],
+		'value'       => [
+			'flex-start'    => esc_html__( 'Flex Start', 'fusion-builder' ),
+			'center'        => esc_html__( 'Center', 'fusion-builder' ),
+			'flex-end'      => esc_html__( 'Flex End', 'fusion-builder' ),
+			'space-between' => esc_html__( 'Space Between', 'fusion-builder' ),
+			'space-around'  => esc_html__( 'Space Around', 'fusion-builder' ),
+			'space-evenly'  => esc_html__( 'Space Evenly', 'fusion-builder' ),
+		],
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'responsive'  => [
+			'state' => 'large',
+		],
+		'callback'    => [
+			'function' => 'fusion_style_block',
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Filters Link Hover Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Controls the hover color of the filters link.', 'fusion-builder' ),
+		'param_name'  => 'filters_hover_color',
+		'value'       => '',
+		'default'     => $fusion_settings->get( 'primary_color' ),
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_style_block',
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Filters Link Active Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Controls the active color of the filters link.', 'fusion-builder' ),
+		'param_name'  => 'filters_active_color',
+		'value'       => '',
+		'default'     => $fusion_settings->get( 'primary_color' ),
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_style_block',
+		],
+	];
+	$params[] = [
+		'type'        => 'range',
+		'heading'     => esc_attr__( 'Active Filter Link Border Size', 'fusion-builder' ),
+		'description' => esc_attr__( 'Controls the filters link border size. In pixels.', 'fusion-builder' ),
+		'param_name'  => 'active_filter_border_size',
+		'value'       => '3',
+		'min'         => '0',
+		'max'         => '100',
+		'step'        => '1',
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_style_block',
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Active Filter Link Border Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Controls the color of the active filter link.', 'fusion-builder' ),
+		'param_name'  => 'active_filter_border_color',
+		'value'       => '',
+		'default'     => $fusion_settings->get( 'primary_color' ),
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'dependency'  => [
+			[
+				'element'  => 'layout',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'source',
+				'value'    => 'posts',
+				'operator' => '==',
+			],
+			[
+				'element'  => 'filters',
+				'value'    => 'no',
+				'operator' => '!=',
+			],
+		],
+		'callback'    => [
+			'function' => 'fusion_style_block',
+		],
 	];
 	$params[] = [
 		'type'        => 'radio_button_set',
@@ -2201,7 +3186,7 @@ function fusion_element_post_cards() {
 		'heading'     => esc_attr__( 'Number of Columns', 'fusion-builder' ),
 		'description' => esc_attr__( 'Set the number of columns per row.', 'fusion-builder' ),
 		'param_name'  => 'columns',
-		'value'       => $fusion_settings->get( 'woocommerce_shop_page_columns' ),
+		'value'       => '4',
 		'min'         => '0',
 		'max'         => '6',
 		'step'        => '1',
@@ -2230,8 +3215,8 @@ function fusion_element_post_cards() {
 		'heading'     => esc_attr__( 'Column Spacing', 'fusion-builder' ),
 		'description' => esc_attr__( "Insert the amount of horizontal spacing between items without 'px'. ex: 40.", 'fusion-builder' ),
 		'param_name'  => 'column_spacing',
-		'value'       => $fusion_settings->get( 'woocommerce_archive_grid_column_spacing' ),
-		'min'         => '1',
+		'value'       => '40',
+		'min'         => '0',
 		'max'         => '300',
 		'step'        => '1',
 		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
@@ -2253,16 +3238,21 @@ function fusion_element_post_cards() {
 		'heading'     => esc_attr__( 'Row Spacing', 'fusion-builder' ),
 		'description' => esc_attr__( "Insert the amount of vertical spacing between items without 'px'. ex: 40.", 'fusion-builder' ),
 		'param_name'  => 'row_spacing',
-		'value'       => $fusion_settings->get( 'woocommerce_archive_grid_column_spacing' ),
-		'min'         => '1',
+		'value'       => '40',
+		'min'         => '0',
 		'max'         => '300',
 		'step'        => '1',
 		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 		'dependency'  => [
 			[
 				'element'  => 'layout',
-				'value'    => 'grid',
-				'operator' => '==',
+				'value'    => 'carousel',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'slider',
+				'operator' => '!=',
 			],
 		],
 	];
@@ -2423,6 +3413,11 @@ function fusion_element_post_cards() {
 				'value'    => 'grid',
 				'operator' => '!=',
 			],
+			[
+				'element'  => 'layout',
+				'value'    => 'masonry',
+				'operator' => '!=',
+			],
 		],
 	];
 	$params[] = [
@@ -2455,6 +3450,11 @@ function fusion_element_post_cards() {
 			[
 				'element'  => 'layout',
 				'value'    => 'grid',
+				'operator' => '!=',
+			],
+			[
+				'element'  => 'layout',
+				'value'    => 'masonry',
 				'operator' => '!=',
 			],
 		],
@@ -2533,6 +3533,111 @@ function fusion_element_post_cards() {
 			'margin_left'   => '',
 		],
 		'group'            => esc_attr__( 'Design', 'fusion-builder' ),
+	];
+
+	$params[] = [
+		'type'             => 'subgroup',
+		'heading'          => esc_html__( 'Load More - Button Styling', 'fusion-builder' ),
+		'description'      => esc_html__( 'Customize "Load More" button colors.', 'fusion-builder' ),
+		'param_name'       => 'load_more_button',
+		'default'          => 'regular',
+		'group'            => esc_html__( 'Design', 'fusion-builder' ),
+		'remove_from_atts' => true,
+		'value'            => [
+			'regular' => esc_html__( 'Regular', 'fusion-builder' ),
+			'active'  => esc_html__( 'Active', 'fusion-builder' ),
+		],
+		'icons'            => [
+			'regular' => '<span class="fusiona-regular-state" style="font-size:18px;"></span>',
+			'active'  => '<span class="fusiona-hover-state" style="font-size:18px;"></span>',
+		],
+		'dependency'       => [
+			[
+				'element'  => 'scrolling',
+				'value'    => 'load_more_button',
+				'operator' => '==',
+			],
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Text Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Select the button text color.', 'fusion-builder' ),
+		'param_name'  => 'load_more_btn_color',
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'value'       => '',
+		'default'     => 'var(--awb-color8)',
+		'subgroup'    => [
+			'name' => 'load_more_button',
+			'tab'  => 'regular',
+		],
+		'dependency'  => [
+			[
+				'element'  => 'scrolling',
+				'value'    => 'load_more_button',
+				'operator' => '==',
+			],
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Background Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Select the button background color.', 'fusion-builder' ),
+		'param_name'  => 'load_more_btn_bg_color',
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'value'       => '',
+		'default'     => 'var(--awb-color3)',
+		'subgroup'    => [
+			'name' => 'load_more_button',
+			'tab'  => 'regular',
+		],
+		'dependency'  => [
+			[
+				'element'  => 'scrolling',
+				'value'    => 'load_more_button',
+				'operator' => '==',
+			],
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Hover Text Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Select the button hover text color.', 'fusion-builder' ),
+		'param_name'  => 'load_more_btn_hover_color',
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'value'       => '',
+		'default'     => 'var(--awb-color1)',
+		'subgroup'    => [
+			'name' => 'load_more_button',
+			'tab'  => 'active',
+		],
+		'dependency'  => [
+			[
+				'element'  => 'scrolling',
+				'value'    => 'load_more_button',
+				'operator' => '==',
+			],
+		],
+	];
+	$params[] = [
+		'type'        => 'colorpickeralpha',
+		'heading'     => esc_attr__( 'Hover Background Color', 'fusion-builder' ),
+		'description' => esc_attr__( 'Select the button hover background color.', 'fusion-builder' ),
+		'param_name'  => 'load_more_btn_hover_bg_color',
+		'group'       => esc_attr__( 'Design', 'fusion-builder' ),
+		'value'       => '',
+		'default'     => 'var(--awb-color5)',
+		'subgroup'    => [
+			'name' => 'load_more_button',
+			'tab'  => 'active',
+		],
+		'dependency'  => [
+			[
+				'element'  => 'scrolling',
+				'value'    => 'load_more_button',
+				'operator' => '==',
+			],
+		],
 	];
 
 	$params['fusion_animation_placeholder'] = [

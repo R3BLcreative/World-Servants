@@ -49,8 +49,7 @@
 .fusion-form-form-wrapper .fusion-form-field .fusion-form-image-select img {
   width: 100%;
   height: 100%;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
 }
 .fusion-form-form-wrapper .fusion-form-field.fusion-form-label-above label span {
   margin-bottom: 0.35em;

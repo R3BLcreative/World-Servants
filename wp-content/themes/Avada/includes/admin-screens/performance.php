@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 			<?php endif; ?>
 
-			<a href="#2" class="button button-primary awb-wizard-link awb-wizard-next awb-get-started" data-id="2"><?php esc_html_e( 'Let\'s Start', 'Avada' ); ?> <i class="fusiona-arrow-forward"></i></a>
+			<a href="#2" class="button button-primary awb-wizard-link awb-wizard-next awb-get-started" data-id="2"><span class="awb-text-wrapper"><span><?php esc_html_e( 'Let\'s Start', 'Avada' ); ?></span><i class="fusiona-arrow-forward"></i></span></a>
 		</div>
 	</section>
 
@@ -116,6 +116,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$options['status_eslider'],
 			$options['status_fusion_slider'],
 			$options['status_fusion_forms'],
+			$options['status_awb_Off_Canvas'],
 			$options['status_fusion_portfolio'],
 			$options['status_fusion_faqs'],
 		];
@@ -171,7 +172,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="awb-wizard-actions">
 			<a href="#3" class="button button-secondary awb-wizard-save hidden" data-id="features"><i class="awb-wizard-button-icon fusiona-exclamation-sign"></i><?php esc_html_e( 'Save Changes', 'Avada' ); ?></a>
-			<a href="#3" class="button button-primary awb-wizard-link awb-wizard-next" data-id="3"><?php esc_html_e( 'Next Step', 'Avada' ); ?> <i class="fusiona-arrow-forward"></i></a>
+			<a href="#3" class="button button-primary awb-wizard-link awb-wizard-next" data-id="3"><span class="awb-text-wrapper"><span><?php esc_html_e( 'Next Step', 'Avada' ); ?></span><i class="fusiona-arrow-forward"></i></span></a>
 		</div>
 	</section>
 
@@ -222,7 +223,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="awb-wizard-actions">
 			<a href="#4" class="button button-secondary awb-wizard-save hidden" data-id="icons"><i class="awb-wizard-button-icon fusiona-exclamation-sign"></i><?php esc_html_e( 'Save Changes', 'Avada' ); ?></a>
-			<a href="#4" class="button button-primary awb-wizard-link awb-wizard-next" data-id="4"><?php esc_html_e( 'Next Step', 'Avada' ); ?> <i class="fusiona-arrow-forward"></i></a>
+			<a href="#4" class="button button-primary awb-wizard-link awb-wizard-next" data-id="4"><span class="awb-text-wrapper"><span><?php esc_html_e( 'Next Step', 'Avada' ); ?></span><i class="fusiona-arrow-forward"></i></span></a>
 		</div>
 	</section>
 
@@ -261,7 +262,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				$variant_value = ! empty( $style_value ) ? $weight_value . $style_value : $weight_value;
 				?>
 
-				<div class="pyre_metabox_field fusion-builder-font-family">
+				<div class="pyre_metabox_field fusion-builder-font-family" data-id="<?php echo esc_attr( $option['id'] ); ?>">
 					<div class="pyre_desc">
 						<label><?php echo $option['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
 						<?php if ( ! empty( $option['description'] ) ) : ?>
@@ -269,17 +270,52 @@ if ( ! defined( 'ABSPATH' ) ) {
 						<?php endif; ?>
 					</div>
 					<div class="pyre_field">
-						<div class="font-family">
-							<div class="fusion-loader">
-								<div class="fusion-builder-loader"></div>
+						<div class="awb-typography" data-global="1">
+							<div class="input-wrapper family-selection awb-contains-global">
+								<div class="awb-typo-heading">
+									<label><?php esc_html_e( 'Font Family', 'Avada' ); ?></label>
+									<span class="awb-global"><i class="fusiona-globe" aria-hidden="true"></i></span>
+								</div>
+								<div class="fusion-select-field">
+									<div class="fusion-select-preview-wrap">
+										<span class="fusion-select-preview">
+											<?php
+											if ( ! empty( $family_value ) ) {
+												echo esc_html( $family_value );
+											} elseif ( ! empty( $option['default']['font-family'] ) ) {
+												echo esc_html( $option['default']['font-family'] );
+											} else {
+												echo '<span class="fusion-select-placeholder">' . esc_attr__( 'Select Font Family', 'Avada' ) . '</span>';
+											}
+											?>
+										</span>
+										<div class="fusiona-arrow-down"></div>
+									</div>
+									<div class="fusion-select-dropdown">
+										<div class="fusion-select-search">
+											<input type="text" class="fusion-hide-from-atts fusion-dont-update" placeholder="<?php esc_attr_e( 'Search Font Families', 'Avada' ); ?>" />
+										</div>
+										<div class="fusion-select-options"></div>
+									</div>
+									<input type="hidden" id="<?php echo esc_attr( $family_id ); ?>" name="<?php echo esc_attr( $family_id ); ?>" value="<?php echo esc_attr( $family_value ); ?>" data-default="<?php echo esc_attr( $option['default']['font-family'] ); ?>" class="input-font_family fusion-select-option-value" data-subset="font-family">
+								</div>
+								<span class="awb-global-label"></span>
 							</div>
-							<div class="select_arrow"></div>
-							<select id="<?php echo esc_attr( $family_id ); ?>" name="<?php echo esc_attr( $family_id ); ?>" class="input-font_family fusion-select-field fusion-skip-init<?php echo ( is_rtl() ) ? ' fusion-select-field-rtl' : ''; ?>" data-default="<?php echo esc_attr( $option['default']['font-family'] ); ?>" data-value="<?php echo esc_attr( $family_value ); ?>" style="width:100%"></select>
-						</div>
-						<div class="variant fusion-variant-wrapper">
-							<div class="fusion-typography-select-wrapper">
-								<div class="select_arrow"></div>
-								<select id="<?php echo esc_attr( $variant_id ); ?>" name="<?php echo esc_attr( $variant_id ); ?>" class="input-variant fusion-select-field fusion-skip-init<?php echo ( is_rtl() ) ? ' fusion-select-field-rtl' : ''; ?>" data-default="<?php echo esc_attr( $option['default']['font-weight'] ); ?>" data-value="<?php echo esc_attr( $variant_value ); ?>"  style="width:100%"></select>
+
+							<div class="input-wrapper fusion-builder-typography">
+								<div class="awb-typo-heading">
+									<label><?php esc_html_e( 'Variant', 'Avada' ); ?></label>
+								</div>
+								<div class="input fusion-typography-select-wrapper">
+									<select
+										name="<?php echo esc_attr( $variant_id ); ?>"
+										class="input-variant variant skip-select2"
+										id="<?php echo esc_attr( $variant_id ); ?>"
+										data-value="<?php echo esc_attr( $variant_value ); ?>"
+										data-default="<?php echo esc_attr( $option['default']['font-weight'] ); ?>"
+										data-subset="variant"></select>
+									<div class="fusiona-arrow-down"></div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -307,7 +343,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="awb-wizard-actions">
 			<a href="#5" class="button button-secondary awb-wizard-save hidden" data-id="fonts"><i class="awb-wizard-button-icon fusiona-exclamation-sign"></i><?php esc_html_e( 'Save Changes', 'Avada' ); ?></a>
-			<a href="#5" class="button button-primary awb-wizard-link awb-wizard-next" data-id="5"><?php esc_html_e( 'Next Step', 'Avada' ); ?> <i class="fusiona-arrow-forward"></i></a>
+			<a href="#5" class="button button-primary awb-wizard-link awb-wizard-next" data-id="5"><span class="awb-text-wrapper"><span><?php esc_html_e( 'Next Step', 'Avada' ); ?></span><i class="fusiona-arrow-forward"></i></span></a>
 		</div>
 	</section>
 
@@ -382,7 +418,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					],
 				];
 
-				$existing_settings           = get_option( 'fusion_builder_settings' );
+				$existing_settings           = get_option( 'fusion_builder_settings', [] );
 				$all_fusion_builder_elements = array_merge( $all_fusion_builder_elements, apply_filters( 'fusion_builder_plugin_elements', $plugin_elements ) );
 
 				echo '<li class="grid-expanded-li"><h3 class="wizard-sep-heading">' . esc_html__( 'Design Elements', 'fusion-builder' ) . '</h3></li>';
@@ -467,7 +503,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<div class="awb-wizard-actions">
 			<a href="#6" class="button button-secondary awb-wizard-save hidden" data-id="elements"><i class="awb-wizard-button-icon fusiona-exclamation-sign"></i><?php esc_html_e( 'Save Changes', 'Avada' ); ?></a>
-			<a href="#6" class="button button-primary awb-wizard-link awb-wizard-next" data-id="6"><?php esc_html_e( 'Next Step', 'Avada' ); ?> <i class="fusiona-arrow-forward"></i></a>
+			<a href="#6" class="button button-primary awb-wizard-link awb-wizard-next" data-id="6"><span class="awb-text-wrapper"><span><?php esc_html_e( 'Next Step', 'Avada' ); ?></span><i class="fusiona-arrow-forward"></i></span></a>
 		</div>
 	</section>
 
@@ -533,7 +569,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<p class="wizard-recommendation"><i class="fusiona-af-rating"></i><?php esc_html_e( 'Strongly recommend setting to file method.', 'Avada' ); ?></p>
 
 		<?php
-		echo $metaboxes->radio_buttonset( $options['css_combine_third_party_assets']['id'], $options['css_combine_third_party_assets']['label'], $on_off, $options['css_combine_third_party_assets']['description'], $options['css_combine_third_party_assets']['default'], [], '0' );  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $metaboxes->radio_buttonset( $options['css_combine_third_party_assets']['id'], $options['css_combine_third_party_assets']['label'], $on_off, $options['css_combine_third_party_assets']['description'], $options['css_combine_third_party_assets']['default'], [], '1' );  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		?>
 		<p class="wizard-recommendation"><i class="fusiona-af-rating"></i><?php esc_html_e( 'Recommend enabling.', 'Avada' ); ?></p>
 
@@ -561,9 +597,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 		<p class="wizard-recommendation"><i class="fusiona-af-rating"></i><?php esc_html_e( 'Recommend turning on and then generating critical CSS for key pages on the critical CSS page.', 'Avada' ); ?></p>
 
+		<?php
+		echo $metaboxes->radio_buttonset( $options['clear_object_cache']['id'], $options['clear_object_cache']['label'], $on_off, $options['clear_object_cache']['description'], $options['clear_object_cache']['default'], [] );  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+		<p class="wizard-recommendation"><i class="fusiona-af-rating"></i><?php esc_html_e( 'Recommend turning on if your host or your caching plugin supports persistant object caching.', 'Avada' ); ?></p>
+
 		<div class="awb-wizard-actions">
 			<a href="#7" class="button button-secondary awb-wizard-save hidden" data-id="assets"><i class="awb-wizard-button-icon fusiona-exclamation-sign"></i><?php esc_html_e( 'Save Changes', 'Avada' ); ?></a>
-			<a href="#7" class="button button-primary awb-wizard-link awb-wizard-next" data-id="7"><?php esc_html_e( 'Finish Wizard', 'Avada' ); ?> <i class="fusiona-arrow-forward"></i></a>
+			<a href="#7" class="button button-primary awb-wizard-link awb-wizard-next" data-id="7"><span class="awb-text-wrapper"><span><?php esc_html_e( 'Finish Wizard', 'Avada' ); ?></span><i class="fusiona-arrow-forward"></i></span></a>
 		</div>
 	</section>
 
@@ -733,4 +774,3 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php wp_nonce_field( 'awb_performance_nonce', 'awb-performance-nonce' ); ?>
 <?php $this->get_admin_screens_footer(); ?>
-

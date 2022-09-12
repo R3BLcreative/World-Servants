@@ -164,10 +164,9 @@ if ( fusion_is_element_enabled( 'fusion_slider' ) ) {
 			 * @since 2.2
 			 */
 			protected function validate_parent_args() {
-				$this->parent_args['width']              = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['width'], 'px' );
-				$this->parent_args['height']             = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['height'], 'px' );
-				$this->parent_args['slideshow_autoplay'] = ( 'yes' === $this->parent_args['slideshow_autoplay'] || '1' === $this->parent_args['slideshow_autoplay'] ) ? true : false;
-
+				$this->parent_args['width']                   = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['width'], 'px' );
+				$this->parent_args['height']                  = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['height'], 'px' );
+				$this->parent_args['slideshow_autoplay']      = ( 'yes' === $this->parent_args['slideshow_autoplay'] || '1' === $this->parent_args['slideshow_autoplay'] ) ? true : false;
 				$this->parent_args['slideshow_smooth_height'] = ( 'yes' === $this->parent_args['slideshow_smooth_height'] || '1' === $this->parent_args['slideshow_smooth_height'] ) ? true : false;
 			}
 
@@ -318,6 +317,11 @@ if ( fusion_is_element_enabled( 'fusion_slider' ) ) {
 
 					$image = fusion_add_responsive_image_markup( $image );
 
+					$image_id   = explode( '|', $this->child_args['image_id'] );
+					$image_id   = $image_id[0];
+					$image_size = isset( $image_id[1] ) ? $image_id[1] : 'full';
+					$image      = fusion_library()->images->apply_lazy_loading( $image, null, $image_id, $image_size );
+
 					fusion_library()->images->set_grid_image_meta( [] );
 
 					$html .= $image;
@@ -400,8 +404,6 @@ if ( fusion_is_element_enabled( 'fusion_slider' ) ) {
 					$attr['class'] = 'wp-image-' . $image_id[0];
 				}
 
-				$attr = fusion_library()->images->lazy_load_attributes( $attr, $this->child_args['image_id'] );
-
 				return $attr;
 			}
 
@@ -470,7 +472,7 @@ function fusion_element_media_slider() {
 				'preview'       => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-media-slider-preview.php',
 				'preview_id'    => 'fusion-builder-block-module-media-slider-preview-template',
 				'child_ui'      => true,
-				'help_url'      => 'https://theme-fusion.com/documentation/fusion-builder/elements/slider-element/',
+				'help_url'      => 'https://theme-fusion.com/documentation/avada/elements/slider-element/',
 				'sortable'      => false,
 				'params'        => [
 					[

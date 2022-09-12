@@ -45,6 +45,8 @@ class Fusion_Builder_Element_Helper {
 			'fusion_filter_placeholder'              => 'Fusion_Builder_Filter_Helper::get_params',
 			'fusion_border_radius_placeholder'       => 'Fusion_Builder_Border_Radius_Helper::get_params',
 			'fusion_gradient_placeholder'            => 'Fusion_Builder_Gradient_Helper::get_params',
+			'fusion_pattern_placeholder'             => 'Fusion_Builder_Pattern_Helper::get_params',
+			'fusion_mask_placeholder'                => 'Fusion_Builder_Mask_Helper::get_params',
 			'fusion_gradient_text_placeholder'       => 'Fusion_Builder_Gradient_Helper::get_text_params',
 			'fusion_margin_placeholder'              => 'Fusion_Builder_Margin_Helper::get_params',
 			'fusion_margin_mobile_placeholder'       => 'Fusion_Builder_Margin_Helper::get_params',
@@ -54,6 +56,7 @@ class Fusion_Builder_Element_Helper {
 			'fusion_sticky_visibility_placeholder'   => 'Fusion_Builder_Sticky_Visibility_Helper::get_params',
 			'fusion_form_logics_placeholder'         => 'Fusion_Builder_Form_Logics_Helper::get_params',
 			'fusion_conditional_render_placeholder'  => 'Fusion_Builder_Conditional_Render_Helper::get_params',
+			'fusion_transform_placeholder'           => 'Fusion_Builder_Transform_Helper::get_params',
 		];
 
 		foreach ( $placeholders_to_params as $placeholder => $param_callback ) {
@@ -198,34 +201,42 @@ class Fusion_Builder_Element_Helper {
 	 * @param array  $params Element params.
 	 * @param string $param Font family param name.
 	 * @param string $format Format of returned value, string or array.
+	 * @param bool   $important Add !important to css props. only for string format.
 	 * @return mixed
 	 */
-	public static function get_font_styling( $params, $param = 'font_family', $format = 'string' ) {
+	public static function get_font_styling( $params, $param = 'font_family', $format = 'string', $important = false ) {
 		$style = [];
 
 		if ( '' !== $params[ 'fusion_font_family_' . $param ] ) {
-			if ( false !== strpos( $params[ 'fusion_font_family_' . $param ], '\'' ) || 'inherit' === $params[ 'fusion_font_family_' . $param ] || false !== strpos( $params[ 'fusion_font_family_' . $param ], ',' ) ) {
+			if ( false !== strpos( $params[ 'fusion_font_family_' . $param ], 'var(' ) ) {
+				$style['font-family'] = $params[ 'fusion_font_family_' . $param ];
+				if ( function_exists( 'AWB_Global_Typography' ) ) {
+					$style['font-weight'] = AWB_Global_Typography()->get_var_string( $style['font-family'], 'font-weight' );
+					$style['font-style']  = AWB_Global_Typography()->get_var_string( $style['font-family'], 'font-style' );
+				}
+			} elseif ( false !== strpos( $params[ 'fusion_font_family_' . $param ], '\'' ) || 'inherit' === $params[ 'fusion_font_family_' . $param ] || false !== strpos( $params[ 'fusion_font_family_' . $param ], ',' ) || false !== strpos( $params[ 'fusion_font_family_' . $param ], 'var(' ) ) {
 				$style['font-family'] = $params[ 'fusion_font_family_' . $param ];
 			} else {
 				$style['font-family'] = '"' . $params[ 'fusion_font_family_' . $param ] . '"';
 			}
-		}
 
-		if ( '' !== $params[ 'fusion_font_variant_' . $param ] ) {
-			$weight = str_replace( 'italic', '', $params[ 'fusion_font_variant_' . $param ] );
-			if ( $weight !== $params[ 'fusion_font_variant_' . $param ] ) {
-				$style['font-style'] = 'italic';
-			}
-			if ( '' !== $weight ) {
-				$style['font-weight'] = $weight;
+			if ( '' !== $params[ 'fusion_font_variant_' . $param ] && ! isset( $style['font-weight'] ) ) {
+				$weight = str_replace( 'italic', '', $params[ 'fusion_font_variant_' . $param ] );
+				if ( $weight !== $params[ 'fusion_font_variant_' . $param ] ) {
+					$style['font-style'] = 'italic';
+				}
+				if ( '' !== $weight ) {
+					$style['font-weight'] = $weight;
+				}
 			}
 		}
 
 		if ( 'string' === $format ) {
 			$style_str = '';
+			$important = $important ? ' !important' : '';
 
 			foreach ( $style as $key => $value ) {
-				$style_str .= $key . ':' . $value . ';';
+				$style_str .= $key . ':' . $value . $important . ';';
 			}
 
 			return $style_str;

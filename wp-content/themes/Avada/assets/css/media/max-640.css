@@ -1,7 +1,6 @@
 /* stylelint-disable no-descending-specificity */
 #wrapper {
   width: auto !important;
-  overflow-x: hidden !important;
 }
 #wrapper .ei-slider {
   width: 100% !important;

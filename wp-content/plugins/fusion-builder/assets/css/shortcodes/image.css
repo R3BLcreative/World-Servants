@@ -29,6 +29,31 @@
   vertical-align: top;
   box-shadow: none !important;
 }
+.fusion-imageframe.has-mask img {
+  -webkit-mask-size: contain;
+  -webkit-mask-position: center center;
+  -webkit-mask-repeat: no-repeat;
+  mask-size: contain;
+  mask-position: center center;
+  mask-repeat: no-repeat;
+}
+.fusion-imageframe.has-aspect-ratio {
+  position: relative;
+}
+.fusion-imageframe.has-aspect-ratio img {
+  aspect-ratio: 1;
+  /* stylelint-disable-line */
+  width: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+.awb-image-frame.imageframe-liftup.hover-with-mask:before {
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  box-shadow: none;
+  filter: drop-shadow(0 4px 5px #000) opacity(0.4);
+}
 .awb-imageframe-style {
   position: relative;
   /* Navin style */
@@ -102,6 +127,9 @@
 .fusion-carousel .fusion-carousel-item .awb-imageframe-style-navin img {
   width: calc(100% + 50px);
 }
+.awb-imageframe-style-navin.has-aspect-ratio img {
+  width: calc(100% + 50px);
+}
 .awb-imageframe-style-navin .fusion-masonry-element-container {
   transition: opacity 0.35s, background-position 0.35s;
   background-position-x: -40px;
@@ -155,6 +183,9 @@
 .fusion-carousel .fusion-carousel-item .awb-imageframe-style-dario img {
   width: calc(100% + 20px);
 }
+.awb-imageframe-style-dario.has-aspect-ratio img {
+  width: calc(100% + 20px);
+}
 .awb-imageframe-style-dario .fusion-masonry-element-container {
   transition: opacity 0.35s, background-position 0.35s;
   background-position-x: -10px;
@@ -189,7 +220,7 @@
   left: 0;
   width: 100%;
   height: 3px;
-  background: #fff;
+  background: var(--awb-color1);
   content: "";
   transition: transform 0.35s;
   transform: translate3d(-100%, 0, 0);
@@ -235,13 +266,13 @@
   transition: opacity 0.35s, transform 0.35s;
 }
 .awb-imageframe-style-resa .awb-imageframe-caption-container:before {
-  border-top: 1px solid #fff;
-  border-bottom: 1px solid #fff;
+  border-top: 1px solid var(--awb-color1);
+  border-bottom: 1px solid var(--awb-color1);
   transform: scale(0, 1);
 }
 .awb-imageframe-style-resa .awb-imageframe-caption-container:after {
-  border-right: 1px solid #fff;
-  border-left: 1px solid #fff;
+  border-right: 1px solid var(--awb-color1);
+  border-left: 1px solid var(--awb-color1);
   transform: scale(1, 0);
 }
 .awb-imageframe-style-resa .awb-imageframe-caption-container .awb-imageframe-caption-title {
@@ -316,42 +347,38 @@
   opacity: 0.4;
   transform: scale3d(1.1, 1.1, 1);
 }
-.awb-imageframe-style-dany img,
-.awb-imageframe-style-dany .awb-imageframe-caption-container .awb-imageframe-caption-title {
+.awb-imageframe-style-dany img {
   transition: transform 0.35s;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 .awb-imageframe-style-dany .fusion-masonry-element-container {
   transition: background-position 0.35s;
 }
-.awb-imageframe-style-dany img {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
 .awb-imageframe-style-dany .awb-imageframe-caption-container {
   text-align: left;
+  padding: 0;
 }
-.awb-imageframe-style-dany .awb-imageframe-caption-container .awb-imageframe-caption-title,
-.awb-imageframe-style-dany .awb-imageframe-caption-container .awb-imageframe-caption-text {
-  position: absolute;
-  bottom: 0;
-  left: 0;
+.awb-imageframe-style-dany .awb-imageframe-caption-container .awb-imageframe-caption-title {
   padding: 1.66666667em;
 }
 .awb-imageframe-style-dany .awb-imageframe-caption-container .awb-imageframe-caption-text {
-  text-transform: none;
-  font-size: 0.9em;
-  width: 100%;
-  transition: transform 0.35s;
-  transform: translate3d(0, 100%, 0);
+  max-height: 0;
+  padding: 0 1.66666667em;
+  transition: max-height 0.35s, padding 0.35s, margin 0.35s ease-in-out;
+}
+.awb-imageframe-style-dany .awb-imageframe-caption {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: flex-end;
 }
 .awb-imageframe-style-dany:hover img {
-  transform: translate3d(0, -74px, 0);
-}
-.awb-imageframe-style-dany:hover .awb-imageframe-caption-container .awb-imageframe-caption-title {
-  transform: translate3d(0, -100px, 0);
+  transform: translate3d(0, -60px, 0);
 }
 .awb-imageframe-style-dany:hover .awb-imageframe-caption-container .awb-imageframe-caption-text {
-  transform: translate3d(0, 0, 0);
+  max-height: 100%;
+  padding: 1.66666667em 1.66666667em;
 }
 .awb-imageframe-style-dany:hover .fusion-masonry-element-container {
   background-position-y: -74px;

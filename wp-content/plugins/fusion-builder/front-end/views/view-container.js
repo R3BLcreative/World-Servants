@@ -1,4 +1,4 @@
-/* global FusionApp, cssua, FusionPageBuilderApp, FusionPageBuilderViewManager, fusionAllElements, fusionBuilderText, FusionEvents, FusionPageBuilderElements */
+/* global FusionApp, FusionPageBuilderApp, FusionPageBuilderViewManager, fusionAllElements, fusionBuilderText, FusionEvents, FusionPageBuilderElements */
 /* jshint -W020 */
 /* eslint no-shadow: 0 */
 var FusionPageBuilder = FusionPageBuilder || {};
@@ -23,6 +23,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					classes += ' fusion-builder-flex-container';
 				}
 
+				if ( values.status && 'draft' === values.status ) {
+					classes += ' fusion-builder-container-status-draft';
+				}
+
 				// Absolute container.
 				if ( 'undefined' !== typeof values.absolute && 'on' === values.absolute ) {
 					classes += ' fusion-builder-absolute-container-wrapper';
@@ -36,9 +40,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				'click .fusion-builder-container-clone': 'cloneContainer',
 				'click .fusion-builder-container-add': 'addContainer',
 				'click .fusion-builder-container-save': 'openLibrary',
-				'paste .fusion-builder-section-name': 'renameContainer',
-				'keydown .fusion-builder-section-name': 'renameContainer',
-				'click .fusion-builder-toggle': 'toggleContainer',
 				'click .fusion-builder-publish-tooltip': 'publish',
 				'click .fusion-builder-unglobal-tooltip': 'unglobalize',
 				'click .fusion-builder-container-drag': 'preventDefault'
@@ -72,16 +73,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.model.children = new FusionPageBuilder.Collection();
 				this.listenTo( this.model.children, 'add', this.addChildView );
 
-				this.listenTo( FusionEvents, 'fusion-wireframe-toggle', this.wireFrameToggled );
-
 				this.renderedYet          = FusionPageBuilderApp.loaded;
 				this._refreshJs           = _.debounce( _.bind( this.refreshJs, this ), 300 );
 				this._triggerScrollUpdate = _.debounce( _.bind( this.triggerScrollUpdate, this ), 300 );
 				this._reInitSticky        = _.debounce( _.bind( this.reInitSticky, this ), 300 );
 				this._updateInnerStyles	  = _.debounce( _.bind( this.updateInnerStyles, this ), 500 );
-
-				this.typingTimer; // jshint ignore:line
-				this.doneTypingInterval = 800;
 
 				this.scrollingSections = false;
 
@@ -179,11 +175,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).trigger( 'fusion-option-change-equal_height_columns', this.model.attributes.cid );
 				}
 
-				if ( 'undefined' !== typeof this.model.attributes.params.admin_toggled && 'yes' === this.model.attributes.params.admin_toggled ) {
-					this.$el.addClass( 'fusion-builder-section-folded' );
-					this.$el.find( '.fusion-builder-toggle > span' ).toggleClass( 'fusiona-caret-up' ).toggleClass( 'fusiona-caret-down' );
-				}
-
 				this.onRender();
 
 				this.renderedYet = true;
@@ -204,8 +195,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * @return {void}
 			 */
 			droppableContainer: function() {
-
 				var $el   = this.$el,
+					self  = this,
 					cid   = this.model.get( 'cid' ),
 					$body = jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' );
 
@@ -252,79 +243,24 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					hoverClass: 'ui-droppable-active',
 					accept: '.fusion-builder-container, .fusion-builder-next-page, .fusion-checkout-form',
 					drop: function( event, ui ) {
-
-						// Move the actual html.
-						if ( jQuery( event.target ).hasClass( 'target-after' ) ) {
-							$el.after( ui.draggable );
-						} else {
-							$el.before( ui.draggable );
-						}
-
-						FusionEvents.trigger( 'fusion-content-changed' );
-
-						FusionPageBuilderApp.scrollingContainers();
-
-						FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.full_width_section + ' order changed' );
+						self.handleDropContainer( ui.draggable, $el, jQuery( event.target ) );
 					}
 				} );
-
-				// If we are in wireframe mode, then disable.
-				if ( FusionPageBuilderApp.wireframeActive ) {
-					this.disableDroppableContainer();
-				}
 			},
 
-			/**
-			 * Enable the droppable and draggable.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			enableDroppableContainer: function() {
-				var $el = this.$el;
-
-				if ( 'undefined' !== typeof $el.draggable( 'instance' ) && 'undefined' !== typeof $el.find( '.fusion-container-target' ).droppable( 'instance' ) ) {
-					$el.draggable( 'enable' );
-					$el.find( '.fusion-container-target' ).droppable( 'enable' );
+			handleDropContainer( $column, $targetEl, $dropTarget ) {
+				// Move the actual html.
+				if ( jQuery( $dropTarget ).hasClass( 'target-after' ) ) {
+					$targetEl.after( $column );
 				} else {
-
-					// No sign of init, then need to call it.
-					this.droppableContainer();
-				}
-			},
-
-			/**
-			 * Destroy or disable the droppable and draggable.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			disableDroppableContainer: function() {
-				var $el = this.$el;
-
-				// If its been init, just disable.
-				if ( 'undefined' !== typeof $el.draggable( 'instance' ) ) {
-					$el.draggable( 'disable' );
+					$targetEl.before( $column );
 				}
 
-				// If its been init, just disable.
-				if ( 'undefined' !== typeof $el.find( '.fusion-container-target' ).droppable( 'instance' ) ) {
-					$el.find( '.fusion-container-target' ).droppable( 'disable' );
-				}
-			},
+				FusionEvents.trigger( 'fusion-content-changed' );
 
-			/**
-			 * Fired when wireframe mode is toggled.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			wireFrameToggled: function() {
-				if ( FusionPageBuilderApp.wireframeActive ) {
-					this.disableDroppableContainer();
-				} else {
-					this.enableDroppableContainer();
-				}
+				FusionPageBuilderApp.scrollingContainers();
+
+				FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.full_width_section + ' Order Changed' );
 			},
 
 			/**
@@ -356,7 +292,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// If no blend mode is defined, check if we should set to overlay.
 				if ( 'undefined' === typeof params.background_blend_mode && '' !== values.background_color  ) {
-					alphaBackgroundColor = jQuery.Color( values.background_color ).alpha();
+					alphaBackgroundColor = jQuery.AWB_Color( values.background_color ).alpha();
 					if ( 1 > alphaBackgroundColor && 0 !== alphaBackgroundColor && ( '' !== params.background_image || '' !== params.video_bg ) ) {
 						params.background_blend_mode = 'overlay';
 					}
@@ -488,7 +424,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * @return {void}
 			 */
 			setExtraValues: function() {
-				this.values.alpha_background_color = jQuery.Color( this.values.background_color ).alpha();
+				this.values.alpha_background_color = jQuery.AWB_Color( this.values.background_color ).alpha();
 			},
 
 			contentStyle: function() {
@@ -535,7 +471,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 			parallaxAttr: function() {
 				var attr 			= {},
-					bgColorAlpha 	= jQuery.Color( this.values.background_color ).alpha();
+					bgColorAlpha 	= jQuery.AWB_Color( this.values.background_color ).alpha();
 
 				attr[ 'class' ] = 'fusion-bg-parallax';
 
@@ -671,10 +607,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					attr[ 'class' ] += ' video-background';
 				}
 
-				if ( cssua.ua.edge && 1 > this.values.alpha_background_color ) {
-					attr[ 'class' ] += ' fusion-ie-mode';
-				}
-
 				// Fading Background.
 				if ( 'yes' === this.values.fade && '' !== this.values.background_image && false === this.values.video_bg ) {
 					attr[ 'class' ] += ' faded-background';
@@ -714,7 +646,63 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 
 				// Visibility classes.
-				attr[ 'class' ] = _.fusionVisibilityAtts( this.values.hide_on_mobile, attr[ 'class' ] );
+				let visibilityValue = this.values.hide_on_mobile;
+
+				// Get Render logics Array.
+				const renderLogicsDevices = this.getRenderLogicsDevices();
+
+				if ( renderLogicsDevices.length ) {
+					const rlDevicesEqual = [];
+					const rlDevicesNotEqual = [];
+
+					renderLogicsDevices.forEach( ( r ) => {
+						switch ( r.value ) {
+							case 'desktop':
+								if ( 'equal' === r.comparison ) {
+									rlDevicesEqual.push( 'large-visibility' );
+								} else {
+									rlDevicesNotEqual.push( 'large-visibility' );
+								}
+								break;
+
+							case 'tablet':
+								if ( 'equal' === r.comparison ) {
+									rlDevicesEqual.push( 'medium-visibility' );
+								} else {
+									rlDevicesNotEqual.push( 'medium-visibility' );
+								}
+								break;
+
+							case 'mobile':
+								if ( 'equal' === r.comparison ) {
+									rlDevicesEqual.push( 'small-visibility' );
+								} else {
+									rlDevicesNotEqual.push( 'small-visibility' );
+								}
+								break;
+
+							case 'mobile_tablet':
+								if ( 'equal' === r.comparison ) {
+									rlDevicesEqual.push( 'medium-visibility' );
+									rlDevicesEqual.push( 'small-visibility' );
+								} else {
+									rlDevicesNotEqual.push( 'medium-visibility' );
+									rlDevicesNotEqual.push( 'small-visibility' );
+								}
+								break;
+						}
+					} );
+
+					if ( rlDevicesEqual.length ) {
+						attr[ 'class' ] = _.fusionVisibilityAtts( rlDevicesEqual.join( ',' ), attr[ 'class' ] );
+					}
+
+					if ( rlDevicesNotEqual.length ) {
+						visibilityValue = visibilityValue.split( ',' ).filter( ( v ) => !rlDevicesNotEqual.includes( v ) );
+					}
+				}
+
+				attr[ 'class' ] = _.fusionVisibilityAtts( visibilityValue, attr[ 'class' ] );
 
 				// Animations.
 				attr = _.fusionAnimations( this.values, attr );
@@ -767,6 +755,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					} );
 				}
 			}
+
+			if ( this.values.pattern_bg ) {
+				attr[ 'class' ] += ' has-pattern-background';
+			}
+
+			if ( this.values.mask_bg ) {
+				attr[ 'class' ] += ' has-mask-background';
+			}
+
 
 				return attr;
 			},
@@ -827,7 +824,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					overlayStyle += 'background-image:' + _.getGradientString( this.values ) + ';';
 				}
 
-				if ( '' !== this.values.background_color && 1 > jQuery.Color( this.values.background_color ).alpha() ) {
+				if ( '' !== this.values.background_color && 1 > jQuery.AWB_Color( this.values.background_color ).alpha() ) {
 					overlayStyle += 'background-color:' + this.values.background_color + ';';
 				}
 
@@ -974,6 +971,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				templateAttributes.responsiveStyles      = this.responsiveStyles || '';
 				templateAttributes.scrollPosition 		 = ( 'right' === FusionApp.settings.header_position || jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).hasClass( 'rtl' ) ) ? 'scroll-navigation-left' : 'scroll-navigation-right';
 				templateAttributes.contentStyle 		 = this.contentStyle();
+				templateAttributes.patternBg 		 	 = _.fusionGetPatternElement( this.values );
+				templateAttributes.maskBg 		 	 = _.fusionGetMaskElement( this.values );
 
 
 				return templateAttributes;
@@ -1121,10 +1120,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * @since 2.0.0
 			 * @param {Object}         event - The event.
 			 * @param {boolean|undefined} skip - Should we skip this?
+			 * @param {bool} forceManually - Force manually, even if it's not an event, to update history and trigger content changes.
 			 * @return {void}
 			 */
-			removeContainer: function( event, skip ) {
-
+			removeContainer: function( event, skip, forceManually ) {
 				var rows;
 
 				if ( event ) {
@@ -1153,7 +1152,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					FusionPageBuilderApp.clearBuilderLayout( true );
 				}
 
-				if ( event ) {
+				// If the column is deleted manually.
+				if ( event || forceManually ) {
 
 					FusionPageBuilderApp.scrollingContainers();
 
@@ -1166,11 +1166,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * Clones a container.
 			 *
 			 * @since 2.0.0
-			 * @param {Object} event - The evemt.
+			 * @param {Object} event - The event.
 			 * @return {void}
 			 */
 			cloneContainer: function( event ) {
-
 				var containerAttributes,
 					$thisContainer;
 
@@ -1443,6 +1442,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							this.$el.removeClass( 'fusion-builder-absolute-container-wrapper' );
 						}
 						break;
+
+					case 'render_logics':
+						if ( this.getRenderLogicsDevices( paramValue ).length ) {
+							this.reRender();
+						}
+					break;
 				}
 			},
 
@@ -1862,90 +1867,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				return filteredDiff;
 			},
 
-			/**
-			 * Handle container name edit in wireframe mode.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			renameContainer: function( event ) {
-
-				// Detect "enter" key
-				var code,
-					model,
-					input,
-					fusionHistoryState;
-
-				code = event.keyCode || event.which;
-
-				if ( 13 == code ) { // jshint ignore:line
-					event.preventDefault();
-					this.$el.find( '.fusion-builder-section-name' ).blur();
-
-					return false;
-				}
-
-				fusionHistoryState = fusionBuilderText.edited + ' ' + fusionAllElements[ this.model.get( 'element_type' ) ].name + ' ' + fusionBuilderText.element;
-
-				model = this.model;
-				input = this.$el.find( '.fusion-builder-section-name' );
-				clearTimeout( this.typingTimer );
-
-				this.typingTimer = setTimeout( function() {
-
-					model.attributes.params.admin_label = input.val().replace( /[[\]]+/g, '' );
-					FusionEvents.trigger( 'fusion-content-changed' );
-					FusionEvents.trigger( 'fusion-history-save-step', fusionHistoryState );
-
-				}, this.doneTypingInterval );
-			},
-
-			/**
-			 * Handle container toggle in wireframe mode.
-			 *
-			 * @since 2.0.0
-			 * @return {void}
-			 */
-			toggleContainer: function( event ) {
-
-				var thisEl = jQuery( event.currentTarget ),
-					fusionHistoryState;
-
-				if ( event ) {
-					event.preventDefault();
-				}
-
-				this.$el.toggleClass( 'fusion-builder-section-folded' );
-				thisEl.find( 'span' ).toggleClass( 'fusiona-caret-up' ).toggleClass( 'fusiona-caret-down' );
-
-				if ( this.$el.hasClass( 'fusion-builder-section-folded' ) ) {
-					this.model.attributes.params.admin_toggled = 'yes';
-				} else {
-					this.model.attributes.params.admin_toggled = 'no';
-				}
-
-				fusionHistoryState = fusionBuilderText.edited + ' ' + fusionAllElements[ this.model.get( 'element_type' ) ].name + ' ' + fusionBuilderText.element;
-
-				FusionEvents.trigger( 'fusion-content-changed' );
-				FusionEvents.trigger( 'fusion-history-save-step', fusionHistoryState );
-			},
-
-			scrollHighlight: function() {
-				var $trigger = jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( '.fusion-one-page-text-link' ),
-					$el      = this.$el;
-
-				setTimeout( function() {
-					if ( $trigger.length && 'function' === typeof $trigger.fusion_scroll_to_anchor_target ) {
-						$trigger.attr( 'href', '#fusion-container-' + this.model.get( 'cid' ) ).fusion_scroll_to_anchor_target( 15 );
-					}
-
-					$el.find( '> .fusion-column-wrapper' ).addClass( 'fusion-active-highlight' );
-					setTimeout( function() {
-						$el.find( '> .fusion-column-wrapper' ).removeClass( 'fusion-active-highlight' );
-					}, 6000 );
-				}, 10 );
-			},
-
 			publish: function( event ) {
 				var cid    = jQuery( event.currentTarget ).data( 'cid' ),
 					view   = FusionPageBuilderViewManager.getView( cid ),
@@ -2097,7 +2018,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					// Wrap CSS selectors
 					if ( '' !== containerStyles ) {
-						containerStyles = '.fusion-body:not(.fusion-builder-ui-wireframe) #fusion-container-' + self.model.get( 'cid' ) + ' > .fusion-fullwidth {' + containerStyles + '}';
+						containerStyles = '.fusion-body #fusion-container-' + self.model.get( 'cid' ) + ' > .fusion-fullwidth {' + containerStyles + '}';
 					}
 
 					// Large styles, no wrapping needed.
@@ -2149,7 +2070,39 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						}
 					}
 				}
+			},
+
+			/**
+			 * check if String is JSON string.
+			 *
+			 * @since 3.7
+			 * @return boolean
+			 */
+			IsJsonString: function( str ) {
+				try {
+					const json = JSON.parse( str );
+					return ( 'object' === typeof json );
+				} catch ( e ) {
+					return false;
+				}
+			},
+
+			/**
+			 * Get render logics devices.
+			 *
+			 * @since 3.7
+			 * @return boolean
+			 */
+			getRenderLogicsDevices: function( value ) {
+				value = value || this.values.render_logics;
+				let renderLogics = value && this.IsJsonString( atob( value ) ) ? JSON.parse( atob( value ) ) : [];
+
+				// Get device Render logics only.
+				renderLogics = renderLogics.filter( ( r ) => 'device_type' === r.field );
+
+				return renderLogics;
 			}
+
 		} );
 	} );
 }( jQuery ) );

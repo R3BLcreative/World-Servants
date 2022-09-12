@@ -11,7 +11,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			isOriginLeft: jQuery( 'body.rtl' ).length ? false : true,
 			resizable: true,
 			initLayout: true,
-			view: false
+			view: false,
+			sortBy: 'number',
+			sortAscending: true
 		},
 
 		initialize: function() {
@@ -21,7 +23,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 		init: function() {
 			var self      = this,
-				container = self.get( 'view' ).$el.find( self.get( 'selector' ) );
+				container = self.get( 'view' ).$el.find( self.get( 'selector' ) ),
+				sortBy        = 'rand' === container.attr( 'data-order' ) ? 'random' : 'number',
+				sortAscending = 'number' === sortBy && 'desc' === container.attr( 'data-order' ) ? true : false;
 
 			self.set( 'container', container );
 
@@ -31,7 +35,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					itemSelector: self.get( 'itemSelector' ),
 					isOriginLeft: jQuery( 'body.rtl' ).length ? false : true,
 					resizable: true,
-					initLayout: true
+					initLayout: true,
+					sortBy: sortBy,
+					sortAscending: sortAscending
 				} );
 			}
 		},

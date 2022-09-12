@@ -1,4 +1,4 @@
-/* global FusionApp, FusionPageBuilderApp, fusionAppConfig, fusionBuilderText, FusionEvents, fusionAllElements, FusionPageBuilderViewManager, fusionHistoryState */
+/* global FusionApp, FusionPageBuilderApp, fusionAppConfig, fusionBuilderText, FusionEvents, fusionAllElements, FusionPageBuilderViewManager */
 /* eslint no-unused-vars: 0 */
 var FusionPageBuilder = FusionPageBuilder || {};
 
@@ -14,7 +14,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			events: {
 				'click .fusion-builder-column-layouts li': 'addColumns',
 				'click .fusion_builder_custom_columns_load': 'addCustomColumn',
-				'click .fusion-studio-load': 'loadStudioColumn'
+				'click .awb-import-options-toggle': 'toggleImportOptions',
+				'click .awb-import-studio-item': 'loadStudioColumn',
+				'change .awb-import-options .awb-import-style input[name="overwrite-type"]': 'triggerPreviewChanges',
+				'change .awb-import-options .awb-import-inversion input[name="invert"]': 'triggerPreviewChanges'
 			},
 
 			/**
@@ -236,21 +239,20 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
-			 * Adds a custom column.
+			 * Adds studio column.
 			 *
 			 * @since 2.0.0
-			 * @param {Object} event - The event.
+			 * @param {Object} [event]         The event.
 			 * @return {void}
 			 */
 			loadStudioColumn: function( event ) {
-				var layoutID,
-					self              = this,
-					parentID          = this.model.get( 'parent' ),
-					parentView        = FusionPageBuilderViewManager.getView( parentID ),
-					$layout           = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
-					targetColumn      = jQuery( [] ); // Empty jQuery object.
+				var self          = this,
+					parentID      = this.model.get( 'parent' ),
+					parentView    = FusionPageBuilderViewManager.getView( parentID ),
+					targetColumn  = ( 'undefined' !== typeof this.options.targetElement ) ? this.options.targetElement : false,
+					importOptions = this.getImportOptions( event );
 
-				if ( parentView.$el instanceof jQuery ) {
+				if ( false === targetColumn && parentView.$el instanceof jQuery ) {
 					targetColumn = parentView.$el.find( '.fusion-builder-column' ).last();
 				}
 
@@ -265,8 +267,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 				FusionPageBuilderApp.layoutIsLoading = true;
 
-				layoutID = $layout.data( 'layout_id' );
-
 				jQuery.ajax( {
 					type: 'POST',
 					url: fusionAppConfig.ajaxurl,
@@ -275,8 +275,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						action: 'fusion_builder_load_layout',
 						fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
 						fusion_is_global: false,
-						fusion_layout_id: layoutID,
+						fusion_layout_id: importOptions.layoutID,
 						fusion_studio: true,
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						category: 'columns',
 						post_id: FusionApp.getPost( 'post_id' )
 					},
@@ -319,7 +322,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								( function( k ) { // eslint-disable-line no-loop-func
 
 									dfdNext = dfdNext.then( function() {
-										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ] );
+										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ], importOptions );
 									} );
 
 									promises.push( dfdNext );
@@ -340,7 +343,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 									}
 									*/
 
-									FusionPageBuilderApp.shortcodesToBuilder( FusionPageBuilderApp.studio.getImportData().post_content, FusionPageBuilderApp.parentRowId );
+									FusionPageBuilderApp.shortcodesToBuilder( FusionPageBuilderApp.studio.getImportData().post_content, FusionPageBuilderApp.parentRowId, false, false, targetColumn, 'after' );
 									FusionPageBuilderApp.layoutIsLoading = false;
 									FusionEvents.trigger( 'fusion-studio-content-imported', FusionPageBuilderApp.studio.getImportData() );
 
@@ -357,7 +360,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							);
 						} else {
 
-							FusionPageBuilderApp.shortcodesToBuilder( data.post_content, FusionPageBuilderApp.parentRowId );
+							FusionPageBuilderApp.shortcodesToBuilder( data.post_content, FusionPageBuilderApp.parentRowId, false, false, targetColumn, 'after' );
 							FusionPageBuilderApp.layoutIsLoading = false;
 							FusionEvents.trigger( 'fusion-studio-content-imported', data );
 
@@ -375,10 +378,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * @param {jQuery} targetColumn - The Column after which the new column is inserted.
 			 */
 			studioColumnImportComplete: function( event, targetColumn ) {
-				var $layout           = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
-					$scroll_elem    = jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( '.fusion-one-page-text-link' ),
-					title             = $layout.find( '.fusion_module_title' ).text(),
-					cid               = '';
+				var $layout      = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
+					$scroll_elem = jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( '.fusion-one-page-text-link' ),
+					title        = $layout.find( '.fusion_module_title' ).text(),
+					cid          = '';
 
 				FusionPageBuilderApp.loaded = true;
 				FusionEvents.trigger( 'fusion-builder-loaded' );

@@ -27,6 +27,7 @@
   font-weight: var(--footer_headings_typography-font-weight);
   line-height: var(--footer_headings_typography-line-height);
   letter-spacing: var(--footer_headings_typography-letter-spacing);
+  text-transform: var(--footer_headings_typography-text-transform);
   font-style: var(--footer_headings_typography-font-style, normal);
   color: var(--footer_headings_typography-color);
 }

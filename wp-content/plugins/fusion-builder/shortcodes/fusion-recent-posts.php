@@ -78,40 +78,51 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				return [
-					'hide_on_mobile'      => fusion_builder_default_visibility( 'string' ),
-					'class'               => '',
-					'id'                  => '',
-					'pull_by'             => '',
-					'cat_id'              => '',
-					'cat_slug'            => '',
-					'tag_slug'            => '',
-					'exclude_tags'        => '',
-					'columns'             => 3,
-					'content_alignment'   => '',
-					'excerpt'             => 'no',
-					'exclude_cats'        => '',
-					'excerpt_length'      => '',
-					'excerpt_words'       => '15', // Deprecated.
-					'hover_type'          => 'none',
-					'layout'              => 'default',
-					'meta'                => 'yes',
-					'meta_author'         => 'no',
-					'meta_categories'     => 'no',
-					'meta_comments'       => 'yes',
-					'meta_date'           => 'yes',
-					'meta_tags'           => 'no',
-					'number_posts'        => '4',
-					'offset'              => '',
-					'picture_size'        => 'fixed',
-					'post_status'         => '',
-					'scrolling'           => 'no',
-					'strip_html'          => 'yes',
-					'title'               => 'yes',
-					'thumbnail'           => 'yes',
-					'animation_direction' => 'left',
-					'animation_speed'     => '',
-					'animation_type'      => '',
-					'animation_offset'    => $fusion_settings->get( 'animation_offset' ),
+					'margin_top'                     => '',
+					'margin_right'                   => '',
+					'margin_bottom'                  => '',
+					'margin_left'                    => '',
+					'hide_on_mobile'                 => fusion_builder_default_visibility( 'string' ),
+					'class'                          => '',
+					'id'                             => '',
+					'pull_by'                        => '',
+					'cat_id'                         => '',
+					'cat_slug'                       => '',
+					'tag_slug'                       => '',
+					'exclude_tags'                   => '',
+					'columns'                        => 3,
+					'content_alignment'              => '',
+					'excerpt'                        => 'no',
+					'exclude_cats'                   => '',
+					'excerpt_length'                 => '',
+					'excerpt_words'                  => '15', // Deprecated.
+					'hover_type'                     => 'none',
+					'layout'                         => 'default',
+					'meta'                           => 'yes',
+					'meta_author'                    => 'no',
+					'meta_categories'                => 'no',
+					'meta_comments'                  => 'yes',
+					'meta_date'                      => 'yes',
+					'meta_tags'                      => 'no',
+					'number_posts'                   => '4',
+					'offset'                         => '',
+					'picture_size'                   => 'fixed',
+					'post_status'                    => '',
+					'scrolling'                      => 'no',
+					'strip_html'                     => 'yes',
+					'title'                          => 'yes',
+					'title_size'                     => '4',
+					'fusion_font_family_title_font'  => '',
+					'fusion_font_variant_title_font' => '',
+					'title_font_size'                => '',
+					'title_letter_spacing'           => '',
+					'title_line_height'              => '',
+					'title_text_transform'           => '',
+					'thumbnail'                      => 'yes',
+					'animation_direction'            => 'left',
+					'animation_speed'                => '',
+					'animation_type'                 => '',
+					'animation_offset'               => $fusion_settings->get( 'animation_offset' ),
 				];
 			}
 
@@ -475,6 +486,11 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 					$defaults['excerpt_words'] = $defaults['excerpt_length'];
 				}
 
+				$defaults['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_top'], 'px' );
+				$defaults['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_right'], 'px' );
+				$defaults['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_bottom'], 'px' );
+				$defaults['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_left'], 'px' );
+
 				extract( $defaults );
 
 				// Deprecated 5.2.1 hide value, mapped to no.
@@ -639,7 +655,8 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 						if ( $fusion_settings->get( 'disable_date_rich_snippet_pages' ) && $fusion_settings->get( 'disable_rich_snippet_title' ) ) {
 							$entry_title = 'entry-title';
 						}
-						$content .= '<h4 class="' . $entry_title . '"><a href="' . esc_url( $permalink ) . '">' . get_the_title() . '</a></h4>';
+						$title_tag = $this->get_title_tag();
+						$content  .= '<' . $title_tag . ' class="' . $entry_title . '"><a href="' . esc_url( $permalink ) . '">' . get_the_title() . '</a></' . $title_tag . '>';
 					} else {
 						$content .= fusion_builder_render_rich_snippets_for_pages();
 					}
@@ -674,7 +691,8 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 					}
 				}
 
-				$html = '<div ' . FusionBuilder::attributes( 'recentposts-shortcode' ) . '><section ' . FusionBuilder::attributes( 'recentposts-shortcode-section' ) . '>' . $items . '</section>' . $pagination . '</div>';
+				$style = $this->get_style_element();
+				$html  = '<div ' . FusionBuilder::attributes( 'recentposts-shortcode' ) . '>' . $style . '<section ' . FusionBuilder::attributes( 'recentposts-shortcode-section' ) . '>' . $items . '</section>' . $pagination . '</div>';
 
 				wp_reset_postdata();
 				remove_filter( 'fusion_dynamic_post_id', [ $this, 'post_dynamic_data' ] );
@@ -683,6 +701,54 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 				$this->on_render();
 
 				return apply_filters( 'fusion_element_recent_posts_content', $html, $args );
+			}
+
+			/**
+			 * Get the style html tag.
+			 *
+			 * @since 3.8
+			 * @return string
+			 */
+			public function get_style_element() {
+				$style             = '';
+				$base_class        = '.fusion-recent-posts.fusion-recent-posts-' . $this->recent_posts_counter;
+				$this->dynamic_css = [];
+
+				$title_selector = $base_class . ' .columns .column .entry-title';
+
+				$title_typography = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'title_font', 'array' );
+
+				if ( isset( $title_typography['font-family'] ) && $title_typography['font-family'] ) {
+					$this->add_css_property( $title_selector, 'font-family', $title_typography['font-family'] );
+				}
+
+				if ( isset( $title_typography['font-weight'] ) && $title_typography['font-weight'] ) {
+					$this->add_css_property( $title_selector, 'font-weight', $title_typography['font-weight'] );
+				}
+
+				if ( isset( $title_typography['font-style'] ) && $title_typography['font-style'] ) {
+					$this->add_css_property( $title_selector, 'font-style', $title_typography['font-style'] );
+				}
+
+				if ( $this->args['title_font_size'] ) {
+					$this->add_css_property( $title_selector, 'font-size', $this->args['title_font_size'] );
+				}
+
+				if ( $this->args['title_line_height'] ) {
+					$this->add_css_property( $title_selector, 'line-height', $this->args['title_line_height'] );
+				}
+
+				if ( $this->args['title_letter_spacing'] ) {
+					$this->add_css_property( $title_selector, 'letter-spacing', $this->args['title_letter_spacing'] );
+				}
+
+				if ( $this->args['title_text_transform'] ) {
+					$this->add_css_property( $title_selector, 'text-transform', $this->args['title_text_transform'] );
+				}
+
+				$style = $this->parse_css();
+
+				return $style ? '<style>' . $style . '</style>' : '';
 			}
 
 			/**
@@ -698,6 +764,7 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 					$this->args['hide_on_mobile'],
 					[
 						'class' => 'fusion-recent-posts fusion-recent-posts-' . $this->recent_posts_counter . ' avada-container layout-' . $this->args['layout'] . ' layout-columns-' . $this->args['columns'],
+						'style' => '',
 					]
 				);
 
@@ -713,6 +780,8 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 				if ( 'load_more_button' === $this->args['scrolling'] ) {
 					$attr['class'] .= ' fusion-recent-posts-load-more';
 				}
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( $this->args['class'] ) {
 					$attr['class'] .= ' ' . $this->args['class'];
@@ -876,6 +945,24 @@ if ( fusion_is_element_enabled( 'fusion_recent_posts' ) ) {
 			}
 
 			/**
+			 * Get the tag of the title.
+			 *
+			 * @return string
+			 */
+			public function get_title_tag() {
+				$tag_option = $this->args['title_size'];
+				if ( ! $tag_option ) {
+					return 'h4';
+				}
+
+				if ( is_numeric( $tag_option ) ) {
+					return 'h' . $tag_option;
+				}
+
+				return $tag_option;
+			}
+
+			/**
 			 * Load base CSS.
 			 *
 			 * @access public
@@ -909,7 +996,7 @@ function fusion_element_recent_posts() {
 				'icon'       => 'fusiona-feather',
 				'preview'    => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-recent-posts-preview.php',
 				'preview_id' => 'fusion-builder-block-module-recent-posts-preview-template',
-				'help_url'   => 'https://theme-fusion.com/documentation/fusion-builder/elements/recent-posts-element/',
+				'help_url'   => 'https://theme-fusion.com/documentation/avada/elements/recent-posts-element/',
 				'params'     => [
 					[
 						'type'        => 'radio_button_set',
@@ -1167,6 +1254,52 @@ function fusion_element_recent_posts() {
 					],
 					[
 						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Title Size', 'fusion-builder' ),
+						'description' => esc_attr__( 'Choose HTML tag of the title heading, either div or the heading tag, h1-h6.', 'fusion-builder' ),
+						'param_name'  => 'title_size',
+						'value'       => [
+							'1'   => 'H1',
+							'2'   => 'H2',
+							'3'   => 'H3',
+							'4'   => 'H4',
+							'5'   => 'H5',
+							'6'   => 'H6',
+							'div' => 'DIV',
+						],
+						'default'     => '4',
+						'dependency'  => [
+							[
+								'element'  => 'title',
+								'value'    => 'no',
+								'operator' => '!=',
+							],
+						],
+					],
+					[
+						'type'             => 'typography',
+						'remove_from_atts' => true,
+						'global'           => true,
+						'heading'          => esc_attr__( 'Title Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the title typography', 'fusion-builder' ),
+						'param_name'       => 'title_typography',
+						'choices'          => [
+							'font-family'    => 'title_font',
+							'font-size'      => 'title_font_size',
+							'line-height'    => 'title_line_height',
+							'letter-spacing' => 'title_letter_spacing',
+							'text-transform' => 'title_text_transform',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '',
+							'font-size'      => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'text-transform' => '',
+						],
+					],
+					[
+						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Show Meta', 'fusion-builder' ),
 						'description' => esc_attr__( 'Choose to show all meta data.', 'fusion-builder' ),
 						'param_name'  => 'meta',
@@ -1348,6 +1481,16 @@ function fusion_element_recent_posts() {
 					],
 					'fusion_animation_placeholder' => [
 						'preview_selector' => '.fusion-column',
+					],
+					'fusion_margin_placeholder'    => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

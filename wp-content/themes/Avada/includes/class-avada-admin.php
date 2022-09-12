@@ -126,7 +126,7 @@ class Avada_Admin {
 		add_filter( 'instant_articles_transformer_rules_loaded', [ $this, 'add_instant_article_rules' ] );
 
 		// Load jQuery in the demos and plugins page.
-		if ( isset( $_GET['page'] ) && ( 'avada-prebuilt-websites' === $_GET['page'] || 'avada-plugins' === $_GET['page'] ) ) { // phpcs:ignore WordPress.Security
+		if ( isset( $_GET['page'] ) && ( 'avada-prebuilt-websites' === $_GET['page'] || 'avada-plugins' === $_GET['page'] || 'avada-setup' === $_GET['page'] ) ) { // phpcs:ignore WordPress.Security
 			add_action( 'admin_enqueue_scripts', [ $this, 'add_jquery' ] );
 
 			if ( 'avada-plugins' === $_GET['page'] ) { // phpcs:ignore WordPress.Security
@@ -156,6 +156,11 @@ class Avada_Admin {
 			$this->init_performance_wizard();
 		}
 
+		// Setup wizard, both needed for page and wizard ajax.
+		if ( ( isset( $_GET['page'] ) && 'avada-setup' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) || ( fusion_doing_ajax() && ( isset( $_GET['awb_setup_nonce'] ) || isset( $_POST['awb_setup_nonce'] ) ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.NonceVerification.Recommended
+			$this->init_setup_wizard();
+		}
+
 		add_filter( 'leadin_impact_code', [ $this, 'get_hubspot_affiliate_code' ] );
 	}
 
@@ -168,6 +173,17 @@ class Avada_Admin {
 	 */
 	public function init_performance_wizard() {
 		require_once $this->includes_path . '/class-awb-performance-wizard.php';
+	}
+
+	/**
+	 * Require and instantiate setup wizard.
+	 *
+	 * @access public
+	 * @since 7.5
+	 * @return void
+	 */
+	public function init_setup_wizard() {
+		require_once $this->includes_path . '/class-awb-setup-wizard.php';
 	}
 
 	/**
@@ -237,12 +253,29 @@ class Avada_Admin {
 	 * @return void
 	 */
 	public function activation_redirect() {
+
+		delete_transient( 'awb_cli_activation' );
+
 		if ( current_user_can( 'switch_themes' ) ) {
-			// Do not redirect if a migration is needed for Avada 5.0.0.
-			if ( true === Fusion_Builder_Migrate::needs_migration() ) {
+
+			$current_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			// Early exit if already on desired pages. CLI theme activation triggers the hook multiple times.
+			if ( 'avada' === $current_page || 'avada-setup' === $current_page ) {
 				return;
 			}
-			header( 'Location:' . admin_url( 'admin.php?page=avada' ) );
+
+			// Fresh install transient is set in class-avada-upgrade.php.
+			$fresh_install = get_transient( 'awb_fresh_install' );
+
+			if ( $fresh_install && 'fresh' === $fresh_install && ! wp_doing_ajax() && ! is_network_admin() && apply_filters( 'awb_setup_wizard_redirect', true ) ) {
+				delete_transient( 'awb_fresh_install' );
+				wp_safe_redirect( admin_url( 'admin.php?page=avada-setup' ) );
+				exit;
+			} elseif ( true !== Fusion_Builder_Migrate::needs_migration() ) { // Do not redirect if a migration is needed for Avada 5.0.0.
+				wp_safe_redirect( admin_url( 'admin.php?page=avada' ) );
+				exit;
+			}
 		}
 	}
 
@@ -256,6 +289,11 @@ class Avada_Admin {
 	public function admin_init() {
 
 		if ( current_user_can( 'switch_themes' ) ) {
+
+			// Set in register.php, function fusion_register_cmd().
+			if ( get_transient( 'awb_cli_activation' ) ) {
+				$this->activation_redirect();
+			}
 
 			if ( isset( $_GET['avada-deactivate'] ) && 'deactivate-plugin' === $_GET['avada-deactivate'] ) { // phpcs:ignore WordPress.Security
 				check_admin_referer( 'avada-deactivate', 'avada-deactivate-nonce' );
@@ -302,13 +340,13 @@ class Avada_Admin {
 			$avada_submenu_page_creation_method = 'add_submenu_page';
 
 			$dashboard         = $avada_menu_page_creation_method( 'Avada Website Builder', 'Avada', 'switch_themes', 'avada', [ $this, 'dashboard_screen' ], 'dashicons-avada', '2.111111' );
-			$options           = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Options', 'Avada' ), esc_html__( 'Options', 'Avada' ), 'switch_themes', 'themes.php?page=avada_options', '', 1 );
-			$prebuilt_websites = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Websites', 'Avada' ), esc_html__( 'Websites', 'Avada' ), 'manage_options', 'avada-prebuilt-websites', [ $this, 'prebuilt_websites_tab' ], 2 );
+			$options           = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Options', 'Avada' ), esc_html__( 'Options', 'Avada' ), 'switch_themes', 'themes.php?page=avada_options', '', 2 );
+			$prebuilt_websites = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Websites', 'Avada' ), esc_html__( 'Websites', 'Avada' ), 'manage_options', 'avada-prebuilt-websites', [ $this, 'prebuilt_websites_tab' ], 3 );
 
 			// Add in pages from Avada Builder.
 			do_action( 'avada_add_admin_menu_pages' );
 
-			$maintenance = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Maintenance', 'Avada' ), esc_html__( 'Maintenance', 'Avada' ), 'manage_options', 'avada-maintenance', null, 8 );
+			$maintenance = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Maintenance', 'Avada' ), esc_html__( 'Maintenance', 'Avada' ), 'manage_options', 'avada-maintenance', null, 12 );
 
 			// Patcher is added in through patcher class, order is 9.
 			do_action( 'avada_add_admin_menu_maintenance_pages' );
@@ -320,10 +358,11 @@ class Avada_Admin {
 				$plugins_callback = [ $GLOBALS['avada_tgmpa'], 'install_plugins_page' ];
 			}
 
-			$plugins     = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Plugins & Add-ons', 'Avada' ), esc_html__( 'Plugins & Add-ons', 'Avada' ), 'install_plugins', 'avada-plugins', $plugins_callback, 10 );
-			$performance = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Performance', 'Avada' ), esc_html__( 'Performance', 'Avada' ), 'switch_themes', 'avada-performance', [ $this, 'performance_tab' ], 11 );
-			$support     = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Support', 'Avada' ), esc_html__( 'Support', 'Avada' ), 'manage_options', 'avada-support', [ $this, 'support_tab' ], 13 );
-			$status      = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Status', 'Avada' ), esc_html__( 'Status', 'Avada' ), 'switch_themes', 'avada-status', [ $this, 'status_tab' ], 14 );
+			$plugins     = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Plugins & Add-ons', 'Avada' ), esc_html__( 'Plugins & Add-ons', 'Avada' ), 'install_plugins', 'avada-plugins', $plugins_callback, 14 );
+			$performance = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Performance', 'Avada' ), esc_html__( 'Performance', 'Avada' ), 'switch_themes', 'avada-performance', [ $this, 'performance_tab' ], 15 );
+			$support     = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Support', 'Avada' ), esc_html__( 'Support', 'Avada' ), 'manage_options', 'avada-support', [ $this, 'support_tab' ], 17 );
+			$status      = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Status', 'Avada' ), esc_html__( 'Status', 'Avada' ), 'switch_themes', 'avada-status', [ $this, 'status_tab' ], 18 );
+			$setup       = $avada_submenu_page_creation_method( 'avada', esc_html__( 'Setup', 'Avada' ), esc_html__( 'Setup', 'Avada' ), 'switch_themes', 'avada-setup', [ $this, 'setup_tab' ], 19 );
 
 			if ( ! class_exists( 'FusionReduxFrameworkPlugin' ) ) {
 				$theme_options_global = $avada_submenu_page_creation_method( 'themes.php', esc_html__( 'Options', 'Avada' ), esc_html__( 'Options', 'Avada' ), 'switch_themes', 'themes.php?page=avada_options' );
@@ -359,6 +398,8 @@ class Avada_Admin {
 
 			add_action( 'admin_print_styles-' . $performance, [ $this, 'styles_general' ] );
 			add_action( 'admin_print_scripts-' . $performance, [ $this, 'scripts_general' ] );
+			add_action( 'admin_print_styles-' . $setup, [ $this, 'styles_general' ] );
+			add_action( 'admin_print_scripts-' . $setup, [ $this, 'scripts_general' ] );
 
 			add_action( 'admin_footer', 'fusion_the_admin_font_async' );
 		}
@@ -431,6 +472,17 @@ class Avada_Admin {
 	}
 
 	/**
+	 * Include file.
+	 *
+	 * @access public
+	 * @since 8.0
+	 * @return void
+	 */
+	public function setup_tab() {
+		require_once $this->includes_path . '/admin-screens/setup.php';
+	}
+
+	/**
 	 * Renders the admin screens header with title, logo and tabs.
 	 *
 	 * @static
@@ -450,8 +502,10 @@ class Avada_Admin {
 
 		$screen_classes  = 'wrap avada-dashboard avada-db-' . $screen;
 		$screen_classes .= Avada()->registration->appear_registered() ? ' avada-registration-completed' : ' avada-registration-pending';
+		$screen_classes .= class_exists( 'AWB_Prebuilt_Websites' ) && AWB_Prebuilt_Websites()->are_avada_plugins_active() ? ' avada-plugins-activated' : ' avada-pending-plugins-activation';
 
-		if ( in_array( $screen, [ 'builder-options', 'layout-sections', 'layouts', 'icons', 'forms', 'form-entries', 'library' ], true ) ) {
+
+		if ( in_array( $screen, [ 'builder-options', 'layout-sections', 'layouts', 'off-canvas', 'icons', 'forms', 'form-entries', 'library' ], true ) ) {
 			$screen_classes .= ' fusion-builder-wrap';
 
 			if ( 'builder-options' === $screen ) {
@@ -461,6 +515,11 @@ class Avada_Admin {
 			$screen_classes .= ' avada-db-edit-screen';
 		} else {
 			$screen_classes .= ' about-wrap';
+		}
+
+		if ( 'setup' === $screen ) {
+			AWB_Setup_Wizard()->render_header( $screen_classes );
+			return;
 		}
 
 		if ( 'performance' === $screen ) {
@@ -539,7 +598,7 @@ class Avada_Admin {
 									</li>
 									<?php endif; ?>
 									<li class="avada-db-menu-sub-item avada-db-menu-sub-item-changelog">
-										<a class="avada-db-menu-sub-item-link avada-db-changelog-link" href="#">
+										<a class="avada-db-menu-sub-item-link avada-db-changelog-link" href="<?php echo esc_url( get_template_directory_uri() . '/changelog.txt' ); ?>" target="_blank">
 											<i class="fusiona-documentation"></i>
 											<div class="avada-db-menu-sub-item-text">
 												<div class="avada-db-menu-sub-item-label"><?php esc_html_e( 'Changelog', 'Avada' ); ?></div>
@@ -640,45 +699,6 @@ class Avada_Admin {
 					</div>
 				</footer>
 			<?php endif; ?>
-
-			<div class="avada-db-changelog avada-db-card avada-db-card-first">
-				<div class="avada-db-changelog-heading">
-					<h2><?php esc_html_e( 'Avada Changelog', 'Avada' ); ?></h2>
-					<i class="fusiona-cross"></i>
-				</div>
-				<iframe src="<?php echo esc_url( get_template_directory_uri() . '/changelog.txt' ); ?>"></iframe>
-			</div>
-
-
-			<div class="avada-db-overlay"></div>
-			<script type="text/javascript">
-				jQuery( document ).ready( function() {
-					setTimeout( function() {
-						jQuery( '.avada-db-notice' ).not( '.inline, .below-h2' ).insertAfter( '.avada-db-demos-notices h1' );
-					}, 10 );
-
-					jQuery( '.avada-db-changelog-link' ).on( 'click', function( e ) {
-						e.preventDefault();
-
-						jQuery( '.avada-db-changelog' ).show();
-						jQuery( '.avada-db-overlay' ).show();
-					} );
-
-					jQuery( '.avada-db-overlay, .avada-db-changelog .fusiona-cross' ).on( 'click', function( e ) {
-						e.preventDefault();
-
-						jQuery( '.avada-db-changelog' ).hide();
-						jQuery( '.avada-db-overlay' ).hide();
-					} );
-
-					jQuery( document ).on( 'keydown', function( e ) {
-						if ( 'block' === jQuery( '.avada-db-overlay' ).css( 'display' ) && 27 === e.keyCode ) {
-							jQuery( '.avada-db-changelog' ).hide();
-							jQuery( '.avada-db-overlay' ).hide();
-						}
-					} );
-				} );
-			</script>
 		</div>
 		<?php
 	}
@@ -793,12 +813,11 @@ class Avada_Admin {
 					'1.0.2',
 					true
 				);
-				wp_enqueue_script( 'jquery-color' );
-				wp_enqueue_script( 'wp-color-picker' );
-				wp_enqueue_style( 'wp-color-picker' );
 				wp_enqueue_style( 'fusion-font-icomoon', FUSION_LIBRARY_URL . '/assets/fonts/icomoon-admin/icomoon.css', false, $version, 'all' );
-				// ColorPicker Alpha Channel.
-				wp_enqueue_script( 'wp-color-picker-alpha', trailingslashit( Avada::$template_dir_url ) . 'assets/admin/js/wp-color-picker-alpha.js', [ 'wp-color-picker', 'jquery-color' ], $version, false );
+
+				if ( function_exists( 'AWB_Global_Colors' ) ) {
+					AWB_Global_Colors()->enqueue();
+				}
 
 				wp_enqueue_style( 'fontawesome', Fusion_Font_Awesome::get_backend_css_url(), [], $version );
 
@@ -923,30 +942,7 @@ class Avada_Admin {
 						$result   = activate_plugin( $plugin['file_path'] );
 						$response = [];
 
-						// Make sure woo setup won't run after this.
-						if ( 'woocommerce' === $_GET['plugin'] ) {
-							delete_transient( '_wc_activation_redirect' );
-						}
-
-						// Make sure bbpress welcome screen won't run after this.
-						if ( 'bbpress' === $_GET['plugin'] ) {
-							delete_transient( '_bbp_activation_redirect' );
-						}
-
-						// Make sure Convert Plus welcome screen won't run after this.
-						if ( 'convertplug' === $_GET['plugin'] ) {
-							delete_option( 'convert_plug_redirect' );
-						}
-
-						// Make sure events calendar welcome screen won't run after this.
-						if ( 'the-events-calendar' === $_GET['plugin'] ) {
-							delete_transient( '_tribe_events_activation_redirect' );
-						}
-
-						// Make sure HubSpot welcome screen won't load.
-						if ( 'leadin' === $_GET['plugin'] ) {
-							delete_transient( 'leadin_redirect_after_activation' );
-						}
+						$this->clear_plugin_redirection_transients( $_GET['plugin'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 
 						if ( ! is_wp_error( $result ) ) {
 							$response['message'] = 'plugin activated';
@@ -983,10 +979,48 @@ class Avada_Admin {
 				// Unfortunately 'output buffering' doesn't work here as eventually 'wp_ob_end_flush_all' function is called.
 				$GLOBALS['avada_tgmpa']->install_plugins_page();
 
+				$this->clear_plugin_redirection_transients( $_GET['plugin'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
 				die();
 			}
 		}
 
+	}
+
+	/**
+	 * Clears plugin's redirection transients.
+	 *
+	 * @access private
+	 * @since 7.7
+	 * @param string $plugin_slug Plugin slug.
+	 * @return void
+	 */
+	private function clear_plugin_redirection_transients( $plugin_slug ) {
+
+		// Make sure woo setup won't run after this.
+		if ( 'woocommerce' === $plugin_slug ) {
+			delete_transient( '_wc_activation_redirect' );
+		}
+
+		// Make sure bbpress welcome screen won't run after this.
+		if ( 'bbpress' === $plugin_slug ) {
+			delete_transient( '_bbp_activation_redirect' );
+		}
+
+		// Make sure Convert Plus welcome screen won't run after this.
+		if ( 'convertplug' === $plugin_slug ) {
+			delete_option( 'convert_plug_redirect' );
+		}
+
+		// Make sure events calendar welcome screen won't run after this.
+		if ( 'the-events-calendar' === $plugin_slug ) {
+			delete_transient( '_tribe_events_activation_redirect' );
+		}
+
+		// Make sure HubSpot welcome screen won't load.
+		if ( 'leadin' === $plugin_slug ) {
+			delete_transient( 'leadin_redirect_after_activation' );
+		}
 	}
 
 	/**
@@ -1394,6 +1428,7 @@ class Avada_Admin {
 			'partial_import'        => esc_attr__( 'Partial Import', 'Avada' ),
 			'import'                => esc_attr__( 'Import', 'Avada' ),
 			'download'              => esc_attr__( 'Download', 'Avada' ),
+			'general_data'          => esc_attr__( 'General Data', 'Avada' ),
 			'default'               => $import_warning_default,
 			/* translators: The current step label. */
 			'currently_processing'  => esc_attr__( 'Currently Processing: %s', 'Avada' ),

@@ -14,7 +14,7 @@ function fusionHubSpotMapOption( $element ) {
 	this.properties = FusionApp.data.hubspot.properties;
 	this.$el        = $element.find( '.hubspot_map .fusion-mapping' );
 	this.options    = false;
-	this.$input     = $element.find( '#hubspot_map' );
+	this.$input     = $element.find( 'input#hubspot_map' );
 	this.values     = {};
 
 	try {
@@ -44,7 +44,11 @@ fusionHubSpotMapOption.prototype.updateValues  = function() {
 	} );
 
 	this.values = values;
-	this.$input.val( JSON.stringify( values ) ).change();
+
+	this.$input.val( JSON.stringify( values ) );
+	setTimeout( () => {
+		this.$input.trigger( 'change' );
+	}, 10 );
 };
 
 fusionHubSpotMapOption.prototype.updateMap  = function() {

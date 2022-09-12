@@ -27,7 +27,7 @@
 				<div class="awb-admin-modal-status-bar-label"><span></span></div>
 				<div class="awb-admin-modal-status-bar-progress-bar"></div>
 
-				<a class="button-done-demo demo-update-modal-close" href="#">Done</a>
+				<a class="button-done-demo demo-update-modal-close" href="#"><?php echo esc_html( __( 'Done', 'fusion-builder' ) ); ?></a>
 			</div>
 		</div>
 

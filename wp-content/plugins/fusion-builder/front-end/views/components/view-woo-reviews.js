@@ -171,6 +171,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.addCssProperty( this.baseSelector, 'font-size',  _.fusionGetValueWithUnit( this.values.text_font_size ) );
 				}
 
+				if ( !this.isDefault( 'text_line_height' ) ) {
+					this.addCssProperty( this.baseSelector, 'line-height', this.values.text_line_height );
+				}
+
+				if ( !this.isDefault( 'text_text_transform' ) ) {
+					this.addCssProperty( this.baseSelector, 'text-transform', this.values.text_text_transform );
+				}
+
+				if ( !this.isDefault( 'text_letter_spacing' ) ) {
+					this.addCssProperty( this.baseSelector, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.text_letter_spacing ) );
+				}
+
 				// Text typography styles.
 				textStyles = _.fusionGetFontStyle( 'text_font', values, 'object' );
 				jQuery.each( textStyles, function( rule, value ) {

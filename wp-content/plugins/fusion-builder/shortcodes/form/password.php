@@ -58,8 +58,11 @@ if ( fusion_is_element_enabled( 'fusion_form_password' ) ) {
 					'label'            => '',
 					'name'             => '',
 					'required'         => '',
+					'empty_notice'     => '',
+					'invalid_notice'   => '',
 					'placeholder'      => '',
 					'input_field_icon' => '',
+					'pattern'          => '',
 					'tab_index'        => '',
 					'class'            => '',
 					'id'               => '',
@@ -114,7 +117,7 @@ function fusion_form_password() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Field Name', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the field name. Should be single word without spaces. Underscores and dashes are allowed.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter the field name. Please use only lowercase alphanumeric characters, dashes, and underscores.', 'fusion-builder' ),
 						'param_name'  => 'name',
 						'value'       => '',
 						'placeholder' => true,
@@ -128,6 +131,20 @@ function fusion_form_password() {
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Empty Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter text validation notice that should display if data input is empty.', 'fusion-builder' ),
+						'param_name'  => 'empty_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'required',
+								'value'    => 'yes',
+								'operator' => '==',
+							],
 						],
 					],
 					[
@@ -150,6 +167,28 @@ function fusion_form_password() {
 						'param_name'  => 'input_field_icon',
 						'value'       => '',
 						'description' => esc_attr__( 'Select an icon for the input field, click again to deselect.', 'fusion-builder' ),
+					],
+					[
+						'type'        => 'raw_text',
+						'heading'     => esc_attr__( 'Custom Pattern', 'fusion-builder' ),
+						'param_name'  => 'pattern',
+						'value'       => '',
+						/* translators: Patterns link. */
+						'description' => sprintf( __( 'Enter allowed input pattern. For pattern examples, you can check %s.', 'fusion-builder' ), '<a href="https://www.html5pattern.com/" target="_blank">' . esc_attr__( 'HTML5 Pattern', 'fusion-builder' ) . '</a>' ),
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Invalid Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter validation notice that should display if data input is invalid.', 'fusion-builder' ),
+						'param_name'  => 'invalid_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'pattern',
+								'value'    => '',
+								'operator' => '!=',
+							],
+						],
 					],
 					[
 						'type'        => 'textfield',

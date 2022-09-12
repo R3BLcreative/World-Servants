@@ -60,6 +60,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				values.icon_size  = _.fusionValidateAttrValue( values.icon_size, '' );
 				values.body_size  = _.fusionValidateAttrValue( values.body_size, '' );
 				values.columns    = Math.min( 6, values.columns );
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -71,11 +76,28 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			buildAtts: function( values ) {
 				var countersBoxShortcode = _.fusionVisibilityAtts( values.hide_on_mobile, {
-					class: 'fusion-counters-box counters-box row fusion-clearfix fusion-columns-' + values.columns
+					class: 'fusion-counters-box counters-box row fusion-clearfix fusion-columns-' + values.columns,
+					style: ''
 				} );
 
 				if ( '' !== values[ 'class' ] ) {
 					countersBoxShortcode[ 'class' ] += ' ' + values[ 'class' ];
+				}
+
+				if ( '' !== values.margin_top ) {
+					countersBoxShortcode.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					countersBoxShortcode.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					countersBoxShortcode.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					countersBoxShortcode.style += 'margin-left:' + values.margin_left + ';';
 				}
 
 				if ( '' !== values.id ) {

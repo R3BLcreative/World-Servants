@@ -98,6 +98,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.$el.find( 'input' ).each( function() {
 					$preferences[ jQuery( this ).attr( 'id' ) ] = jQuery( this ).val();
 				} );
+
+				$preferences.overWriteType    = jQuery( '.awb-import-option input[name="overwrite-type"]:checked' ).val();
+				$preferences.shouldInvert     = jQuery( '.awb-import-option input[name="invert"]:checked' ).val();
+				$preferences.contentPlacement = jQuery( '.awb-import-option input[name="load-type"]:checked' ).val();
+				$preferences.imagesImport     = jQuery( '.awb-import-option input[name="images"]:checked' ).val();
+
 				FusionApp.preferencesData = $preferences;
 
 				jQuery.ajax( {

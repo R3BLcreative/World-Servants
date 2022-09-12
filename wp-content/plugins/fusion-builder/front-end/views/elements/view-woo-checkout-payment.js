@@ -143,6 +143,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( this.baseSelector, 'font-size',  _.fusionGetValueWithUnit( this.values.text_font_size ) );
 				}
 
+				if ( !this.isDefault( 'text_line_height' ) ) {
+					this.addCssProperty( this.baseSelector, 'line-height', this.values.text_line_height );
+				}
+
+				if ( !this.isDefault( 'text_text_transform' ) ) {
+					this.addCssProperty( this.baseSelector, 'text-transform', this.values.text_text_transform );
+				}
+
+				if ( !this.isDefault( 'text_letter_spacing' ) ) {
+					this.addCssProperty( this.baseSelector, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.text_letter_spacing ) );
+				}
+
 				if ( !this.isDefault( 'link_color' ) ) {
 				  this.addCssProperty( this.baseSelector + ' a', 'color',  this.values.link_color );
 				}
@@ -151,7 +163,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( this.baseSelector + ' a:hover', 'color',  this.values.link_hover_color );
 				}
 
-				selector =  this.baseSelector + ' .woocommerce-checkout-payment ul.wc_payment_methods li label';
+				selector =  this.baseSelector + ' .woocommerce-checkout-payment ul.wc_payment_methods li > label';
 				if ( !this.isDefault( 'label_padding_top' ) ) {
 				  this.addCssProperty( selector, 'padding-top',  this.values.label_padding_top );
 				}
@@ -181,7 +193,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.addCssProperty( this.baseSelector + ' ul li input:checked+label', 'color',  this.values.label_hover_color );
 				}
 
-				selector =  this.baseSelector + ' .woocommerce-checkout-payment ul.wc_payment_methods li:hover label';
+				selector =  this.baseSelector + ' .woocommerce-checkout-payment ul.wc_payment_methods li:hover > label';
 				if ( !this.isDefault( 'label_bg_hover_color' ) ) {
 				  this.addCssProperty( selector, 'background',  this.values.label_bg_hover_color );
 				}

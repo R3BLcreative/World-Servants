@@ -112,7 +112,7 @@ FusionPageBuilder.options.fusionLogics = {
 					break;
 
 				case 'text':
-					$options = '<input type="text" value="" placeholder="' + fusionBuilderText.condition_value + '" class="fusion-hide-from-atts fusion-logic-option" />';
+					$options = `<input type="text" value="" placeholder="${currentChoice.placeholder || fusionBuilderText.condition_value}" class="fusion-hide-from-atts fusion-logic-option" />`;
 					$wrapper.find( '.logic-value-field' ).html( $options );
 					break;
 				}

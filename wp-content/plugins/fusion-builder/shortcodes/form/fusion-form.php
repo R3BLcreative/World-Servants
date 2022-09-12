@@ -26,6 +26,15 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 			protected $args;
 
 			/**
+			 * An array of rendered form's IDs.
+			 *
+			 * @access protected
+			 * @since 3.7
+			 * @var array
+			 */
+			protected $rendered_forms = [];
+
+			/**
 			 * Constructor.
 			 *
 			 * @access public
@@ -133,6 +142,11 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 					}
 				}
 
+				// Add Off Canvas to stack, so it's markup is added to the page.
+				if ( class_exists( 'AWB_Off_Canvas' ) && false !== AWB_Off_Canvas::is_enabled() && in_array( 'off-canvas', $this->params['form_meta']['form_actions'], true ) && $this->params['form_meta']['off_canvas'] ) {
+					AWB_Off_Canvas_Front_End::add_off_canvas_to_stack( $this->params['form_meta']['off_canvas'] );
+				}
+
 				// Build the form markup.
 				$html = $this->create_style_tag();
 
@@ -141,6 +155,11 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 				$form .= '<input type="hidden" name="fusion_privacy_store_ip_ua" value="' . ( 'yes' === $this->params['form_meta']['privacy_store_ip_ua'] ? 'true' : 'false' ) . '">';
 				$form .= '<input type="hidden" name="fusion_privacy_expiration_interval" value="' . absint( $this->params['form_meta']['privacy_expiration_interval'] ) . '">';
 				$form .= '<input type="hidden" name="privacy_expiration_action" value="' . esc_attr( $this->params['form_meta']['privacy_expiration_action'] ) . '">';
+
+				if ( isset( $this->params['form_meta']['nonce_method'] ) && 'localized' === $this->params['form_meta']['nonce_method'] ) {
+					$form .= wp_nonce_field( 'fusion_form_nonce', 'fusion-form-nonce-' . absint( $this->args['form_post_id'] ), false, false );
+				}
+
 				$form .= $this->close_form();
 
 				$html .= '<div ' . FusionBuilder::attributes( 'fusion-form-wrapper' ) . '>';
@@ -151,6 +170,25 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 
 				return apply_filters( 'fusion_element_form_content', $html, $args );
 			}
+
+			/**
+			 * Fires on render.
+			 *
+			 * @access protected
+			 * @since 3.2
+			 */
+			protected function on_render() {
+				if ( ! $this->has_rendered ) {
+					$this->on_first_render();
+					$this->has_rendered = true;
+				}
+
+				if ( ! in_array( (int) $this->args['form_post_id'], $this->rendered_forms, true ) && isset( $this->params['form_meta']['nonce_method'] ) && ( 'none' === $this->params['form_meta']['nonce_method'] || 'localized' === $this->params['form_meta']['nonce_method'] ) ) {
+					Fusion_Form_Builder()->increase_view_count( $this->args['form_post_id'] );
+					$this->rendered_forms[] = (int) $this->args['form_post_id'];
+				}
+			}
+
 			/**
 			 * Check if a param is default.
 			 *
@@ -198,7 +236,6 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 					$this->base_selector . ' input[type="password"]',
 					$this->base_selector . ' input[type="search"]',
 					$this->base_selector . ' input[type="tel"]',
-					$this->base_selector . ' input[type="phone-number"]',
 					$this->base_selector . ' input[type="text"]',
 					$this->base_selector . ' input[type="time"]',
 					$this->base_selector . ' input[type="url"]',
@@ -251,7 +288,7 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 				if ( '' !== $this->params['form_meta']['form_placeholder_color'] ) {
 					$placeholders_color = $this->params['form_meta']['form_placeholder_color'];
 				} elseif ( ! $this->is_default( 'form_text_color' ) ) {
-					$placeholders_color = Fusion_Color::new_color( $this->params['form_meta']['form_text_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$placeholders_color = Fusion_Color::new_color( $this->params['form_meta']['form_text_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 				}
 
 				if ( $placeholders_color ) {
@@ -286,7 +323,7 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 
 				// Label color.
 				if ( ! $this->is_default( 'form_label_color' ) ) {
-					$this->add_css_property( $this->base_selector . ' label, ' . $this->base_selector . ' .label', 'color', $this->params['form_meta']['form_label_color'] );
+					$this->add_css_property( $this->base_selector . ' label, ' . $this->base_selector . ' .label,' . $this->base_selector . ' .fusion-form-tooltip > i', 'color', $this->params['form_meta']['form_label_color'] );
 				}
 
 				// Border size.
@@ -354,7 +391,7 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 
 				// Border focus color.
 				if ( ! $this->is_default( 'form_focus_border_color' ) ) {
-					$hover_color = Fusion_Color::new_color( $this->params['form_meta']['form_focus_border_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$hover_color = Fusion_Color::new_color( $this->params['form_meta']['form_focus_border_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 
 					$selectors = [
 						$this->base_selector . ' input:not([type="submit"]):focus',
@@ -452,8 +489,11 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 
 				$class .= ' fusion-form-' . $this->params['form_number'];
 
-				$action = isset( $this->params['form_meta']['action'] ) ? $this->params['form_meta']['action'] : get_permalink();
+				$action = get_permalink();
 
+				if ( 'post' === $this->params['form_meta']['form_type'] && '' !== $this->params['form_meta']['post_method_url'] ) {
+					$action = $this->params['form_meta']['post_method_url'];
+				}
 				$html .= '<form action="' . $action . '" method="' . $this->params['form_meta']['method'] . '"' . $data_attributes . ' class="' . $class . '"' . $id . $enctype . '>';
 
 				/**
@@ -522,6 +562,12 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 
 				$attr['data-config'] = $this->localize_form_data();
 
+				// Add Off Canvas data attr.
+				if ( class_exists( 'AWB_Off_Canvas' ) && false !== AWB_Off_Canvas::is_enabled() && in_array( 'off-canvas', $this->params['form_meta']['form_actions'], true ) && $this->params['form_meta']['off_canvas'] ) {
+					AWB_Off_Canvas_Front_End::add_off_canvas_to_stack( $this->params['form_meta']['off_canvas'] );
+					$attr['data-off-canvas'] = $this->params['form_meta']['off_canvas'];
+				}
+
 				return $attr;
 			}
 
@@ -556,7 +602,6 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 					'formCreatorConfig',
 					[
 						'ajaxurl'             => admin_url( 'admin-ajax.php' ),
-						'post_id'             => get_the_ID(),
 						'invalid_email'       => esc_attr__( 'The supplied email address is invalid.', 'fusion-builder' ),
 						'max_value_error'     => esc_attr__( 'Max allowed value is: 2.', 'fusion-builder' ),
 						'min_value_error'     => esc_attr__( 'Min allowed value is: 1.', 'fusion-builder' ),
@@ -586,7 +631,9 @@ if ( fusion_is_element_enabled( 'fusion_form' ) ) {
 					'redirect_url'      => isset( $this->params['form_meta']['redirect_url'] ) ? $this->params['form_meta']['redirect_url'] : '',
 					'field_labels'      => $fusion_form['field_labels'],
 					'field_logics'      => $fusion_form['field_logics'],
+					'nonce_method'      => isset( $this->params['form_meta']['nonce_method'] ) ? $this->params['form_meta']['nonce_method'] : 'ajax',
 				];
+
 				return wp_json_encode( $form_data );
 			}
 		}
@@ -627,6 +674,11 @@ function fusion_element_form() {
 						),
 						'param_name'  => 'form_post_id',
 						'value'       => Fusion_Builder_Form_Helper::fusion_form_creator_form_list(),
+						'quick_edit'  => [
+							'label' => esc_html__( 'Edit Form', 'fusion-builder' ),
+							'type'  => 'form',
+							'items' => Fusion_Builder_Form_Helper::fusion_form_creator_form_list( 'permalinks' ),
+						],
 					],
 					'fusion_margin_placeholder' => [
 						'group'      => esc_attr__( 'General', 'fusion-builder' ),

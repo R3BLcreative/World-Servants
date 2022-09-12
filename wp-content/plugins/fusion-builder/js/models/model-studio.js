@@ -43,6 +43,49 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		},
 
 		/**
+		 * Sets options.
+		 *
+		 * @since 3.7
+		 * @param {Object} $layoutsContainer
+		 * @return {void}
+		 */
+		setImportOptions: function( $layoutsContainer ) {
+			var $wrapper = $layoutsContainer.closest( '.studio-wrapper' ).find( '.awb-import-options-group' ),
+				options  = { // Object of option name and default value.
+					'load-type': 'load-type-replace',
+					'overwrite-type': 'replace-pos',
+					'invert': 'dont-invert',
+					'images': 'do-import-images'
+				};
+
+				jQuery.each( options, function( name, value ) {
+					if ( ! $wrapper.find( 'input[name="' + name + '"]' ).is( ':checked' ) ) {
+						$wrapper.find( '#' +  value ).prop( 'checked', true );
+					}
+				} );
+		},
+
+		getImportOptions: function( event ) {
+			var $wrapper = jQuery( event.currentTarget ).closest( '.studio-wrapper' ),
+				overWriteType    = $wrapper.find( 'input[name="overwrite-type"]:checked' ).val(),
+				shouldInvert     = $wrapper.find( 'input[name="invert"]:checked' ).val(),
+				loadType         = $wrapper.find( 'input[name="load-type"]:checked' ).val(),
+				imagesImport     = $wrapper.find( 'input[name="images"]:checked' ).val(),
+				layoutID         = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ).data( 'layout-id' ),
+				options;
+
+				options = {
+					'overWriteType': overWriteType,
+					'shouldInvert': shouldInvert,
+					'loadType': loadType,
+					'layoutID': layoutID,
+					'imagesImport': imagesImport
+				};
+
+				return options;
+		},
+
+		/**
 		 * Filter out invalid layouts, containers etc for current situation.
 		 *
 		 * @since 3.5

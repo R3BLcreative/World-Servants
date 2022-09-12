@@ -30,11 +30,11 @@
 			</ul>
 		<# } #>
 
-		<# if ( 'no' !== values.scrolling && 'terms' !== values.source && 'grid' === values.layout ) { #>
+		<# if ( 'no' !== values.scrolling && 'terms' !== values.source && ( 'grid' === values.layout || 'masonry' === values.layout ) ) { #>
 			{{{ pagination }}}
-		<# } #>	
+		<# } #>
 
-		<# if ( 'load_more_button' === values.scrolling && -1 !== values.number_posts && 'terms' !== values.source && 'grid' === values.layout ) { #>
+		<# if ( 'load_more_button' === values.scrolling && -1 !== values.number_posts && 'terms' !== values.source && ( 'grid' === values.layout || 'masonry' === values.layout ) ) { #>
 			<button class="fusion-load-more-button fusion-product-button fusion-clearfix">{{{ loadMoreText }}}</button>
 		<# } #>
 

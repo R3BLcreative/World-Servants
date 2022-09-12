@@ -365,6 +365,18 @@ class Fusion_Media_Query_Scripts {
 						'min-width' => $visibility_medium,
 					]
 				);
+			case 'fusion-max-small':
+				return self::get_media_query(
+					[
+						'max-width' => $visibility_small,
+					]
+				);
+			case 'fusion-max-medium':
+				return self::get_media_query(
+					[
+						'max-width' => $visibility_medium,
+					]
+				);              
 		}
 	}
 

@@ -91,9 +91,6 @@ class Avada_Scripts {
 
 		// Disable jQuery Migrate script.
 		add_action( 'wp_default_scripts', [ $this, 'disable_jquery_migrate' ] );
-
-		// Delay fusion_get_options in order for default value to be available.
-		add_action( 'init', [ $this, 'add_filter_replace_css_vars' ], 11 );
 	}
 
 	/**
@@ -110,16 +107,6 @@ class Avada_Scripts {
 		$dynamic_css_obj     = Fusion_Dynamic_CSS::get_instance();
 		$this->compiler_mode = ( method_exists( $dynamic_css_obj, 'get_mode' ) ) ? $dynamic_css_obj->get_mode() : $dynamic_css_obj->mode;
 		return $this->compiler_mode;
-	}
-
-	/**
-	 * Add filter for replacing CSS vars.
-	 */
-	public function add_filter_replace_css_vars() {
-
-		// Replace CSS-Variables in compiled CSS.
-		$callback = fusion_get_option( 'css_vars' ) ? '__return_false' : '__return_true';
-		add_filter( 'fusion_replace_css_var_values', $callback );
 	}
 
 	/**
@@ -242,16 +229,6 @@ class Avada_Scripts {
 				true,
 			];
 		}
-		if ( $privacy_options['privacy_embeds'] || $privacy_options['privacy_bar'] || Avada()->settings->get( 'slidingbar_widgets' ) || $is_builder ) {
-			$scripts[] = [
-				'avada-container-scroll',
-				$js_folder_url . '/general/avada-container-scroll.js',
-				$js_folder_path . '/general/avada-container-scroll.js',
-				[ 'jquery' ],
-				self::$version,
-				true,
-			];
-		}
 		if ( is_page_template( 'side-navigation.php' ) ) {
 			$scripts[] = [
 				'avada-side-nav',
@@ -283,6 +260,17 @@ class Avada_Scripts {
 			}
 		}
 
+		if ( 'ajax' === Avada()->settings->get( 'post_views' ) && ! $is_builder && is_singular() && ! is_preview() ) {
+			$scripts[] = [
+				'avada-views-counter',
+				$js_folder_url . '/general/avada-views-counter.js',
+				$js_folder_path . '/general/avada-views-counter.js',
+				[ 'jquery' ],
+				self::$version,
+				true,
+			];
+		}
+
 		if ( 'off' !== Avada()->settings->get( 'status_totop' ) || $is_builder ) {
 			$scripts[] = [
 				'avada-to-top',
@@ -298,7 +286,7 @@ class Avada_Scripts {
 				'avada-sliding-bar',
 				$js_folder_url . '/general/avada-sliding-bar.js',
 				$js_folder_path . '/general/avada-sliding-bar.js',
-				[ 'modernizr', 'jquery', 'jquery-easing', 'avada-container-scroll' ],
+				[ 'modernizr', 'jquery', 'jquery-easing' ],
 				self::$version,
 				true,
 			];
@@ -422,7 +410,7 @@ class Avada_Scripts {
 				'avada-privacy',
 				$js_folder_url . '/general/avada-privacy.js',
 				$js_folder_path . '/general/avada-privacy.js',
-				[ 'jquery', 'avada-container-scroll' ],
+				[ 'jquery' ],
 				self::$version,
 				true,
 			];
@@ -645,6 +633,12 @@ class Avada_Scripts {
 
 		$privacy_options = Avada()->privacy_embeds->get_options();
 
+		global $post;
+		$post_id = 0;
+		if ( $post && $post->ID && $post->ID > 0 ) {
+			$post_id = $post->ID;
+		}
+
 		$side_header_breakpoint = Avada()->settings->get( 'side_header_break_point' );
 		if ( ! $side_header_breakpoint ) {
 			$side_header_breakpoint = 800;
@@ -685,6 +679,13 @@ class Avada_Scripts {
 					'status_totop'           => Avada()->settings->get( 'status_totop' ),
 					'totop_position'         => Avada()->settings->get( 'totop_position' ),
 					'totop_scroll_down_only' => Avada()->settings->get( 'totop_scroll_down_only' ),
+				],
+			],
+			[
+				'avada-views-counter',
+				'avadaViewsCounterVars',
+				[
+					'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				],
 			],
 			[
@@ -933,7 +934,7 @@ class Avada_Scripts {
 		if ( 'off' !== Avada()->settings->get( 'css_cache_method' ) ) {
 			if ( is_rtl() ) {
 				// Stylesheet ID: avada-rtl.
-				$styles .= fusion_file_get_contents( Avada::$template_dir_path . '/assets/css/rtl.min.css' );
+				$styles .= fusion_file_get_contents( Avada::$template_dir_path . '/assets/css/dynamic/rtl.min.css' );
 				if ( ! $header_override ) {
 					$styles .= fusion_file_get_contents( Avada::$template_dir_path . '/assets/css/rtl-header-legacy.min.css' );
 				}
@@ -944,6 +945,8 @@ class Avada_Scripts {
 			$stylesheets = $this->get_third_party_stylesheets();
 
 			foreach ( $stylesheets as $src ) {
+				$src = apply_filters( 'awb_combined_stylesheet_url', $src, site_url(), plugins_url() );
+
 				$contents = fusion_file_get_contents( $src );
 
 				if ( false !== strpos( $src, 'events-calendar' ) ) {
@@ -988,7 +991,7 @@ class Avada_Scripts {
 	 * @return string The style HTML tag.
 	 */
 	public function remove_directly_printed_ec_styles( $tag, $handle, $href, $media ) {
-		if ( 'file' === $this->get_compiler_mode() && Avada()->settings->get( 'css_combine_third_party_assets' ) && false !== strpos( $handle, 'tribe-' ) ) {
+		if ( 'file' === $this->get_compiler_mode() && Avada()->settings->get( 'css_combine_third_party_assets' ) && ( false !== strpos( $handle, 'tec-' ) || false !== strpos( $handle, 'tribe-' ) ) && function_exists( 'tribe_is_event_query' ) && tribe_is_event_query() ) {
 			return '';
 		}
 
@@ -1032,13 +1035,13 @@ class Avada_Scripts {
 	 */
 	public function get_third_party_stylesheets() {
 		$wp_styles = wp_styles();
-		$handles   = array_merge( $wp_styles->done, $wp_styles->queue );
+		$handles   = array_keys( $wp_styles->registered );
 
 		if ( empty( $this->combined_assets ) ) {
 			foreach ( $handles as $handle ) {
 				$src = $wp_styles->registered[ $handle ]->src;
 
-				if ( ! isset( $wp_styles->done[ $handle ] ) && isset( $wp_styles->registered[ $handle ]->args ) && 'all' === $wp_styles->registered[ $handle ]->args && ! empty( $src ) && true === $this->is_bundled_plugin_style( $src ) ) {
+				if ( ! isset( $wp_styles->done[ $handle ] ) && isset( $wp_styles->registered[ $handle ]->args ) && 'all' === $wp_styles->registered[ $handle ]->args && ! empty( $src ) && ! in_array( $handle, $this->combined_assets, true ) && true === $this->is_bundled_plugin_style( $src ) ) {
 					$this->combined_assets[ $handle ] = $src;
 
 					if ( isset( $wp_styles->registered[ $handle ]->deps ) ) {
@@ -1064,7 +1067,7 @@ class Avada_Scripts {
 	 * @return bool
 	 */
 	protected function is_bundled_plugin_style( $src ) {
-		$bundled_plugins = [ '/the-events-calendar/', '/events-calendar-pro/', '/woocommerce/', '/bbpress/', '/revslider/', '/contact-form-7/', '/convertplug/' ];
+		$bundled_plugins = [ '/the-events-calendar/', '/events-calendar-pro/', '/the-events-calendar-filterbar/', '/event-tickets/', '/event-tickets-plus/', '/woocommerce/', '/bbpress/', '/revslider/', '/contact-form-7/', '/convertplug/' ];
 
 		// Check if src containes bundled plugin dir name.
 		if ( str_replace( $bundled_plugins, '', $src ) === $src ) {
@@ -1490,7 +1493,6 @@ class Avada_Scripts {
 						Fusion_Media_Query_Scripts::get_media_query_from_key( 'fusion-max-sh-cbp' ),
 					];
 
-
 				}
 			}
 		}
@@ -1610,8 +1612,14 @@ class Avada_Scripts {
 	public function disable_emojis_remove_dns_prefetch( $urls, $relation_type ) {
 
 		if ( 'dns-prefetch' === $relation_type ) {
-			$emoji_svg_url = apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/11/svg/' );
-			$urls          = array_diff( $urls, [ $emoji_svg_url ] );
+
+			// Strip out any URLs referencing the WordPress.org emoji location.
+			$emoji_svg_url_bit = 'https://s.w.org/images/core/emoji/';
+			foreach ( $urls as $key => $url ) {
+				if ( false !== strpos( $url, $emoji_svg_url_bit ) ) {
+					unset( $urls[ $key ] );
+				}
+			}
 		}
 
 		return $urls;

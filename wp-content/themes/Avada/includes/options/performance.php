@@ -68,10 +68,23 @@ function avada_options_section_performance( $sections ) {
 		'icon'     => 'el-icon-time-alt',
 		'alt_icon' => 'fusiona-check',
 		'fields'   => [
+			'svg_upload'                           => [
+				'label'       => esc_html__( 'SVG Media Upload', 'Avada' ),
+				'description' => esc_html__( 'Enable upload of SVG files and improve performance through their smaller image and logo file size.', 'Avada' ),
+				'id'          => 'svg_upload',
+				'default'     => 'disabled',
+				'type'        => 'radio-buttonset',
+				'choices'     => [
+					'enabled'  => esc_html__( 'Enable', 'Avada' ),
+					'disabled' => esc_html__( 'Disable', 'Avada' ),
+				],
+				// No need to refresh the page.
+				'transport'   => 'postMessage',
+			],
 			'pw_jpeg_quality'                      => [
-				'label'       => esc_html__( 'WordPress JPG Quality', 'Avada' ),
+				'label'       => esc_html__( 'WordPress Image Quality', 'Avada' ),
 				/* translators: "Regenerate Thumbnails" plugin link. */
-				'description' => sprintf( esc_html__( 'Controls the quality of the generated image sizes for every uploaded image. Ranges between 0 and 100 percent. Higher values lead to better image qualities but also higher file sizes. NOTE: After changing this value, please install and run the %s plugin once.', 'Avada' ), '<a target="_blank" href="' . admin_url( 'plugin-install.php?s=Regenerate+Thumbnails&tab=search&type=term' ) . '" title="' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '">' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '</a>' ),
+				'description' => sprintf( __( 'Controls the quality of the generated image sizes for every uploaded image. Ranges between 0 and 100 percent. Higher values lead to better image qualities but also higher file sizes. <strong>NOTE:</strong> After changing this value, please install and run the %s plugin once.', 'Avada' ), '<a target="_blank" href="' . admin_url( 'plugin-install.php?s=Regenerate+Thumbnails&tab=search&type=term' ) . '" title="' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '">' . esc_html__( 'Regenerate Thumbnails', 'Avada' ) . '</a>' ),
 				'id'          => 'pw_jpeg_quality',
 				'default'     => '82',
 				'type'        => 'slider',
@@ -101,6 +114,19 @@ function avada_options_section_performance( $sections ) {
 				'label'       => esc_html__( 'Image Lazy Loading', 'Avada' ),
 				'description' => __( 'Choose your preferred lazy loading method for your website\'s images to improve performance. <strong>IMPORTANT:</strong> The WordPress native method can cause issues with dynamically loaded elements like image carousels.', 'Avada' ),
 				'id'          => 'lazy_load',
+				'default'     => 'none',
+				'type'        => 'radio-buttonset',
+				'choices'     => [
+					'avada'     => esc_html__( 'Avada', 'Avada' ),
+					'wordpress' => esc_html__( 'WordPress', 'Avada' ),
+					'none'      => esc_html__( 'None', 'Avada' ),
+				],
+				'transport'   => 'postMessage', // No need to refresh the page.
+			],
+			'lazy_load_iframes'                    => [
+				'label'       => esc_html__( 'Iframe Lazy Loading', 'Avada' ),
+				'description' => __( 'Choose your preferred lazy loading method for your website\'s iframe to improve performance.', 'Avada' ),
+				'id'          => 'lazy_load_iframes',
 				'default'     => 'none',
 				'type'        => 'radio-buttonset',
 				'choices'     => [
@@ -259,7 +285,7 @@ function avada_options_section_performance( $sections ) {
 			],
 			'defer_jquery'                         => [
 				'label'       => esc_html__( 'Load jQuery In Footer', 'Avada' ),
-				'description' => esc_html__( 'Set to \'on\' to defer loading of jQuery to the footer of the page.  This will only take effect if no other jQuery dependent scripts are added to the head. Turning this on can cause JS scripts to break, use with caution.', 'Avada' ),
+				'description' => esc_html__( 'Set to \'on\' to defer loading of jQuery to the footer of the page. This will only take effect if no other jQuery dependent scripts are added to the head. Turning this on can cause JS scripts to break, use with caution.', 'Avada' ),
 				'id'          => 'defer_jquery',
 				'default'     => '0',
 				'type'        => 'switch',
@@ -303,6 +329,15 @@ function avada_options_section_performance( $sections ) {
 				// No need to refresh the page.
 				'transport'   => 'postMessage',
 			],
+			'clear_object_cache'                   => [
+				'label'       => esc_html__( 'Clear Object Cache ', 'Avada' ),
+				'description' => __( 'Set to \'on\' to clear WP\'s object cache on post edit and post deletion. This is useful, if your setup or hoster uses persistent object caching, to make sure that queries update when you add or remove posts.', 'Avada' ),
+				'id'          => 'clear_object_cache',
+				'default'     => '0',
+				'type'        => 'switch',
+				// No need to refresh the page.
+				'transport'   => 'postMessage',
+			],
 			'dynamic_compiler_section'             => [
 				'label' => esc_html__( 'Dynamic CSS & JS', 'Avada' ),
 				'id'    => 'dynamic_compiler_section',
@@ -324,7 +359,7 @@ function avada_options_section_performance( $sections ) {
 			],
 			'css_combine_third_party_assets'       => [
 				'label'       => esc_html__( 'Combine Third Party CSS Files', 'Avada' ),
-				'description' => __( 'When enabled, third party CSS files will be combined into Avada\'s main stylesheet. Plugins affected are WooCommerce, The Events Calendar, Slider Revolution, ConvertPlus, Contact Form 7 and bbPress. <strong>IMPORTANT:</strong> When this option is changed, Avada Caches have to be reset for changes to apply.', 'Avada' ),
+				'description' => __( 'When enabled, third party CSS files will be combined into Avada\'s main stylesheet. Plugins affected are WooCommerce, The Events Calendar, Slider Revolution, ConvertPlus, Contact Form 7 and bbPress. <strong>IMPORTANT:</strong> Enabling this option is not recommended when you are are using third party file combining services, like cache plugins. <strong>NOTE:</strong> When this option is changed, Avada Caches have to be reset for changes to apply.', 'Avada' ),
 				'id'          => 'css_combine_third_party_assets',
 				'default'     => '0',
 				'type'        => 'switch',
@@ -341,14 +376,6 @@ function avada_options_section_performance( $sections ) {
 				'label'       => esc_html__( 'Load Media-Queries Files Asynchronously', 'Avada' ),
 				'description' => esc_html__( 'When enabled, the CSS media-queries will be enqueued separately and then loaded asynchronously, improving performance on mobile and desktop.', 'Avada' ),
 				'id'          => 'media_queries_async',
-				'default'     => '0',
-				'type'        => 'switch',
-				'transport'   => 'postMessage', // No need to refresh the page.
-			],
-			'css_vars'                             => [
-				'label'       => esc_html__( 'Enable CSS Variables', 'Avada' ),
-				'description' => __( 'Enable this option to use CSS Variables (Custom Properties). Makes compilations faster and lighter.', 'Avada' ),
-				'id'          => 'css_vars',
 				'default'     => '0',
 				'type'        => 'switch',
 				'transport'   => 'postMessage', // No need to refresh the page.

@@ -297,7 +297,7 @@ class Fusion_Mailchimp {
 			return $this->token;
 		}
 
-		$this->token = get_transient( 'fusion_mailchimp_token' );
+		$this->token = get_option( 'fusion_mailchimp_token' );
 
 		// No transient.
 		if ( ! $this->token ) {
@@ -323,11 +323,11 @@ class Fusion_Mailchimp {
 		}
 
 		if ( 'auth' === $this->type ) {
-			$this->dc = get_transient( 'fusion_mailchimp_dc' );
+			$this->dc = get_option( 'fusion_mailchimp_dc' );
 		} elseif ( 'key' === $this->type ) {
 			$key      = $this->get_api_key();
 			$dc       = explode( '-', $this->get_api_key() );
-			$this->dc = $dc[1];
+			$this->dc = isset( $dc[1] ) ? $dc[1] : false;
 		}
 
 		// Return what we have.
@@ -421,8 +421,8 @@ class Fusion_Mailchimp {
 	 * @return void
 	 */
 	public function reset_token() {
-		delete_transient( 'fusion_mailchimp_token' );
-		delete_transient( 'fusion_mailchimp_dc' );
+		delete_option( 'fusion_mailchimp_token' );
+		delete_option( 'fusion_mailchimp_dc' );
 		$this->token = null;
 	}
 
@@ -436,7 +436,7 @@ class Fusion_Mailchimp {
 	 * @return mixed
 	 */
 	public function api_request( $action = '', $options = [] ) {
-		if ( '' === $action || ! $this->can_connect() ) {
+		if ( '' === $action || ! $this->can_connect() || ! $this->get_server_prefix() ) {
 			return false;
 		}
 
@@ -670,11 +670,10 @@ class Fusion_Mailchimp {
 		}
 
 		// Transient with expiry to match.
-		$token      = sanitize_text_field( wp_unslash( $_GET['token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
-		$dc         = sanitize_text_field( wp_unslash( $_GET['dc'] ) ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
-		$expiration = isset( $_GET['expires'] ) ? (int) sanitize_text_field( wp_unslash( $_GET['expires'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification
-		set_transient( 'fusion_mailchimp_token', $token, $expiration );
-		set_transient( 'fusion_mailchimp_dc', $dc, $expiration );
+		$token = sanitize_text_field( wp_unslash( $_GET['token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
+		$dc    = sanitize_text_field( wp_unslash( $_GET['dc'] ) ); // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
+		update_option( 'fusion_mailchimp_token', $token );
+		update_option( 'fusion_mailchimp_dc', $dc );
 		$this->token = $token;
 		$this->dc    = $dc;
 
@@ -823,6 +822,18 @@ class Fusion_Mailchimp {
 				/* translators: 1: Mailchimp link. 2: Documentation link. */
 				'description' => '<div class="fusion-redux-important-notice">' . sprintf( __( 'Sign up for a %1$s and manage your contacts in their free CRM.  For more information check out our %2$s. ', 'fusion-builder' ), $mailchimp_link, $document_link ) . '</div>',
 				'id'          => 'mailchimp_info',
+				'dependency'  => [
+					[
+						'field'      => 'form_type',
+						'value'      => 'ajax',
+						'comparison' => '==',
+					],
+					[
+						'field'      => 'form_actions',
+						'value'      => 'mailchimp',
+						'comparison' => 'contains',
+					],
+				],
 			];
 
 			return $sections;
@@ -835,82 +846,102 @@ class Fusion_Mailchimp {
 				$lists_data[ $list['id'] ] = $list['name'];
 			}
 
-			$sections['form_submission']['fields']['mailchimp_info']          = [
-				'type'        => 'custom',
-				'label'       => '',
-				'description' => '<div class="fusion-redux-important-notice">' . __( 'You are currently connected to the Mailchimp API.', 'fusion-builder' ) . '</div>',
-				'id'          => 'mailchimp_info',
-			];
-			$sections['form_submission']['fields']['mailchimp_action']        = [
-				'type'        => 'radio-buttonset',
-				'label'       => esc_html__( 'Mailchimp Action', 'fusion-builder' ),
-				'description' => esc_html__( 'Select if you want to perform a Mailchimp action after form submission.', 'fusion-builder' ),
-				'id'          => 'mailchimp_action',
-				'default'     => 'no',
-				'transport'   => 'postMessage',
-				'choices'     => [
-					'no'      => esc_html__( 'None', 'fusion-builder' ),
-					'contact' => esc_html__( 'Create/Update Contact', 'fusion-builder' ),
-				],
-			];
-			$sections['form_submission']['fields']['mailchimp_lists']         = [
-				'type'        => 'select',
-				'label'       => esc_html__( 'Mailchimp List', 'fusion-builder' ),
-				'description' => __( 'Select Mailchimp list.', 'fusion-builder' ),
-				'id'          => 'mailchimp_lists',
-				'choices'     => $lists_data,
-				'transport'   => 'postMessage',
-				'dependency'  => [
+			$sections['form_submission']['fields']['mailchimp_options'] = [
+				'type'       => 'toggle',
+				'row_title'  => esc_html__( 'Mailchimp', 'fusion-builder' ),
+				'id'         => 'mailchimp_options',
+				'dependency' => [
 					[
-						'field'      => 'mailchimp_action',
-						'value'      => 'contact',
-						'comparison' => '==',
-					],
-				],
-			];
-			$sections['form_submission']['fields']['mailchimp_double_opt_in'] = [
-				'type'        => 'radio-buttonset',
-				'label'       => esc_html__( 'Double Opt-In', 'fusion-builder' ),
-				'description' => __( 'With double opt-in, everyone who signs up will receive a follow-up email with a confirmation link to verify their subscription.', 'fusion-builder' ),
-				'id'          => 'mailchimp_double_opt_in',
-				'default'     => 'no',
-				'transport'   => 'postMessage',
-				'choices'     => [
-					'yes' => esc_html__( 'Yes', 'fusion-builder' ),
-					'no'  => esc_html__( 'No', 'fusion-builder' ),
-				],
-				'dependency'  => [
-					[
-						'field'      => 'mailchimp_action',
-						'value'      => 'contact',
+						'field'      => 'form_type',
+						'value'      => 'ajax',
 						'comparison' => '==',
 					],
 					[
-						'field'      => 'mailchimp_lists',
-						'value'      => '',
-						'comparison' => '!=',
+						'field'      => 'form_actions',
+						'value'      => 'mailchimp',
+						'comparison' => 'contains',
+					],
+				],
+				'fields'     => [
+					'mailchimp_info'          => [
+						'type'        => 'custom',
+						'label'       => '',
+						'description' => '<div class="fusion-redux-important-notice">' . __( 'You are currently connected to the Mailchimp API.', 'fusion-builder' ) . '</div>',
+						'id'          => 'mailchimp_info',
+					],
+					'mailchimp_action'        => [
+						'type'        => 'radio-buttonset',
+						'label'       => esc_html__( 'Mailchimp Action', 'fusion-builder' ),
+						'description' => esc_html__( 'Select if you want to perform a Mailchimp action after form submission.', 'fusion-builder' ),
+						'id'          => 'mailchimp_action',
+						'default'     => 'no',
+						'transport'   => 'postMessage',
+						'choices'     => [
+							'no'      => esc_html__( 'None', 'fusion-builder' ),
+							'contact' => esc_html__( 'Create/Update Contact', 'fusion-builder' ),
+						],
+					],
+					'mailchimp_lists'         => [
+						'type'        => 'select',
+						'label'       => esc_html__( 'Mailchimp List', 'fusion-builder' ),
+						'description' => __( 'Select Mailchimp list.', 'fusion-builder' ),
+						'id'          => 'mailchimp_lists',
+						'choices'     => $lists_data,
+						'transport'   => 'postMessage',
+						'dependency'  => [
+							[
+								'field'      => 'mailchimp_action',
+								'value'      => 'contact',
+								'comparison' => '==',
+							],
+						],
+					],
+					'mailchimp_double_opt_in' => [
+						'type'        => 'radio-buttonset',
+						'label'       => esc_html__( 'Double Opt-In', 'fusion-builder' ),
+						'description' => __( 'With double opt-in, everyone who signs up will receive a follow-up email with a confirmation link to verify their subscription.', 'fusion-builder' ),
+						'id'          => 'mailchimp_double_opt_in',
+						'default'     => 'no',
+						'transport'   => 'postMessage',
+						'choices'     => [
+							'yes' => esc_html__( 'Yes', 'fusion-builder' ),
+							'no'  => esc_html__( 'No', 'fusion-builder' ),
+						],
+						'dependency'  => [
+							[
+								'field'      => 'mailchimp_action',
+								'value'      => 'contact',
+								'comparison' => '==',
+							],
+							[
+								'field'      => 'mailchimp_lists',
+								'value'      => '',
+								'comparison' => '!=',
+							],
+						],
+					],
+					'mailchimp_map'           => [
+						'type'        => 'mailchimp_map',
+						'label'       => esc_html__( 'Mailchimp Mapping', 'fusion-builder' ),
+						'description' => __( 'Map fields from the form to Mailchimp list merge tags. <strong>NOTE:</strong> The email property is required for creating or updating a contact. When mapping is set to "Automatic", Avada will try to map based on field label, name and tags.', 'fusion-builder' ),
+						'id'          => 'mailchimp_map',
+						'transport'   => 'postMessage',
+						'dependency'  => [
+							[
+								'field'      => 'mailchimp_action',
+								'value'      => 'contact',
+								'comparison' => '==',
+							],
+							[
+								'field'      => 'mailchimp_lists',
+								'value'      => '',
+								'comparison' => '!=',
+							],
+						],
 					],
 				],
 			];
-			$sections['form_submission']['fields']['mailchimp_map']           = [
-				'type'        => 'mailchimp_map',
-				'label'       => esc_html__( 'Mailchimp Mapping', 'fusion-builder' ),
-				'description' => __( 'Map fields from the form to Mailchimp list merge tags. <strong>Note:</strong> The email property is required for creating or updating a contact. When mapping is set to "Automatic", Avada will try to map based on field label, name and tags.', 'fusion-builder' ),
-				'id'          => 'mailchimp_map',
-				'transport'   => 'postMessage',
-				'dependency'  => [
-					[
-						'field'      => 'mailchimp_action',
-						'value'      => 'contact',
-						'comparison' => '==',
-					],
-					[
-						'field'      => 'mailchimp_lists',
-						'value'      => '',
-						'comparison' => '!=',
-					],
-				],
-			];
+
 			return $sections;
 		}
 

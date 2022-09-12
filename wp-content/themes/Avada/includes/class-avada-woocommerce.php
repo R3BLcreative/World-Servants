@@ -264,11 +264,11 @@ class Avada_Woocommerce {
 		// Main shared.
 		Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/dynamic/woocommerce/woocommerce.min.css', Avada::$template_dir_url . '/assets/css/dynamic/woocommerce/woocommerce.min.css' );
 
-		if ( is_checkout() && ! fusion_library()->woocommerce->is_new_checkout() ) {
+		if ( is_checkout() && ! fusion_library()->woocommerce->is_checkout_layout() ) {
 			Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/dynamic/woocommerce/woo-legacy-checkout.min.css', Avada::$template_dir_url . '/assets/css/dynamic/woocommerce/woo-legacy-checkout.min.css' );
 		}
 
-		if ( fusion_library()->woocommerce->is_new_checkout() ) {
+		if ( fusion_library()->woocommerce->is_checkout_layout() ) {
 			Fusion_Dynamic_CSS::enqueue_style( Avada::$template_dir_path . '/assets/css/dynamic/woocommerce/woo-new-checkout.min.css', Avada::$template_dir_url . '/assets/css/dynamic/woocommerce/woo-new-checkout.min.css' );
 		}
 
@@ -541,7 +541,7 @@ class Avada_Woocommerce {
 
 		remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
 
-		if ( ! fusion_library()->woocommerce->is_new_checkout() ) {
+		if ( ! fusion_library()->woocommerce->is_checkout_layout() ) {
 			// Add welcome user bar to checkout page.
 			add_action( 'woocommerce_before_checkout_form', [ $this, 'avada_top_user_container' ], 1 );
 
@@ -555,10 +555,11 @@ class Avada_Woocommerce {
 				add_action( 'woocommerce_checkout_before_customer_details', [ $this, 'checkout_before_customer_details' ] );
 				add_action( 'woocommerce_checkout_after_customer_details', [ $this, 'checkout_after_customer_details' ] );
 			}
+
+			add_action( 'woocommerce_checkout_billing', [ $this, 'checkout_billing' ], 20 );
+			add_action( 'woocommerce_checkout_shipping', [ $this, 'checkout_shipping' ], 20 );
 		}
 
-		add_action( 'woocommerce_checkout_billing', [ $this, 'checkout_billing' ], 20 );
-		add_action( 'woocommerce_checkout_shipping', [ $this, 'checkout_shipping' ], 20 );
 		add_filter( 'woocommerce_enable_order_notes_field', [ $this, 'enable_order_notes_field' ] );
 	}
 
@@ -1261,7 +1262,16 @@ class Avada_Woocommerce {
 			return;
 		}
 
-		if ( fusion_is_shop( $query->get( 'page_id' ) ) || $query->is_post_type_archive( 'product' ) || $query->is_tax( get_object_taxonomies( 'product' ) ) ) {
+		$display_type = '';
+		if ( fusion_is_shop( $query->get( 'page_id' ) ) ) {
+			$display_type = get_option( 'woocommerce_shop_page_display', '' );
+		} elseif ( $query->is_tax( get_object_taxonomies( 'product' ) ) ) {
+			$parent_id    = get_queried_object_id();
+			$display_type = get_term_meta( $parent_id, 'display_type', true );
+			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
+		}
+
+		if ( 'subcategories' !== $display_type && ( fusion_is_shop( $query->get( 'page_id' ) ) || $query->is_post_type_archive( 'product' ) || $query->is_tax( get_object_taxonomies( 'product' ) ) ) ) {
 
 			if ( Avada()->settings->get( 'woocommerce_avada_ordering' ) || Avada()->settings->get( 'woocommerce_toggle_grid_list' ) ) {
 				remove_action( 'woocommerce_before_shop_loop', 'woocommerce_catalog_ordering', 30 );
@@ -1777,7 +1787,7 @@ class Avada_Woocommerce {
 			$data_name = 'col-2';
 		}
 		?>
-		<?php if ( ! Avada()->settings->get( 'woocommerce_one_page_checkout' ) || fusion_library()->woocommerce->is_new_checkout() ) : ?>
+		<?php if ( ! Avada()->settings->get( 'woocommerce_one_page_checkout' ) ) : ?>
 			<a data-name="<?php echo esc_attr( $data_name ); ?>" href="#" class="fusion-button button-default fusion-button-default-size button continue-checkout">
 				<?php esc_attr_e( 'Continue', 'Avada' ); ?>
 			</a>
@@ -1795,7 +1805,7 @@ class Avada_Woocommerce {
 	 */
 	public function checkout_shipping( $args ) {
 		?>
-		<?php if ( ! Avada()->settings->get( 'woocommerce_one_page_checkout' ) || fusion_library()->woocommerce->is_new_checkout() ) : ?>
+		<?php if ( ! Avada()->settings->get( 'woocommerce_one_page_checkout' ) ) : ?>
 			<a data-name="order_review" href="#" class="fusion-button button-default fusion-button-default-size continue-checkout button">
 				<?php esc_attr_e( 'Continue', 'Avada' ); ?>
 			</a>
@@ -1923,7 +1933,9 @@ class Avada_Woocommerce {
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
 
 		// WooCommerce Bundled Products plugin, load scripts and styles.
-		do_action( 'wc_quick_view_enqueue_scripts' );
+		if ( class_exists( 'WC_PB_QV_Compatibility' ) && ! is_cart() && ! is_checkout() ) {
+			do_action( 'wc_quick_view_enqueue_scripts' );
+		}
 	}
 
 	/**
@@ -2083,7 +2095,7 @@ class Avada_Woocommerce {
 	public function shop_template_loader( $template ) {
 		global $wp_query;
 		$shop_page_id = wc_get_page_id( 'shop' );
-		if ( is_post_type_archive( 'product' ) || is_page( $shop_page_id ) ) {
+		if ( ( ! is_search() && is_post_type_archive( 'product' ) ) || is_page( $shop_page_id ) ) {
 			$wp_query->queried_object    = $wp_query->post = $GLOBALS['post'] = get_post( wc_get_page_id( 'shop' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
 			$wp_query->queried_object_id = (int) $wp_query->queried_object->ID;
 			$wp_query->is_singular       = 1;

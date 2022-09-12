@@ -99,6 +99,42 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( '' === values.chart_type ) {
 					values.chart_type = 'bar';
 				}
+
+				// validate bg_colors.
+				if ( values.bg_colors ) {
+					values.bg_colors = this.validateGlobalColors( values.bg_colors );
+				}
+
+				// validate border_colors.
+				if ( values.border_colors ) {
+					values.border_colors = this.validateGlobalColors( values.border_colors );
+				}
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
+			},
+
+			/**
+			 * Validate global color variable.
+			 *
+			 * @since 3.6
+			 * @param {String} value - The value.
+			 * @return {Object|String}
+			 */
+			validateGlobalColors: function( value ) {
+				var colors    = value.split( '|' ),
+					newColors = [];
+
+				if ( colors ) {
+					_.each( colors, function( v ) {
+						var newValue = '' !== v ? jQuery.AWB_Color( v ).toRgbaString() : '';
+						newColors.push( newValue );
+					} );
+					return newColors.join( '|' );
+				}
+				return value;
 			},
 
 			/**
@@ -112,7 +148,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				var chartShortcode = _.fusionVisibilityAtts(
 					values.hide_on_mobile, {
 						id: 'fusion-chart-cid' + this.model.get( 'cid' ),
-						class: 'fusion-chart fusion-child-element'
+						class: 'fusion-chart fusion-child-element',
+						style: ''
 					}
 				);
 
@@ -177,19 +214,35 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 
 				if ( '' !== values.chart_point_bg_color ) {
-					chartShortcode[ 'data-chart_point_bg_color' ] = values.chart_point_bg_color;
+					chartShortcode[ 'data-chart_point_bg_color' ] = jQuery.AWB_Color( values.chart_point_bg_color ).toRgbaString();
 				}
 
 				if ( '' !== values.chart_point_border_color ) {
-					chartShortcode[ 'data-chart_point_border_color' ] = values.chart_point_border_color;
+					chartShortcode[ 'data-chart_point_border_color' ] = jQuery.AWB_Color( values.chart_point_border_color ).toRgbaString();
 				}
 
 				if ( '' !== values.chart_axis_text_color ) {
-					chartShortcode[ 'data-chart_axis_text_color' ] = values.chart_axis_text_color;
+					chartShortcode[ 'data-chart_axis_text_color' ] = jQuery.AWB_Color( values.chart_axis_text_color ).toRgbaString();
 				}
 
 				if ( '' !== values.chart_gridline_color ) {
-					chartShortcode[ 'data-chart_gridline_color' ] = values.chart_gridline_color;
+					chartShortcode[ 'data-chart_gridline_color' ] = jQuery.AWB_Color( values.chart_gridline_color ).toRgbaString();
+				}
+
+				if ( '' !== values.margin_top ) {
+					chartShortcode.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					chartShortcode.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					chartShortcode.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					chartShortcode.style += 'margin-left:' + values.margin_left + ';';
 				}
 
 				if ( '' !== values[ 'class' ] ) {

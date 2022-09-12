@@ -86,7 +86,8 @@ FusionPageBuilder.fusionActiveStates = {
 			selectors,
 			$targetEl = this.$targetEl && this.$targetEl.length ? this.$targetEl : jQuery( '#fb-preview' ).contents().find( '.fusion-builder-live' ),
 			$target,
-			animationDuration;
+			animationDuration,
+			animationDelay;
 
 		if ( 'string' === typeof data.selector && -1 !== data.selector.indexOf( '$el' ) ) {
 			$target = $targetEl;
@@ -118,10 +119,14 @@ FusionPageBuilder.fusionActiveStates = {
 
 				data.toggle       = $singleTarget.attr( 'data-animationtype' );
 				animationDuration = $singleTarget.attr( 'data-animationduration' );
+				animationDelay    = $singleTarget.attr( 'data-animationdelay' );
+
 				$singleTarget.css( '-moz-animation-duration', animationDuration + 's' );
 				$singleTarget.css( '-webkit-animation-duration', animationDuration + 's' );
 				$singleTarget.css( '-o-animation-duration', animationDuration + 's' );
 				$singleTarget.css( 'animation-duration', animationDuration + 's' );
+
+				$singleTarget.css( 'animation-delay', animationDelay + 's' );
 
 				$singleTarget.removeClass( _.fusionGetAnimationTypes().join( ' ' ) );
 

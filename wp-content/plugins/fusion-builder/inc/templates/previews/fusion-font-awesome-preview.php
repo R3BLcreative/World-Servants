@@ -36,10 +36,12 @@ $icon_circle_color = $fusion_settings->get( 'icon_circle_color' );
 		icon_color = '#dddddd';
 	}
 
-	if ( 'fusion-prefix-' === icon.substr( 0, 14 ) ) {
-		icon = icon.replace( 'fusion-prefix-', '' );
-	} else if ( 'undefined' !== typeof icon && -1 === icon.trim().indexOf( ' ' ) && -1 !== icon.indexOf( 'fa-' ) ) {
-		icon = 'fa ' + icon;
+	if ( 'undefined' !== typeof icon ) {
+		if ( 'fusion-prefix-' === icon.substr( 0, 14 ) ) {
+			icon = icon.replace( 'fusion-prefix-', '' );
+		} else if ( -1 === icon.trim().indexOf( ' ' ) && -1 !== icon.indexOf( 'fa-' ) ) {
+			icon = 'fa ' + icon;
+		}
 	}
 	#>
 

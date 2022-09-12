@@ -11,6 +11,9 @@ div.fusion-woo-cart_coupons #avada_coupon_code {
 div.fusion-woo-cart_coupons .fusion-apply-coupon {
   flex: 0.2;
 }
+div.fusion-woo-cart_coupons label {
+  display: none;
+}
 form.fusion-woo-cart-coupons-checkout-form {
   border: 0;
   margin: 0 !important;

@@ -462,7 +462,7 @@ if ( fusion_is_element_enabled( 'fusion_woo_product_grid' ) ) {
 						[
 							'type'        => 'select',
 							'heading'     => esc_attr__( 'Grid Separator Style', 'fusion-builder' ),
-							'description' => __( 'Controls the line style of grid separators. <strong>Note:</strong> Separators will display, when buttons below the separators is displayed and Box Design mode set to Classic.', 'fusion-builder' ),
+							'description' => __( 'Controls the line style of grid separators. <strong>NOTE:</strong> Separators will display, when buttons below the separators is displayed and Box Design mode set to Classic.', 'fusion-builder' ),
 							'param_name'  => 'grid_separator_style_type',
 							'value'       => [
 								''              => esc_attr__( 'Default', 'fusion-builder' ),
@@ -493,7 +493,7 @@ if ( fusion_is_element_enabled( 'fusion_woo_product_grid' ) ) {
 						[
 							'type'        => 'colorpickeralpha',
 							'heading'     => esc_attr__( 'Grid Separator Color', 'fusion-builder' ),
-							'description' => __( 'Controls the line style color of grid separators. <strong>Note:</strong> Only work when Box Design mode set to Classic.', 'fusion-builder' ),
+							'description' => __( 'Controls the line style color of grid separators. <strong>NOTE:</strong> Only work when Box Design mode set to Classic.', 'fusion-builder' ),
 							'param_name'  => 'grid_separator_color',
 							'value'       => '',
 							'default'     => $fusion_settings->get( 'grid_separator_color' ),

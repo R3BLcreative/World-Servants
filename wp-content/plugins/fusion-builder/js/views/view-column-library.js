@@ -18,8 +18,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				'click .fusion_builder_custom_columns_load': 'addCustomColumn',
 				'click .fusion_builder_custom_sections_load': 'addCustomSection',
 				'click .fusion-special-item': 'addSpecialItem',
-				'click #fusion-builder-sections-studio .fusion-studio-load': 'loadStudioContainer',
-				'click #fusion-builder-columns-studio .fusion-studio-load': 'loadStudioColumn'
+				'click .awb-import-options-toggle': 'toggleImportOptions',
+				'click #fusion-builder-sections-studio .awb-import-studio-item': 'loadStudioContainer',
+				'click #fusion-builder-columns-studio .awb-import-studio-item': 'loadStudioColumn'
 			},
 
 			render: function() {
@@ -47,8 +48,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 			loadStudioColumn: function( event ) {
 				var layoutID,
-					self     = this,
-					$layout  = jQuery( event.currentTarget ).closest( '.fusion-page-layout' );
+					self          = this,
+					$layout       = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
+					importOptions = FusionPageBuilderApp.studio.getImportOptions( event );
 
 				if ( event ) {
 					event.preventDefault();
@@ -61,7 +63,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 				FusionPageBuilderApp.layoutIsLoading = true;
 
-				layoutID  = $layout.data( 'layout_id' );
+				layoutID  = $layout.data( 'layout-id' );
 
 				jQuery.ajax( {
 					type: 'POST',
@@ -72,6 +74,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						fusion_load_nonce: FusionPageBuilderApp.fusion_load_nonce,
 						fusion_is_global: false,
 						fusion_layout_id: layoutID,
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						fusion_studio: true,
 						category: 'columns',
 						post_id: fusionBuilderConfig.post_id
@@ -118,7 +123,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								( function( k ) { // eslint-disable-line no-loop-func
 
 									dfdNext = dfdNext.then( function() {
-										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ] );
+										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ], importOptions );
 									} );
 
 									promises.push( dfdNext );
@@ -200,6 +205,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					parentID          = this.model.get( 'parent' ),
 					parentView        = FusionPageBuilderViewManager.getView( parentID ),
 					$layout           = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
+					importOptions     = FusionPageBuilderApp.studio.getImportOptions( event ),
 					layoutID,
 					targetContainer;
 
@@ -220,7 +226,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				FusionPageBuilderApp.layoutIsLoading = true;
 
-				layoutID = $layout.data( 'layout_id' );
+				layoutID = $layout.data( 'layout-id' );
 
 				jQuery.ajax( {
 					type: 'POST',
@@ -231,6 +237,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						fusion_load_nonce: FusionPageBuilderApp.fusion_load_nonce,
 						fusion_is_global: false,
 						fusion_layout_id: layoutID,
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						fusion_studio: true,
 						category: 'sections',
 						post_id: fusionBuilderConfig.post_id
@@ -277,7 +286,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								( function( k ) { // eslint-disable-line no-loop-func
 
 									dfdNext = dfdNext.then( function() {
-										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ] );
+										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ], importOptions );
 									} );
 
 									promises.push( dfdNext );

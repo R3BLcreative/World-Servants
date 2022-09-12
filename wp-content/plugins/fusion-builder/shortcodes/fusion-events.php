@@ -305,7 +305,7 @@ if ( fusion_is_element_enabled( 'fusion_events' ) && class_exists( 'Tribe__Event
 					// No image set thumbnail.
 					if ( ! $thumbnail ) {
 						ob_start();
-						do_action( 'fusion_render_placeholder_image', 'fixed' );
+						do_action( 'fusion_placeholder_image', 'fixed' );
 						$placeholder = ob_get_clean();
 						$thumbnail   = str_replace( 'fusion-placeholder-image', ' fusion-placeholder-image tribe-events-event-image', $placeholder );
 					}
@@ -431,11 +431,11 @@ if ( fusion_is_element_enabled( 'fusion_events' ) && class_exists( 'Tribe__Event
 							} else {
 								ob_start();
 								/**
-								 * The avada_placeholder_image hook.
+								 * The fusion_placeholder_image hook.
 								 *
 								 * @hooked fusion_render_placeholder_image - 10 (outputs the HTML for the placeholder image)
 								 */
-								do_action( 'fusion_render_placeholder_image', 'fixed' );
+								do_action( 'fusion_placeholder_image', 'fixed' );
 
 								$placeholder = ob_get_clean();
 								$html       .= str_replace( 'fusion-placeholder-image', ' fusion-placeholder-image tribe-events-event-image', $placeholder );
@@ -805,7 +805,7 @@ function fusion_element_events() {
 					'name'      => esc_attr__( 'Events', 'fusion-builder' ),
 					'shortcode' => 'fusion_events',
 					'icon'      => 'fusiona-tag',
-					'help_url'  => 'https://theme-fusion.com/documentation/fusion-builder/elements/the-events-calendar-element/',
+					'help_url'  => 'https://theme-fusion.com/documentation/avada/elements/the-events-calendar-element/',
 					'params'    => [
 						[
 							'type'        => 'multiple_select',

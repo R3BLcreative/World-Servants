@@ -61,6 +61,7 @@ if ( fusion_is_element_enabled( 'fusion_form_date' ) ) {
 					'picker'           => 'custom',
 					'format'           => '',
 					'required'         => '',
+					'empty_notice'     => '',
 					'placeholder'      => '',
 					'input_field_icon' => '',
 					'tab_index'        => '',
@@ -122,7 +123,9 @@ if ( fusion_is_element_enabled( 'fusion_form_date' ) ) {
 				$auto_complete = 'native' !== $this->args['picker'] ? 'autocomplete="no"' : '';
 
 				// Input markup.
-				$element_html = '<input autocomplete="no" type="date" data-format="' . $this->args['format'] . '" tabindex="' . $this->args['tab_index'] . '" id="' . $this->args['name'] . '" name="' . $this->args['name'] . '" data-type="' . esc_attr( $this->args['picker'] ) . '" value="' . $this->args['value'] . '"' . $element_data['holds_private_data'] . $element_data['class'] . $element_data['required'] . $element_data['placeholder'] . $element_data['style'] . $auto_complete . '/>';
+				$element_html  = '<input autocomplete="no" type="date"';
+				$element_html .= '' !== $element_data['empty_notice'] ? ' data-empty-notice="' . $element_data['empty_notice'] . '" ' : '';
+				$element_html .= ' data-format="' . $this->args['format'] . '" tabindex="' . $this->args['tab_index'] . '" id="' . $this->args['name'] . '" name="' . $this->args['name'] . '" data-type="' . esc_attr( $this->args['picker'] ) . '" value="' . $this->args['value'] . '"' . $element_data['holds_private_data'] . $element_data['class'] . $element_data['required'] . $element_data['placeholder'] . $element_data['style'] . $auto_complete . '/>';
 
 				if ( isset( $this->args['input_field_icon'] ) && '' !== $this->args['input_field_icon'] ) {
 					$icon_html     = '<div class="fusion-form-input-with-icon">';
@@ -174,7 +177,7 @@ function fusion_form_date() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Field Name', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the field name. Should be single word without spaces. Underscores and dashes are allowed.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter the field name. Please use only lowercase alphanumeric characters, dashes, and underscores.', 'fusion-builder' ),
 						'param_name'  => 'name',
 						'value'       => '',
 						'placeholder' => true,
@@ -188,6 +191,20 @@ function fusion_form_date() {
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Empty Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter text validation notice that should display if data input is empty.', 'fusion-builder' ),
+						'param_name'  => 'empty_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'required',
+								'value'    => 'yes',
+								'operator' => '==',
+							],
 						],
 					],
 					[

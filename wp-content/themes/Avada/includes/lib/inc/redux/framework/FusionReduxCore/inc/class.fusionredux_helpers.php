@@ -643,12 +643,14 @@
 					return $data[0];
 				} else {
 					$file_data = $filesystem->execute( 'get_contents', $file );
-
-					$file_data = str_replace( "\r", "\n", $file_data );
 					$version   = '';
 
-					if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] ) {
-						$version = _cleanup_header_comment( $match[1] );
+					if ( null !== $file_data ) {
+						$file_data = str_replace( "\r", "\n", $file_data );
+
+						if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( '@version', '/' ) . '(.*)$/mi', $file_data, $match ) && $match[1] ) {
+							$version = _cleanup_header_comment( $match[1] );
+						}
 					}
 
 					return $version;

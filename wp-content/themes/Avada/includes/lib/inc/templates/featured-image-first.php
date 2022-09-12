@@ -104,24 +104,29 @@ foreach ( $attributes as $key => $value ) {
 					global $product;
 
 					$enable_rollover = apply_filters( 'fusion_builder_image_rollover', true );
-					$is_product      = ! is_null( $product ) && method_exists( $product, 'is_on_sale' ) && method_exists( $product, 'is_in_stock' );
+					$is_product      = ! is_null( $product ) && is_object( $product ) && method_exists( $product, 'is_on_sale' ) && method_exists( $product, 'is_in_stock' );
 					$woo_badges      = '';
+					$in_cart         = false;
+				
+				if ( $is_product ) {
+					$in_cart = fusion_library()->woocommerce->is_product_in_cart( $product->get_id() );
+				}
 
-					ob_start();
+				ob_start();
 				if ( $is_product && true === $display_woo_outofstock ) {
 					get_template_part( 'templates/wc-product-loop-outofstock-flash' );
 				}
-
+			
 				if ( $is_product && true === $display_woo_sale && function_exists( 'woocommerce_show_product_sale_flash' ) ) {
 					woocommerce_show_product_sale_flash();
 				}
-					$woo_badges = ob_get_clean();
+				$woo_badges = ob_get_clean();
 
 				if ( '' !== $woo_badges ) {
 					echo '<div class="fusion-woo-badges-wrapper">' . $woo_badges . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
 
-					$object_title = 'taxonomy' === $type ? single_term_title( '', false ) : get_the_title();
+				$object_title = 'taxonomy' === $type ? single_term_title( '', false ) : get_the_title();
 
 				if ( ( $enable_rollover && 'yes' === $display_rollover ) || 'force_yes' === $display_rollover ) {
 					echo $featured_image; // phpcs:ignore WordPress.Security.EscapeOutput
@@ -145,6 +150,11 @@ foreach ( $attributes as $key => $value ) {
 					}
 
 					echo $featured_image; // phpcs:ignore WordPress.Security.EscapeOutput
+
+					if ( $is_product ) {
+						$icon_class = ( $in_cart ) ? 'awb-icon-check-square-o' : 'awb-icon-spinner';
+						echo sprintf( '<div class="cart-loading"><i class="%s" aria-hidden="true"></i></div>', $icon_class ); // phpcs:ignore WordPress.Security.EscapeOutput
+					}
 
 					if ( true === $image_link ) {
 						?>

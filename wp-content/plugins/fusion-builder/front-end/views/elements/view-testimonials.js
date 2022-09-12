@@ -79,6 +79,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				} else if ( 'classic' === values.design && '' === values.navigation ) {
 					values.navigation = 'no';
 				}
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			buildStyles: function( values ) {
@@ -101,8 +106,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			buildAttr: function( values ) {
 				var attr = _.fusionVisibilityAtts( values.hide_on_mobile, {
-					class: 'fusion-testimonials ' + values.design + ' fusion-testimonials-cid' + this.model.get( 'cid' ) + ' ' + values[ 'class' ]
+					class: 'fusion-testimonials ' + values.design + ' fusion-testimonials-cid' + this.model.get( 'cid' ) + ' ' + values[ 'class' ],
+					style: ''
 				} );
+
+				if ( '' !== values.margin_top ) {
+					attr.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					attr.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					attr.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					attr.style += 'margin-left:' + values.margin_left + ';';
+				}
 
 				attr[ 'data-random' ] = values.random;
 				attr[ 'data-speed' ]  = values.speed;

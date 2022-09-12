@@ -1,4 +1,4 @@
-/* global FusionApp, FusionPageBuilderApp, fusionAllElements, FusionPageBuilderViewManager, FusionEvents, fusionHistoryState, fusionAppConfig, fusionBuilderText, fusionGlobalManager */
+/* global FusionApp, FusionPageBuilderApp, fusionAllElements, FusionPageBuilderViewManager, FusionEvents, fusionAppConfig, fusionBuilderText, fusionGlobalManager */
 /* eslint no-unused-vars: 0 */
 var FusionPageBuilder = FusionPageBuilder || {};
 
@@ -15,7 +15,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				'click .fusion-builder-column-layouts li': 'addColumns',
 				'click .fusion_builder_custom_sections_load': 'addCustomSection',
 				'click .fusion-special-item': 'addSpecialItem',
-				'click .fusion-studio-load': 'loadStudioContainer'
+				'click .awb-import-options-toggle': 'toggleImportOptions',
+				'click .awb-import-studio-item': 'loadStudioContainer',
+				'change .awb-import-options .awb-import-style input[name="overwrite-type"]': 'triggerPreviewChanges',
+				'change .awb-import-options .awb-import-inversion input[name="invert"]': 'triggerPreviewChanges'
 			},
 
 			/**
@@ -272,18 +275,17 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
-			 * Loads the container via AJAX.
+			 * Adds studio container.
 			 *
 			 * @since 2.0.0
-			 * @param {Object} event - The event.
+			 * @param {Object} [event]         The event.
 			 * @return {void}
 			 */
 			loadStudioContainer: function( event ) {
-				var self              = this,
-					parentID          = this.model.get( 'parent' ),
-					parentView        = FusionPageBuilderViewManager.getView( parentID ),
-					$layout           = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
-					layoutID,
+				var self          = this,
+					parentID      = this.model.get( 'parent' ),
+					parentView    = FusionPageBuilderViewManager.getView( parentID ),
+					importOptions = this.getImportOptions( event ),
 					targetContainer;
 
 				targetContainer = parentView.$el.prev( '.fusion-builder-container' );
@@ -303,8 +305,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				FusionPageBuilderApp.layoutIsLoading = true;
 
-				layoutID = $layout.data( 'layout_id' );
-
 				jQuery.ajax( {
 					type: 'POST',
 					url: fusionAppConfig.ajaxurl,
@@ -313,8 +313,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						action: 'fusion_builder_load_layout',
 						fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
 						fusion_is_global: false,
-						fusion_layout_id: layoutID,
+						fusion_layout_id: importOptions.layoutID,
 						fusion_studio: true,
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						category: 'sections',
 						post_id: FusionApp.getPost( 'post_id' )
 					},
@@ -357,7 +360,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								( function( k ) { // eslint-disable-line no-loop-func
 
 									dfdNext = dfdNext.then( function() {
-										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ] );
+										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ], importOptions );
 									} );
 
 									promises.push( dfdNext );

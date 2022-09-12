@@ -68,7 +68,22 @@ window.awbStudio = {
 	 */
 	initIframeListener: function() {
 		this.$el.find( '.awb-studio-preview-frame' ).on( 'load', function() {
+
+			// Trigger event for preview update.
+			window.dispatchEvent( new Event( 'awb-studio-update-preview' ) );
+
 			jQuery( '#fusion-loader' ).hide();
+
+			jQuery( '.awb-import-studio-item-in-preview' ).off( 'click' );
+
+			jQuery( '.awb-import-studio-item-in-preview' ).on( 'click', function( event ) {
+				var dataID = jQuery( this ).data( 'id' );
+
+				event.preventDefault();
+
+				jQuery( '.fusion-studio-preview-back' ).trigger( 'click' );
+				jQuery( '.awb-save[data-id="' + dataID + '"]' ).trigger( 'click' );
+			} );
 		} );
 	},
 
@@ -246,6 +261,27 @@ window.awbStudio = {
 	},
 
 	/**
+	* Get import options.
+	*
+	* @since 3.7
+	* @return {object}
+	*/
+	getImportOptions: function() {
+		var overWriteType    = jQuery( 'input[name="overwrite-type"]:checked' ).val(),
+			shouldInvert     = jQuery( 'input[name="invert"]:checked' ).val(),
+			imagesImport     = jQuery( 'input[name="images"]:checked' ).val(),
+			options;
+
+			options = {
+				'overWriteType': 'undefined' !== typeof overWriteType ? overWriteType : 'replace-pos',
+				'shouldInvert': 'undefined' !== typeof shouldInvert ? shouldInvert  : 'dont-invert',
+				'imagesImport': 'undefined' !== typeof imagesImport ? imagesImport : 'do-import-images'
+			};
+
+			return options;
+	},
+
+	/**
 	 * Click listener for opening previews.
 	 *
 	 * @since 3.1
@@ -255,13 +291,14 @@ window.awbStudio = {
 		var self = this;
 
 		// Remove any existing.
-		self.$el.find( '.awb-preview, .awb-save' ).off( 'click' );
+		self.$el.find( '.awb-studio-content article img, .awb-save' ).off( 'click' );
 
 		// Studio content import.
 		self.$el.find( '.awb-save' ).on( 'click', function( event ) {
 			var $button        = jQuery( this ),
 				dataType       = $button.closest( 'article' ).data( 'type' ),
 				dataID         = $button.closest( 'article' ).data( 'id' ),
+				importOptions  = self.getImportOptions( event ),
 				dataStudioType = jQuery( '.awb-studio-categories li.active' ).data( 'type' );
 
 			event.preventDefault();
@@ -293,6 +330,9 @@ window.awbStudio = {
 				dataType: 'JSON',
 				data: {
 					action: 'awb_studio_import',
+					overWriteType: importOptions.overWriteType,
+					shouldInvert: importOptions.shouldInvert,
+					imagesImport: importOptions.imagesImport,
 					data: {
 						dataType: dataType,
 						dataID: dataID
@@ -307,7 +347,7 @@ window.awbStudio = {
 				self.addTemporaryClass( $button, 'success' );
 
 				if ( 0 < self.mediaImportKeys.length && ( 'undefined' === typeof data.was_imported || false === data.was_imported ) ) {
-					self.importAvadaMedia( data );
+					self.importAvadaMedia( data, importOptions );
 				} else {
 
 					self.closeImportModal();
@@ -324,7 +364,9 @@ window.awbStudio = {
 		} );
 
 		// Add for each.
-		self.$el.find( '.awb-preview' ).on( 'click', function( event ) {
+		self.$el.find( '.awb-studio-content article img' ).on( 'click', function( event ) {
+			var $wrapper        = jQuery( event.currentTarget ).closest( 'article' ),
+				dataID         = $wrapper.data( 'id' );
 
 			event.preventDefault();
 
@@ -332,7 +374,31 @@ window.awbStudio = {
 			jQuery( 'body' ).addClass( 'fusion-studio-preview-active' );
 			jQuery( '.awb-studio-modal' ).animate( { opacity: 1 }, 250 );
 			jQuery( '#fusion-loader' ).show();
-			self.loadIframePreview( jQuery( this ).attr( 'data-url' ) );
+			self.loadIframePreview( jQuery( this ).closest( 'article' ).attr( 'data-url' ) );
+			self.setOptions( dataID );
+		} );
+	},
+
+	/**
+	 * Sets options.
+	 *
+	 * @since 7.7
+	 * @return {void}
+	 */
+	setOptions: function( dataID ) {
+		var $wrapper = jQuery( '.awb-studio-modal' ),
+			options  = { // Object of option name and default value.
+				'overwrite-type': 'replace-pos',
+				'invert': 'dont-invert',
+				'images': 'do-import-images'
+			};
+
+		jQuery( '.awb-import-studio-item-in-preview' ).data( 'id', dataID );
+
+		jQuery.each( options, function( name, value ) {
+			if ( ! $wrapper.find( 'input[name="' + name + '"]' ).is( ':checked' ) ) {
+				jQuery( '#' +  value ).prop( 'checked', true );
+			}
 		} );
 	},
 
@@ -342,9 +408,9 @@ window.awbStudio = {
 	 * @since 3.1
 	 * @return {void}
 	 */
-	importAvadaMedia: function( post_data ) {
+	importAvadaMedia: function( postData, importOptions ) {
 		var self = this,
-			mediaKeys = Object.keys( post_data.avada_media ),
+			mediaKeys = Object.keys( postData.avada_media ),
 			progress = ( mediaKeys.length - self.mediaImportKeys.length + 1 ) / mediaKeys.length;
 
 		self.$modalMessage.html( 'Importing Studio Media: ' + self.mediaImportKeys[ 0 ].replace( '_', ' ' ) );
@@ -356,9 +422,12 @@ window.awbStudio = {
 			dataType: 'JSON',
 			data: {
 				action: 'awb_studio_admin_import_media',
+				overWriteType: importOptions.overWriteType,
+				shouldInvert: importOptions.shouldInvert,
+				imagesImport: importOptions.imagesImport,
 				data: {
 					mediaImportKey: self.mediaImportKeys[ 0 ],
-					postData: post_data
+					postData: postData
 				},
 				awb_studio_nonce: jQuery( '#awb-studio-nonce' ).val()
 			}
@@ -369,7 +438,7 @@ window.awbStudio = {
 			self.mediaImportKeys.shift();
 
 			if ( 0 < self.mediaImportKeys.length ) {
-				self.importAvadaMedia( data );
+				self.importAvadaMedia( data, importOptions );
 			} else {
 				self.closeImportModal();
 			}
@@ -430,6 +499,8 @@ window.awbStudio = {
 			postType = 'fusion_icons';
 		} else if ( 'forms' === self.context.type ) {
 			postType = 'fusion_form';
+		} else if ( 'awb_off_canvas' === self.context.type ) {
+			postType = 'awb_off_canvas';
 		}
 
 		// Get data of posts we need.
@@ -446,11 +517,11 @@ window.awbStudio = {
 			} else {
 
 				// We need to create markup for preview.
-				markup += '<article class="hidden" data-type="' + postType + '" data-id="' + post.ID + '">';
+				markup += '<article class="hidden" data-type="' + postType + '" data-id="' + post.ID + '" data-url="' + post.url + '">';
 				if ( post.thumbnail ) {
 					markup += '<div class="preview lazy-load"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27' + post.thumbnail.width + '%27%20height%3D%27' + post.thumbnail.height + '%27%20viewBox%3D%270%200%20' + post.thumbnail.width + '%20' + post.thumbnail.height + '%27%3E%3Crect%20width%3D%27' + post.thumbnail.width + '>%27%20height%3D%273' + post.thumbnail.height + '%27%20fill-opacity%3D%220%22%2F%3E%3C%2Fsvg%3E" alt="" width="' + post.thumbnail.width + '" height="' + post.thumbnail.height + '" data-src="' + post.thumbnail.url + '" data-alt="' + post.post_title + '"/></div>';
 				}
-				markup += '<div class="bar"><span class="fusion_module_title"><span class="awb-preview-title-text">' + post.post_title + '</span></span><span class="awb-studio-actions"><a href="#" data-url="' + post.url + '" class="awb-preview"><i class="fusiona-search"></i></a><a href="#" data-id="' + post.ID + '" class="awb-save"><i class="fusiona-drive"></i></a></span></div></article>';
+				markup += '<div class="bar"><span class="fusion_module_title"><span class="awb-preview-title-text">' + post.post_title + '</span></span><span class="awb-studio-actions"><a href="#" data-id="' + post.ID + '" class="awb-save"><i class="fusiona-plus"></i></a></span></div></article>';
 			}
 
 			postMatches.push( post );

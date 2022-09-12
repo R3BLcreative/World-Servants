@@ -65,7 +65,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	?>
 	<?php $related_posts_swipe_items = Avada()->settings->get( 'related_posts_swipe_items' ); ?>
 	<?php $related_posts_swipe_items = ( 0 == $related_posts_swipe_items ) ? '' : $related_posts_swipe_items; // phpcs:ignore WordPress.PHP.StrictComparisons.LooseComparison ?>
-	<div class="fusion-carousel<?php echo esc_attr( $additional_carousel_class ); ?>" data-imagesize="<?php echo esc_attr( $data_image_size ); ?>" data-metacontent="<?php echo esc_attr( $data_meta_content ); ?>" data-autoplay="<?php echo esc_attr( $data_autoplay ); ?>" data-touchscroll="<?php echo esc_attr( $data_swipe ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>" data-itemmargin="<?php echo esc_attr( $column_spacing . 'px' ); ?>" data-itemwidth="180" data-touchscroll="yes" data-scrollitems="<?php echo esc_attr( $related_posts_swipe_items ); ?>">
+	<div class="fusion-carousel<?php echo esc_attr( $additional_carousel_class ); ?>" data-imagesize="<?php echo esc_attr( $data_image_size ); ?>" data-metacontent="<?php echo esc_attr( $data_meta_content ); ?>" data-autoplay="<?php echo esc_attr( $data_autoplay ); ?>" data-touchscroll="<?php echo esc_attr( $data_swipe ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>" data-itemmargin="<?php echo esc_attr( $column_spacing . 'px' ); ?>" data-itemwidth="180" data-scrollitems="<?php echo esc_attr( $related_posts_swipe_items ); ?>">
 		<div class="fusion-carousel-positioner">
 			<ul class="fusion-carousel-holder">
 				<?php
@@ -128,12 +128,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			 * Add navigation if needed.
 			 */
 			?>
-			<?php if ( Avada()->settings->get( 'related_posts_navigation' ) ) : ?>
-				<div class="fusion-carousel-nav">
-					<span class="fusion-nav-prev"></span>
-					<span class="fusion-nav-next"></span>
-				</div>
-			<?php endif; ?>
+			<?php
+			if ( Avada()->settings->get( 'related_posts_navigation' ) ) {
+				echo awb_get_carousel_nav(); // phpcs:ignore WordPress.Security.EscapeOutput
+			}
+			?>
 
 		</div><!-- fusion-carousel-positioner -->
 	</div><!-- fusion-carousel -->

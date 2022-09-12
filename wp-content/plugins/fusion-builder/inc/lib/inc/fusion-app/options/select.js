@@ -1,4 +1,4 @@
-/* global fusionAllElements */
+/* global fusionAllElements, fusionAppConfig */
 var FusionPageBuilder = FusionPageBuilder || {};
 FusionPageBuilder.options = FusionPageBuilder.options || {};
 
@@ -22,7 +22,8 @@ FusionPageBuilder.options.fusionSelectField = {
 					$selectDropdown    = $self.find( '.fusion-select-dropdown' ),
 					$selectPreview     = $self.find( '.fusion-select-preview-wrap' ),
 					$selectSearchInput = $self.find( '.fusion-select-search input' ),
-					$selectPreviewText = $selectPreview.find( '.fusion-select-preview' );
+					$selectPreviewText = $selectPreview.find( '.fusion-select-preview' ),
+					$quickEditButton   = $self.closest( '.fusion-builder-option' ).find( '.awb-quick-edit-button' );
 
 				$self.addClass( 'fusion-select-inited' );
 
@@ -120,15 +121,24 @@ FusionPageBuilder.options.fusionSelectField = {
 					}
 				}
 				$self.find( '.fusion-select-option-value' ).on( 'change', function( event, data ) {
+					var itemValue = jQuery( this ).val();
 
 					if ( 'undefined' !== typeof data && 'undefined' !== typeof data.userClicked && true !== data.userClicked ) {
 						return;
 					}
 
 					// Option changed progamatically, we need to update preview.
-					$selectPreview.find( '.fusion-select-preview' ).html( $self.find( '.fusion-select-label[data-value="' + jQuery( this ).val() + '"]' ).html() );
+					$selectPreview.find( '.fusion-select-preview' ).html( $self.find( '.fusion-select-label[data-value="' + itemValue + '"]' ).html() );
 					$selectDropdown.find( '.fusion-select-label' ).removeClass( 'fusion-option-selected' );
-					$selectDropdown.find( '.fusion-select-label[data-value="' + jQuery( this ).val() + '"]' ).addClass( 'fusion-option-selected' );
+					$selectDropdown.find( '.fusion-select-label[data-value="' + itemValue + '"]' ).addClass( 'fusion-option-selected' );
+
+					// Quick edit option update.
+					if ( $selectDropdown.closest( '.fusion-builder-option' ).find( '.awb-quick-edit-button' ).length && ( '0' == itemValue || '' == itemValue ) ) {
+						$selectDropdown.closest( '.fusion-builder-option' ).find( '.awb-quick-edit-button' ).removeClass( 'has-quick-edit' );
+					} else {
+						$selectDropdown.closest( '.fusion-builder-option' ).find( '.awb-quick-edit-button' ).addClass( 'has-quick-edit' );
+					}
+
 				} );
 
 				// Search field.
@@ -149,6 +159,20 @@ FusionPageBuilder.options.fusionSelectField = {
 							jQuery( optionInput ).css( 'display', 'block' );
 						}
 					} );
+				} );
+
+				$quickEditButton.on( 'click', function() { // here.
+					const type    = jQuery( this ).data( 'type' ),
+						itemValue = jQuery( this ).closest( '.fusion-builder-option' ).find( '.fusion-select-option-value' ).val(),
+						items     = jQuery( this ).data( 'items' );
+					let url;
+
+					if ( 'menu' === type ) {
+						window.open( fusionAppConfig.admin_url + 'nav-menus.php?action=edit&menu=' + items[ itemValue ], '_blank' ).focus();
+					} else {
+						url = 'live' === fusionAppConfig.builder_type ? items[ itemValue ] + '?fb-edit=1' : fusionAppConfig.admin_url + 'post.php?post=' + itemValue + '&action=edit';
+						window.open( url, '_blank' ).focus();
+					}
 				} );
 
 			} );

@@ -63,6 +63,10 @@ if ( fusion_is_element_enabled( 'fusion_table' ) ) {
 						'fusion_table_columns' => '',
 						'fusion_table_rows'    => '',
 						'fusion_table_type'    => '',
+						'margin_top'           => '',
+						'margin_right'         => '',
+						'margin_bottom'        => '',
+						'margin_left'          => '',
 						'hide_on_mobile'       => fusion_builder_default_visibility( 'string' ),
 						'id'                   => '',
 					],
@@ -72,6 +76,11 @@ if ( fusion_is_element_enabled( 'fusion_table' ) ) {
 				$defaults = apply_filters( 'fusion_builder_default_args', $defaults, 'fusion_table_element', $args );
 
 				$this->args = $defaults;
+
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
 
 				$this->args['content'] = $content;
 
@@ -125,6 +134,8 @@ if ( fusion_is_element_enabled( 'fusion_table' ) ) {
 						$attr = Fusion_Builder_Animation_Helper::add_animation_attributes( $this->args, $attr );
 					}
 
+					$attr['style'] = Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
+
 					if ( $this->args['class'] ) {
 						$attr['class'] .= ' ' . $this->args['class'];
 					}
@@ -154,7 +165,7 @@ function fusion_element_table() {
 			'icon'             => 'fusiona-table',
 			'allow_generator'  => true,
 			'admin_enqueue_js' => FUSION_BUILDER_PLUGIN_URL . 'shortcodes/js/fusion-table.js',
-			'help_url'         => 'https://theme-fusion.com/documentation/fusion-builder/elements/table-element/',
+			'help_url'         => 'https://theme-fusion.com/documentation/avada/elements/table-element/',
 			'on_settings'      => 'calculateTableData',
 			'params'           => [
 				[
@@ -199,6 +210,16 @@ function fusion_element_table() {
 				],
 				'fusion_animation_placeholder' => [
 					'preview_selector' => '.table-1,.table-2',
+				],
+				'fusion_margin_placeholder'    => [
+					'param_name' => 'margin',
+					'group'      => esc_attr__( 'General', 'fusion-builder' ),
+					'value'      => [
+						'margin_top'    => '',
+						'margin_right'  => '',
+						'margin_bottom' => '',
+						'margin_left'   => '',
+					],
 				],
 				[
 					'type'        => 'checkbox_button_set',

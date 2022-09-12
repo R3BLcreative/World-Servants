@@ -40,6 +40,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				// Create attribute objects.
 				attributes.attr      = this.buildAttr( atts.values );
 				attributes.styles    = this.buildStyles( atts.values );
+				attributes.blogStyles = this.getStyleElement( atts.values );
 				attributes.blogPosts = '';
 
 				this.regularImagesFound = false;
@@ -181,6 +182,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( '' !== values[ 'class' ] ) {
 					attr[ 'class' ] += ' ' + values[ 'class' ];
+				}
+
+				if ( '' !== values.margin_top ) {
+					attr.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					attr.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					attr.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					attr.style += 'margin-left:' + values.margin_left + ';';
 				}
 
 				if ( '' !== values.id ) {
@@ -345,6 +362,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					readMoreLinkAttributes          = {},
 					contentSepAttr                  = {},
 					contentSepTypes                 = '',
+					postTitleTag                    = '',
+					timelineTitleTag                = '',
+					self                            = this,
 					isThereMetaAbove                = false,
 					isThereMetaBelow                = false,
 					isThereContent                  = false;
@@ -409,7 +429,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								timelineDate = '</div>';
 							}
 
-							timelineDate += '<h3 class="fusion-timeline-date" style="background-color:' + values.grid_element_color + ';">' + post.timeline_date_format + '</h3>';
+							timelineTitleTag = self.getTitleTag( values, 'timeline_title' );
+							timelineDate += '<' + timelineTitleTag + ' class="fusion-timeline-date" style="background-color:' + values.grid_element_color + ';">' + post.timeline_date_format + '</' + timelineTitleTag + '>';
 							timelineDate += '<div class="fusion-collapse-month">';
 						}
 
@@ -469,10 +490,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					};
 
 					if ( 'masonry' === values.layout ) {
-						color    = jQuery.Color( values.grid_box_color );
-						colorCSS = color.toRgbaString();
+						color    = jQuery.AWB_Color( values.grid_box_color );
+						colorCSS = color.toVarOrRgbaString();
 						if ( 0 === color.alpha() ) {
-							colorCSS = color.toHexString();
+							color = color.alpha( 1 );
+							colorCSS = color.toVarOrRgbaString();
 						}
 
 						if ( 0 === color.alpha() || 'transparent' === values.grid_element_color ) {
@@ -486,9 +508,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						blogFusionPostWrapper.style += 'border-color:' + values.grid_element_color + ';';
 
 					} else if ( 'grid' === values.layout ) {
-						color       = jQuery.Color( values.grid_box_color );
-						colorCSS    = color.toRgbaString();
-						borderColor = jQuery.Color( values.grid_element_color );
+						color       = jQuery.AWB_Color( values.grid_box_color );
+						colorCSS    = color.toVarOrRgbaString();
+						borderColor = jQuery.AWB_Color( values.grid_element_color );
 
 						if ( 0 === borderColor.alpha() || 'transparent' === values.grid_element_color ) {
 							blogFusionPostWrapper.style += 'border:none;';
@@ -500,8 +522,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						blogFusionPostWrapper.style += 'border-color:' + values.grid_element_color + ';';
 
 					} else if ( 'timeline' === values.layout ) {
-						color    = jQuery.Color( values.grid_box_color );
-						colorCSS = color.toRgbaString();
+						color    = jQuery.AWB_Color( values.grid_box_color );
+						colorCSS = color.toVarOrRgbaString();
 						blogFusionPostWrapper.style = 'background-color:' + colorCSS + ';';
 					}
 
@@ -641,7 +663,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						blogShortcodePostTitle[ 'class' ] += ' entry-title';
 					}
 
-					headerContent = preTitleContent + '<h2 ' + _.fusionGetAttributes( blogShortcodePostTitle ) + '>' + link + '</h2>' + metaData + contentSep;
+					postTitleTag = self.getTitleTag( values, 'post' );
+					headerContent = preTitleContent + '<' + postTitleTag + ' ' + _.fusionGetAttributes( blogShortcodePostTitle ) + '>' + link + '</' + postTitleTag + '>' + metaData + contentSep;
 
 					html += headerContent;
 
@@ -731,6 +754,34 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
+			 * Get the title HTML tag.
+			 *
+			 * @param {Array} values
+			 * @param {string} title Either 'post' or 'timeline_title'.
+			 * @returns
+			 */
+			getTitleTag: function( values, title ) {
+				var title_value;
+				if ( 'post' === title ) {
+					title_value = values.title_size;
+					if ( ! title_value ) {
+						return 'h2';
+					}
+				} else if ( 'timeline_title' === title ) {
+					title_value = values.timeline_title_size;
+					if ( ! title_value ) {
+						return 'h3';
+					}
+				}
+
+				if ( !isNaN( title_value ) && !isNaN( parseFloat( title_value ) ) ) {
+					return 'h' + title_value;
+				}
+
+				return title_value;
+			},
+
+			/**
 			 * Build the styles.
 			 *
 			 * @since 2.0
@@ -745,7 +796,70 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				styles += '.fusion-blog-shortcode-cid' + cid + ' .fusion-posts-container{margin-left: -' + ( parseFloat( values.blog_grid_column_spacing ) / 2 ) + 'px !important; margin-right:-' + ( parseFloat( values.blog_grid_column_spacing ) / 2 ) + 'px !important;}';
 
 				return styles;
+			},
+
+			/**
+			 * Create the style HTML element.
+			 *
+			 * @since 3.5
+			 * @param {Object} values - The values.
+			 * @returns {string}
+			 */
+			getStyleElement: function( values ) {
+			var style,
+				baseSelector = '.fusion-blog-shortcode.fusion-blog-shortcode-cid' + this.model.get( 'cid' ),
+				self = this,
+				titleSelector         = baseSelector + ' .entry-title',
+				timelineTitleSelector = baseSelector + ' .fusion-timeline-date';
+
+			this.dynamic_css = {};
+			this.values = values;
+
+			jQuery.each( _.fusionGetFontStyle( 'title_font', values, 'object' ), function( rule, value ) {
+				self.addCssProperty( titleSelector, rule, value, true );
+			} );
+
+			if ( ! _.isEmpty( values.title_font_size ) ) {
+				this.addCssProperty( titleSelector, 'font-size', values.title_font_size, true );
 			}
+
+			if ( ! _.isEmpty( values.title_line_height ) ) {
+				this.addCssProperty( titleSelector, 'line-height', values.title_line_height, true );
+			}
+
+			if ( ! _.isEmpty( values.title_letter_spacing ) ) {
+				this.addCssProperty( titleSelector, 'letter-spacing', values.title_letter_spacing, true );
+			}
+
+			if ( ! _.isEmpty( values.title_text_transform ) ) {
+				this.addCssProperty( titleSelector, 'text-transform', values.title_text_transform, true );
+			}
+
+			jQuery.each( _.fusionGetFontStyle( 'timeline_title_font', values, 'object' ), function( rule, value ) {
+				self.addCssProperty( timelineTitleSelector, rule, value, true );
+			} );
+
+			if ( ! _.isEmpty( values.timeline_title_font_size ) ) {
+				this.addCssProperty( timelineTitleSelector, 'font-size', values.timeline_title_font_size, true );
+			}
+
+			if ( ! _.isEmpty( values.timeline_title_line_height ) ) {
+				this.addCssProperty( timelineTitleSelector, 'line-height', values.timeline_title_line_height, true );
+			}
+
+			if ( ! _.isEmpty( values.timeline_title_letter_spacing ) ) {
+				this.addCssProperty( timelineTitleSelector, 'letter-spacing', values.timeline_title_letter_spacing, true );
+			}
+
+			if ( ! _.isEmpty( values.timeline_title_text_transform ) ) {
+				this.addCssProperty( timelineTitleSelector, 'text-transform', values.timeline_title_text_transform, true );
+			}
+
+			style = this.parseCSS();
+
+			return style ? '<style>' + style + '</style>' : '';
+		}
+
 		} );
 	} );
 }( jQuery ) );

@@ -1,10 +1,13 @@
 /* stylelint-disable no-descending-specificity */
 /* stylelint-disable no-duplicate-selectors */
 :root {
+  --adminbar-height: 0;
+}
+body.admin-bar {
   --adminbar-height: 32px;
 }
 @media screen and (max-width: 782px) {
-  :root {
+  body.admin-bar {
     --adminbar-height: 46px;
   }
 }
@@ -14,9 +17,6 @@
 .page-template-blank #boxed-wrapper > div {
   flex-grow: 1;
   flex-basis: auto;
-}
-#boxed-wrapper {
-  overflow: hidden;
 }
 #main .fusion-row,
 .fusion-footer-widget-area .fusion-row,
@@ -161,7 +161,6 @@ body.layout-boxed-mode.layout-scroll-offset-framed {
   position: fixed;
   width: 100%;
   height: 100%;
-  z-index: -1;
   left: 0;
   top: 0;
   pointer-events: none;
@@ -173,8 +172,26 @@ body.layout-boxed-mode.layout-scroll-offset-framed {
   z-index: 99999;
   width: 100%;
 }
+.layout-boxed-mode.layout-scroll-offset-framed:not(.avada-has-zero-margin-offset-top) .fusion-top-frame,
+.layout-boxed-mode.layout-scroll-offset-framed:not(.avada-has-zero-margin-offset-top) .fusion-sides-frame {
+  top: 0;
+}
+.layout-boxed-mode.layout-scroll-offset-framed:not(.avada-has-zero-margin-offset-top) .fusion-bottom-frame {
+  bottom: 0;
+}
 .layout-boxed-mode.layout-scroll-offset-framed:not(.avada-has-zero-margin-offset-top).avada-has-boxed-modal-shadow-none .fusion-boxed-shadow {
   display: none;
+}
+.layout-boxed-mode.layout-scroll-offset-framed:not(.avada-has-zero-margin-offset-top):not(.avada-has-boxed-modal-shadow-none):not(.avada-footer-fx-sticky) #wrapper {
+  box-shadow: none;
+}
+.layout-boxed-mode.layout-scroll-offset-framed.avada-has-boxed-modal-shadow-light .fusion-boxed-shadow,
+.layout-boxed-mode.layout-scroll-offset-framed.avada-has-boxed-modal-shadow-medium .fusion-boxed-shadow,
+.layout-boxed-mode.layout-scroll-offset-framed.avada-has-boxed-modal-shadow-hard .fusion-boxed-shadow {
+  display: block;
+  position: fixed;
+  z-index: 99999;
+  pointer-events: none;
 }
 .layout-boxed-mode.layout-scroll-offset-framed .fusion-top-frame {
   height: var(--margin_offset-top-no-percent);
@@ -197,6 +214,12 @@ body.layout-boxed-mode.layout-scroll-offset-framed {
 }
 .layout-boxed-mode.layout-scroll-offset-framed.admin-bar .fusion-boxed-shadow {
   top: calc(var(--margin_offset-top-no-percent) + var(--adminbar-height));
+}
+.layout-boxed-mode:not(.avada-has-zero-margin-offset-top).layout-scroll-offset-framed #boxed-wrapper {
+  padding-top: var(--margin_offset-top-no-percent);
+  padding-bottom: var(--margin_offset-bottom-no-percent);
+  margin-top: calc(var(--margin_offset-top-no-percent) / -1);
+  margin-bottom: calc(var(--margin_offset-bottom-no-percent) / -1);
 }
 html.avada-has-site-width-percent .avada-responsive.layout-boxed-mode #main .fusion-row,
 html.avada-has-site-width-percent .avada-responsive.layout-boxed-mode .fusion-footer-widget-area .fusion-row,

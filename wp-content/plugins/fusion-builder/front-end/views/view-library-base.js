@@ -28,6 +28,41 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.options = attributes;
 
 				this.listenTo( FusionEvents, 'fusion-studio-content-imported', this.loadBuilderAssets );
+				this.listenTo( FusionEvents, 'awb-studio-import-modal-closed', this.removeView );
+
+			},
+
+			triggerPreviewChanges: function( event ) {
+				var $wrapper =  jQuery( event.currentTarget ).closest( '.studio-wrapper' ),
+					changeCounter = 0,
+					overWriteType,
+					shouldInvert,
+					options;
+
+				// Early exit if not in preview mode.
+				if ( ! $wrapper.hasClass( 'fusion-studio-preview-active' ) ) {
+					return;
+				}
+
+				overWriteType = $wrapper.find( 'input[name="overwrite-type"]:checked' ).val();
+				shouldInvert  = $wrapper.find( 'input[name="invert"]:checked' ).val();
+
+				options = {
+					'overWriteType': overWriteType,
+					'shouldInvert': shouldInvert
+				};
+
+				jQuery.each( options, function( index, value ) {
+
+					if ( options[ index ] !== FusionApp.preferencesData[ index ] ) {
+						FusionApp.preferencesData[ index ] = options[ index ];
+						changeCounter++;
+					}
+				} );
+
+				if ( 0 < changeCounter ) {
+					FusionEvents.trigger( 'awb-update-studio-item-preview' );
+				}
 			},
 
 			removeView: function() {
@@ -45,6 +80,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( '1' !== fusionAppConfig.studio_status ) {
 					return;
 				}
+
+				FusionPageBuilderApp.activeStudio = type;
+
+				FusionPageBuilderApp.studio.setOptions( $layoutsContainer );
 
 				// Ajax request for data.
 				if ( ! $layoutsContainer.children().length ) {
@@ -82,6 +121,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					type = 'forms';
 				}
 
+				// Off Canvas.
+				if ( 'fusion_template' === type && 'string' === typeof FusionApp.data.postDetails.post_type && 'awb_off_canvas' === FusionApp.data.postDetails.post_type ) {
+					type = 'awb_off_canvas';
+				}
+
 				if ( 'object' === typeof FusionPageBuilderApp.studio.studioData && null !== FusionPageBuilderApp.studio.studioData && 'undefined' !== typeof FusionPageBuilderApp.studio.studioData[ type ] ) {
 					studioElements = FusionPageBuilderApp.studio.filterLayouts( FusionPageBuilderApp.studio.studioData[ type ] );
 
@@ -97,6 +141,21 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 				FusionPageBuilderApp.studio.initFilter( $sidebar );
 				FusionPageBuilderApp.studio.initLazyLoad( $layoutsContainer );
+			},
+
+			/**
+			* Toggles import options.
+			*
+			* @since 3.7
+			* @param {Object} event - The event.
+			* @return {void}
+			*/
+			toggleImportOptions: function( event ) {
+				var $wrapper = jQuery( event.currentTarget ).closest( '.studio-wrapper' );
+
+				if ( ! $wrapper.hasClass( 'fusion-studio-preview-active' ) ) {
+					$wrapper.find( '.awb-import-options' ).toggleClass( 'open' );
+				}
 			},
 
 			/**
@@ -119,9 +178,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * Imports studio post's media.
 			 *
 			 * @param {object} postData
+			 * * @param {string} mediaKey
+			 * * @param {object} importOptions
 			 * @return promise
 			 */
-			importStudioMedia: function( postData, mediaKey ) {
+			importStudioMedia: function( postData, mediaKey, importOptions ) {
 
 				this.studioImportModalView.updateStatus( fusionBuilderText.studio_importing_media + ' ' + mediaKey.replace( '_', ' ' ) );
 				this.studioImportModalView.updateProgressBar( postData.avada_media, mediaKey );
@@ -136,6 +197,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							mediaImportKey: mediaKey,
 							postData: postData
 						},
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						fusion_load_nonce: fusionAppConfig.fusion_load_nonce
 					},
 					success: function( data ) {
@@ -280,6 +344,96 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					FusionApp.reInitIconPicker();
 				}
 
+			},
+
+			/**
+			* Get import options.
+			*
+			* @since 3.7
+			* @param {Object} event - The event.
+			* @return {object}
+			*/
+			getImportOptions: function( event ) {
+				var $wrapper         =  jQuery( event.currentTarget ).closest( '.studio-wrapper' ),
+					overWriteType    = $wrapper.find( 'input[name="overwrite-type"]:checked' ).val(),
+					shouldInvert     = $wrapper.find( 'input[name="invert"]:checked' ).val(),
+					contentPlacement = $wrapper.find( 'input[name="load-type"]:checked' ).val(),
+					imagesImport     = $wrapper.find( 'input[name="images"]:checked' ).val(),
+					layoutID         = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ).data( 'layout-id' ),
+					options;
+
+					options = {
+						'overWriteType': overWriteType,
+						'layoutID': layoutID,
+						'shouldInvert': shouldInvert,
+						'contentPlacement': contentPlacement,
+						'imagesImport': imagesImport
+					};
+
+					if ( this.areOptionsChanged( options ) ) {
+						this.saveStudioPreferences( options );
+					}
+
+					return options;
+			},
+
+			/**
+			* Checks if studio options are changed.
+			*
+			* @since 3.7
+			* @param {Object} options - The options.
+			* @return {Boolean}
+			*/
+			areOptionsChanged: function( options ) {
+				var preferencesChanged = [],
+					i;
+
+				jQuery.each( options, function( index, value ) {
+
+					if ( 'layoutID' === index ) {
+						return true;
+					}
+
+					if ( options[ index ] !== FusionApp.preferencesData[ index ] ) {
+						preferencesChanged.push( index );
+					}
+				} );
+
+				for ( i = 0; i < preferencesChanged.length; i++ ) {
+					FusionEvents.trigger( 'fusion-preferences-' + preferencesChanged[ i ] + '-updated' );
+				}
+
+				return preferencesChanged.length ? true : false;
+			},
+
+			/**
+			* Saves studio preferences.
+			*
+			* @since 3.7
+			* @param {Object} options - The options.
+			* @return {void}
+			*/
+			saveStudioPreferences: function( options ) {
+
+				// Update data.
+				FusionApp.preferencesData.overWriteType    = options.overWriteType;
+				FusionApp.preferencesData.shouldInvert     = options.shouldInvert;
+				FusionApp.preferencesData.contentPlacement = options.contentPlacement;
+				FusionApp.preferencesData.imagesImport     = options.imagesImport;
+
+				jQuery.ajax( {
+					type: 'POST',
+					url: fusionAppConfig.ajaxurl,
+					dataType: 'JSON',
+					data: {
+						action: 'fusion_app_save_builder_preferences',
+						fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
+						preferences: FusionApp.preferencesData
+					}
+				} )
+				.done( function( response ) {
+					FusionApp.preferences = response;
+				} );
 			}
 	} );
   } );

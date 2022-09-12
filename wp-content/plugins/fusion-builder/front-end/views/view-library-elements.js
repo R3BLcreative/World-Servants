@@ -14,7 +14,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				'click .fusion-builder-all-modules .fusion-builder-element:not(.fusion-builder-element-generator,.fusion-builder-disabled-element)': 'addModule',
 				'click .fusion_builder_custom_elements_load': 'addCustomModule',
 				'click .fusion-builder-column-layouts li': 'addNestedColumns',
-				'click .fusion-studio-load': 'loadStudioElement'
+				'click .awb-import-options-toggle': 'toggleImportOptions',
+				'click .awb-import-studio-item': 'loadStudioElement',
+				'change .awb-import-options .awb-import-style input[name="overwrite-type"]': 'triggerPreviewChanges',
+				'change .awb-import-options .awb-import-inversion input[name="invert"]': 'triggerPreviewChanges'
 			},
 
 			/**
@@ -285,18 +288,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
-			 * Adds a studio element.
+			 * Adds studio element.
 			 *
-			 * @since 3.2
-			 * @param {Object} event - The event.
+			 * @since 2.0.0
+			 * @param {Object} [event]         The event.
 			 * @return {void}
 			 */
 			loadStudioElement: function( event ) {
-				var layoutID,
-					title,
-					self              = this,
-					$layout           = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
-					$layoutsContainer = $layout.closest( '.studio-imports' ),
+				var self          = this,
+					importOptions = this.getImportOptions( event ),
 					targetElement;
 
 				if ( event ) {
@@ -307,9 +307,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					return;
 				}
 				FusionPageBuilderApp.layoutIsLoading = true;
-
-				layoutID  = $layout.data( 'layout_id' );
-				title     = $layout.find( '.fusion_module_title' ).text();
 
 				if ( 'undefined' !== typeof this.options.targetElement ) {
 					targetElement = this.options.targetElement;
@@ -323,8 +320,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						action: 'fusion_builder_load_layout',
 						fusion_load_nonce: fusionAppConfig.fusion_load_nonce,
 						fusion_is_global: false,
-						fusion_layout_id: layoutID,
+						fusion_layout_id: importOptions.layoutID,
 						fusion_studio: true,
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						category: 'elements',
 						post_id: FusionApp.getPost( 'post_id' )
 					},
@@ -367,7 +367,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								( function( k ) { // eslint-disable-line no-loop-func
 
 									dfdNext = dfdNext.then( function() {
-										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ] );
+										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ], importOptions );
 									} );
 
 									promises.push( dfdNext );

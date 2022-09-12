@@ -71,6 +71,7 @@ function avada_set_builder_classes( $default_elements, $class ) {
 	if ( class_exists( 'Tribe__Events__Main' ) ) {
 		$elements[] = ' #tribe-events-bar .tribe-bar-filters .tribe-bar-filters-inner .tribe-bar-submit input[type=submit]';
 		$elements[] = ' #tribe-events .tribe-events-button';
+		$elements[] = ' .single-tribe_events .tribe-events-cal-links .tribe-events-button';
 		$elements[] = ' #tribe-events-footer ~ a.tribe-events-ical.tribe-events-button';
 		$elements[] = ' #tribe_events_filter_control #tribe_events_filters_toggle';
 		$elements[] = ' #tribe_events_filter_control #tribe_events_filters_reset';
@@ -80,11 +81,19 @@ function avada_set_builder_classes( $default_elements, $class ) {
 		$elements[] = ' #tribe-events .tribe-events-list .tribe-events-event-cost form .tribe-button';
 		$elements[] = ' .avada-ec-views-v1 #tribe_events_filters_wrapper .tribe-events-filters-mobile-controls button';
 		$elements[] = '.fusion-body .tribe-common .tribe-events-c-search__button';
+		$elements[] = '.fusion-body .tribe-common .tribe-common-c-btn-border';
+		$elements[] = '.fusion-body .tribe-common a.tribe-common-c-btn-border';
 		$elements[] = ' .tribe-events .tribe-events-c-ical > a';
 		$elements[] = ' .tribe-block__events-link .tribe-block__btn--link > a';
 		$elements[] = ' .tribe-block__event-website a';
 		$elements[] = '.fusion-body .tribe_events .tribe-tickets .tribe-tickets__buy';
+		$elements[] = '.fusion-body .tribe_events .tribe-tickets__tickets-wrapper .tribe-tickets__tickets-buy';
+		$elements[] = '.fusion-body .tribe_events .tribe-events-tickets .tribe-button--rsvp';
 		$elements[] = '.fusion-body .tribe-block.tribe-tickets .tribe-tickets .tribe-tickets__buy';
+		$elements[] = '.fusion-body .tribe_events .tribe-tickets__attendee-tickets-footer-checkout-button';
+		$elements[] = '.fusion-body.page-tribe-attendee-registration .tribe-tickets__registration-submit';
+		$elements[] = '.fusion-body .tribe-tickets__rsvp-actions-button-going';
+		$elements[] = '.fusion-body .tribe-tickets__rsvp-form-button[type="submit"]';
 		$elements[] = '.fusion-body.tribe_community_edit .tribe-button';
 	}
 
@@ -113,6 +122,15 @@ function avada_set_builder_classes( $default_elements, $class ) {
 		'.single-product .product .summary .cart .quantity .qty',
 	];
 	$element_map['.fusion-button-quantity'] = $elements;
+
+	if ( class_exists( 'GFForms' ) ) {
+		$elements = [
+			' .gform_wrapper .gform_validation_errors',
+			' .gform_wrapper .gfield_error .gfield_validation_message',
+		];
+
+		$element_map['.alert-danger'] = $elements;
+	}
 
 	if ( isset( $element_map[ $class ] ) ) {
 		return array_merge( $element_map[ $class ], $default_elements );
@@ -465,7 +483,11 @@ function avada_add_fb_styling( $css ) {
 		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['color']            = 'var(--icon_color)';
 		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['background-color'] = 'var(--icon_circle_color)';
 		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-color']     = 'var(--icon_border_color)';
-		$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-radius']    = implode( ' ', Avada()->settings->get( 'icon_border_radius' ) );
+
+		$icon_border_radius = Avada()->settings->get( 'icon_border_radius' );
+		if ( is_array( $icon_border_radius ) ) {
+			$css['global'][ $dynamic_css_helpers->implode( $elements ) ]['border-radius'] = implode( ' ', $icon_border_radius );
+		}
 
 		$css['global']['.fontawesome-icon:hover']['color'] = 'var(--icon_color_hover)';
 
@@ -546,16 +568,16 @@ function avada_add_fb_styling( $css ) {
 			$elements[] = '.rtl .side-nav';
 		}
 		if ( class_exists( 'bbPress' ) ) {
-			$elements[] = '.bbp-pagination .bbp-pagination-links a.inactive';
-			$elements[] = '.bbp-topic-pagination .page-numbers';
+			$elements[] = '#bbpress-forums .bbp-pagination .bbp-pagination-links a.inactive';
+			$elements[] = '#bbpress-forums .bbp-topic-pagination .page-numbers';
 			$elements[] = '.widget.widget.widget_display_replies ul li';
 			$elements[] = '.widget.widget_display_topics ul li';
 			$elements[] = '.widget.widget_display_views ul li';
 			$elements[] = '.widget.widget_display_stats dt';
 			$elements[] = '.widget.widget_display_stats dd';
 			$elements[] = '.bbp-pagination-links span.dots';
-			$elements[] = '.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-prev';
-			$elements[] = '.fusion-hide-pagination-text .bbp-pagination .bbp-pagination-links .pagination-next';
+			$elements[] = '.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-prev';
+			$elements[] = '.fusion-hide-pagination-text #bbpress-forums .bbp-pagination .bbp-pagination-links .pagination-next';
 		}
 		if ( class_exists( 'WooCommerce' ) ) {
 			$elements[] = '#customer_login_box';

@@ -173,9 +173,18 @@ class Avada_Demo_Import {
 	 *
 	 * @access private
 	 * @since 6.2
-	 * @var bool
+	 * @var array
 	 */
 	private $import_stages = [];
+
+	/**
+	 * Site title.
+	 *
+	 * @access private
+	 * @since 7.7
+	 * @var string
+	 */
+	private $site_title = '';
 
 	/**
 	 * The class constructor.
@@ -228,30 +237,49 @@ class Avada_Demo_Import {
 				$this->import_all = true;
 			}
 
-			$this->run_demo_stage_import();
-
-			// We've just processed last import stage.
-			if ( 1 === count( $this->import_stages ) ) {
-
-				/**
-				 * WIP
-				$this->content_tracker->set_general_data();
-				*/
-				$this->after_import();
-
-				// Reset all caches, don't remove demo data.
-				fusion_reset_all_caches(
-					[
-						'demo_data' => false,
-					]
-				);
-
-				echo 'imported';
-			} else {
-				echo 'import partially completed: ' . $this->import_stages[0]; // phpcs:ignore WordPress.Security.EscapeOutput
+			if ( isset( $_POST['siteTitle'] ) && '' !== sanitize_text_field( wp_unslash( $_POST['siteTitle'] ) ) ) {
+				$this->site_title = sanitize_text_field( wp_unslash( $_POST['siteTitle'] ) );
 			}
-			// Save data after import, for example imported terms.
-			$this->content_tracker->save_demo_history();
+
+			try {
+				$this->run_demo_stage_import();
+
+				// We've just processed last import stage.
+				if ( 1 === count( $this->import_stages ) ) {
+
+					/**
+					 * WIP
+					$this->content_tracker->set_general_data();
+					*/
+					$this->after_import();
+
+					// Reset all caches, don't remove demo data.
+					fusion_reset_all_caches(
+						[
+							'demo_data' => false,
+						]
+					);
+
+					echo 'imported';
+				} else {
+					echo 'import partially completed: ' . $this->import_stages[0]; // phpcs:ignore WordPress.Security.EscapeOutput
+				}
+				// Save data after import, for example imported terms.
+				$this->content_tracker->save_demo_history();
+			} catch ( Throwable $t ) {
+				// Executed only in PHP 7+.
+
+				/* translators: %1$s: Opening span tag. %2$s: PHP error message. %3$s: PHP file path. %4$s: PHP file line. %5$s: Closing span tag. */
+				$response = sprintf( __( '%1$s<strong>PHP ERROR</strong>: %2$s in %3$s on line %4$s.%5$s', 'Avada' ), '<span class="awb-prebuilt-import-error">', $t->getMessage(), $t->getFile(), $t->getLine(), '</span>' );
+				/* translators: %1$s: Opening span tag. %2$: Opening anchor tag. %3$s: closing ancor tag. %4$s: Closing span tag. */
+				$response .= sprintf( __( '%1$sIf you need help to debug this, please create a %2$s support ticket%3$s.%4$s', 'Avada' ), '<span class="awb-prebuilt-import-message">', '<a href="https://theme-fusion.com/support/submit-a-ticket/" target="_blank">', '</a>', '</span>' );
+
+				// Echo response message.
+				echo $response; // phpcs:ignore WordPress.Security.EscapeOutput
+
+				// Sending 500 response to the client side (ajax request).
+				http_response_code( 500 );
+			}
 
 			exit;
 		}
@@ -510,7 +538,7 @@ class Avada_Demo_Import {
 
 		add_filter( 'wxr_importer.pre_process.user', [ $this, 'skip_authors' ], 10, 2 );
 		add_action( 'wxr_importer.processed.post', [ $this, 'add_fusion_demo_import_meta' ], 10, 5 );
-		add_filter( 'import_post_meta_key', [ $this, 'skip_old_menu_meta' ], 10, 3 );
+		add_filter( 'import_post_meta_key', [ $this, 'skip_unnecessary_meta' ], 10, 3 );
 		add_filter( 'wxr_importer.pre_process.post', [ $this, 'trim_post_content' ], 10, 4 );
 
 		if ( ! $this->import_all ) {
@@ -531,6 +559,9 @@ class Avada_Demo_Import {
 			// Slides are imported separately, not from avada.xml file.
 			add_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_slide_post_type' ], 10, 4 );
 			add_filter( 'wxr_importer.pre_process.term', [ $this, 'skip_slide_taxonomy' ], 10, 2 );
+
+			// Don't import WooCommerce orders.
+			add_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_shop_order_post_type' ], 10, 4 );
 		}
 
 		if ( $this->import_all || in_array( 'avada_layout', $this->import_content_types, true ) ) {
@@ -552,7 +583,7 @@ class Avada_Demo_Import {
 
 		remove_filter( 'wxr_importer.pre_process.user', [ $this, 'skip_authors' ], 10 );
 		remove_action( 'wxr_importer.processed.post', [ $this, 'add_fusion_demo_import_meta' ], 10 );
-		remove_filter( 'import_post_meta_key', [ $this, 'skip_old_menu_meta' ], 10 );
+		remove_filter( 'import_post_meta_key', [ $this, 'skip_unnecessary_meta' ], 10 );
 		remove_filter( 'wxr_importer.pre_process.post', [ $this, 'trim_post_content' ], 10 );
 
 		if ( ! $this->import_all ) {
@@ -561,6 +592,7 @@ class Avada_Demo_Import {
 		} else {
 			remove_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_slide_post_type' ], 10 );
 			remove_filter( 'wxr_importer.pre_process.term', [ $this, 'skip_slide_taxonomy' ], 10 );
+			remove_filter( 'wxr_importer.pre_process.post', [ $this, 'skip_shop_order_post_type' ], 10, 4 );
 		}
 
 		if ( $this->import_all || in_array( 'avada_layout', $this->import_content_types, true ) ) {
@@ -688,7 +720,7 @@ class Avada_Demo_Import {
 	 */
 	public function allow_import_product() {
 
-		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'product', 'shop_order', 'shop_coupon', 'product_variation' ] );
+		$this->allowed_post_types = array_merge( $this->allowed_post_types, [ 'product', 'shop_coupon', 'product_variation' ] );
 		$this->allowed_taxonomies = array_merge( $this->allowed_taxonomies, [ 'product_cat', 'product_tag', 'product_visibility', 'product_type' ] );
 
 		// Allow attribute taxonomies to be imported as well.
@@ -774,10 +806,15 @@ class Avada_Demo_Import {
 			include $wp_importer;
 		}
 
-		if ( ! class_exists( 'WXR_Importer' ) ) { // If WP importer doesn't exist.
+		if ( ! class_exists( 'WP_Importer_Logger' ) ) { // If WP importer doesn't exist.
 			include FUSION_LIBRARY_PATH . '/inc/importer/class-logger.php';
-			include FUSION_LIBRARY_PATH . '/inc/importer/class-logger-html.php';
+		}
 
+		if ( ! class_exists( 'AWB_Importer_Logger' ) ) { // If WP importer doesn't exist.
+			include FUSION_LIBRARY_PATH . '/inc/importer/class-awb-importer-logger.php';
+		}
+
+		if ( ! class_exists( 'WXR_Importer' ) ) { // If WP importer doesn't exist.
 			include FUSION_LIBRARY_PATH . '/inc/importer/class-wxr-importer.php';
 		}
 
@@ -785,9 +822,9 @@ class Avada_Demo_Import {
 			include FUSION_LIBRARY_PATH . '/inc/importer/class-fusion-wxr-importer.php';
 		}
 
-		if ( class_exists( 'WP_Importer' ) && class_exists( 'WXR_Importer' ) && class_exists( 'Fusion_WXR_Importer' ) ) { // Check for main import class and wp import class.
+		if ( class_exists( 'AWB_Importer_Logger' ) && class_exists( 'WP_Importer' ) && class_exists( 'WXR_Importer' ) && class_exists( 'Fusion_WXR_Importer' ) ) { // Check for main import class and wp import class.
 
-			$logger = new WP_Importer_Logger_HTML();
+			$logger = new AWB_Importer_Logger();
 
 			// It's important to disable 'prefill_existing_posts'.
 			// In case GUID of importing post matches GUID of an existing post it won't be imported.
@@ -949,14 +986,34 @@ class Avada_Demo_Import {
 	 */
 	public function skip_slide_taxonomy( $data, $meta ) {
 
-		if ( 'slide-page' === $data['taxonomy'] ) {
+		if ( $data && 'slide-page' === $data['taxonomy'] ) {
 			return false;
 		}
 		return $data;
 	}
 
 	/**
-	 * Used to skip importing old menu meta to 5.2+ installs.
+	 * Skips 'shop_order' post type.
+	 * This is used to skip importing 'slides' from avada.xml file.
+	 *
+	 * @access public
+	 * @since 7.7
+	 * @param array $data     The Post importer data.
+	 * @param array $meta     The Post meta.
+	 * @param array $comments The Post comments.
+	 * @param array $terms    The Post terms.
+	 * @return bool|array
+	 */
+	public function skip_shop_order_post_type( $data, $meta, $comments, $terms ) {
+
+		if ( $data && 'shop_order' === $data['post_type'] ) {
+			return false;
+		}
+		return $data;
+	}
+
+	/**
+	 * Used to skip unnecessary menu meta when importing.
 	 *
 	 * @access public
 	 * @since 5.2
@@ -965,9 +1022,10 @@ class Avada_Demo_Import {
 	 * @param object $post     Post object.
 	 * @return bool|string
 	 */
-	public function skip_old_menu_meta( $meta_key, $post_id, $post ) {
+	public function skip_unnecessary_meta( $meta_key, $post_id, $post ) {
 
 		$meta_keys = [
+			// Skip importing old menu meta to 5.2+ installs.
 			'_menu_item_fusion_megamenu_status',
 			'_menu_item_fusion_megamenu_width',
 			'_menu_item_fusion_megamenu_columns',
@@ -979,6 +1037,11 @@ class Avada_Demo_Import {
 			'_menu_item_fusion_megamenu_thumbnail',
 			'_menu_item_fusion_menu_style',
 			'_menu_item_fusion_menu_icononly',
+
+			// Skip post views.
+			'avada_post_views_count',
+			'avada_today_post_views_count',
+			'avada_post_views_count_today_date',
 		];
 
 		if ( in_array( $meta_key, $meta_keys, true ) ) {
@@ -1100,6 +1163,7 @@ class Avada_Demo_Import {
 		$options = [
 			'status_fusion_slider'    => '1',
 			'status_fusion_forms'     => '1',
+			'status_awb_Off_Canvas'   => '1',
 			'status_fusion_portfolio' => '1',
 			'status_fusion_faqs'      => '1',
 			'js_compiler'             => '1',
@@ -1310,7 +1374,7 @@ class Avada_Demo_Import {
 		}
 
 		// Import site title.
-		$site_title = 'Avada ' . ucwords( str_replace( '_', ' ', $this->demo_type ) );
+		$site_title = '' !== $this->site_title ? $this->site_title : 'Avada ' . ucwords( str_replace( '_', ' ', $this->demo_type ) );
 		update_option( 'blogname', $site_title );
 
 		$this->content_tracker->set( 'general_data', 'imported' );

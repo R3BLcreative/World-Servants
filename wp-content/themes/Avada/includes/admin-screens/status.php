@@ -21,12 +21,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<h1 class="avada-db-status-heading"><?php esc_html_e( 'System Status', 'Avada' ); ?></h1>
 		<p><?php esc_html_e( 'On this page you can see your Avada version history, run conversions and see details regarding your site environment.', 'Avada' ); ?></p>
 
-		<div class="avada-db-card-notice">
-			<i class="fusiona-info-circle"></i>
-			<p class="avada-db-card-notice-heading">
+		<div class="avada-db-card-notice-button">
+			<div class="avada-db-card-notice">
+				<i class="fusiona-info-circle"></i>
+				<p class="avada-db-card-notice-heading">
 				<?php esc_html_e( 'Click the button below to produce a system status report. Add this information to support tickets if you are experiencing technical issues.', 'Avada' ); ?>
+				</p>
+			</div>
+			<div class="avada-db-card-notice notice-button">
 				<span class="get-system-status"><a href="#" class="button-primary debug-report-button"><?php esc_html_e( 'Get System Report', 'Avada' ); ?></a></span>
-			</p>
+			</div>
 		</div>
 
 		<div class="debug-report">
@@ -113,15 +117,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 	?>
 
-	<section class="avada-db-card">
-		<h2 class="avada-status-no-export"><?php esc_html_e( 'Avada Conversion Controls', 'Avada' ); ?></h2>
+	<section class="avada-db-card awb-setup-update-tools">
+		<h2 class="avada-status-no-export"><?php esc_html_e( 'Avada Setup & Update Tools', 'Avada' ); ?></h2>
 
 		<table class="widefat avada-status-no-export" cellspacing="0">
 			<tbody>
 				<tr>
 					<td>
 						<?php /* translators: Version Number. */ ?>
-						<?php printf( esc_html__( 'Avada %s Conversion:', 'Avada' ), esc_html( $this->theme_version ) ); ?>
+						<strong><?php printf( esc_html__( 'Avada %s Conversion', 'Avada' ), esc_html( $this->theme_version ) ); ?></strong>
 						<div><a href="https://theme-fusion.com/documentation/avada/install-update/avada-changelog/" target="_blank"><?php esc_html_e( 'Changelog', 'Avada' ); ?></a></div>
 					</td>
 					<td class="help">&nbsp;</td>
@@ -143,8 +147,58 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tbody>
 		</table>
 
+		<?php if ( defined( 'FUSION_BUILDER_VERSION' ) && version_compare( FUSION_BUILDER_VERSION, '3.7', '>=' ) && defined( 'FUSION_CORE_VERSION' ) && version_compare( FUSION_CORE_VERSION, '5.7', '>=' ) ) : ?>
+		<table class="widefat avada-status-no-export" cellspacing="0">
+			<tbody>
+				<tr>
+					<td>
+					<strong><?php esc_html_e( 'Avada Setup Wizard', 'Avada' ); ?></strong>
+						<div><a href="https://theme-fusion.com/documentation/avada/installation-maintenance/how-to-use-the-avada-setup-wizard/" target="_blank"><?php esc_html_e( 'Learn More', 'Avada' ); ?></a></div>
+					</td>
+					<td class="help">&nbsp;</td>
+					<td>
+						<div class="avada-db-status-version-control">
+							<span class="avada-db-status-version-control-desc">
+								<?php esc_html_e( 'Run the Avada Setup Wizard.', 'Avada' ); ?>
+							</span>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=avada-setup' ) ); ?>" class="button button-primary"><?php esc_html_e( 'Setup Wizard', 'Avada' ); ?></a>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<?php endif; ?>
+
+		<?php if ( class_exists( 'Fusion_Form_Builder' ) && Fusion_Form_Builder::is_enabled() ) : ?>
+			<table class="widefat avada-status-no-export" cellspacing="0">
+				<tbody>
+					<tr>
+						<td>
+						<strong><?php esc_html_e( 'Avada Forms', 'Avada' ); ?></strong>
+						<div><a href="https://theme-fusion.com/documentation/avada/forms/how-to-use-the-avada-form-builder/" target="_blank"><?php esc_html_e( 'Learn More', 'Avada' ); ?></a></div>
+
+						</td>
+						<td class="help">&nbsp;</td>
+						<td>
+							<div class="avada-db-status-version-control">
+								<span class="avada-db-status-version-control-desc">
+									<?php esc_html_e( 'Recreate the Avada Forms database tables.', 'Avada' ); ?>
+								</span>
+								<a href="#" class="button button-primary fusion-create-forms-tables"><?php esc_html_e( 'Create Tables', 'Avada' ); ?></a>
+								<span class="fusion-system-status-spinner" style="display: none;">
+									<img src="<?php echo esc_url( admin_url( 'images/spinner.gif' ) ); ?>" />
+								</span>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		<?php endif; ?>
+
 		<?php // Display Avada 4.0 and/or 5.0 conversions if available. ?>
-		<?php if ( ( $show_400_migration && ! $force_hide_400_migration ) || $show_500_migration ) : ?>
+		<?php if ( ( $show_400_migration && false === $force_hide_400_migration ) || $show_500_migration ) : ?>
+			<h3 class="avada-status-no-export awb-status-legacy-conversion"><?php esc_html_e( 'Legacy Conversion Tools', 'Avada' ); ?></h2>
+
 			<p class="avada-db-status-version-control-notice">
 				<?php /* translators: URL. */ ?>
 				<?php printf( __( '<strong style="color:red;">IMPORTANT:</strong> Updating to Avada 4.0 and 5.0 requires a conversion process to ensure your content is compatible with the new version. This is an automatic process that happens upon update. In rare situations, you may need to rerun conversion if there was an issue through the automatic process. The controls below allow you to do this if needed. Please <a href="%s" target="_blank">contact our support team</a> through a ticket if you have any questions or need assistance.', 'Avada' ), 'https://theme-fusion.com/documentation/avada/getting-started/avada-theme-support/' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -180,7 +234,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<tr>
 				<td>
 					<?php esc_html_e( 'Avada 5.0 Conversion:', 'Avada' ); ?>
-					<div><a href="https://theme-fusion.com/documentation/fusion-builder/technical/converting-fusion-builder-pages/" target="_blank"><?php esc_html_e( 'Learn More', 'Avada' ); ?></a></div>
+					<div><a href="https://theme-fusion.com/documentation/avada/how-to/how-to-convert-your-website-to-avada-50/" target="_blank"><?php esc_html_e( 'Learn More', 'Avada' ); ?></a></div>
 				</td>
 				<td class="help">&nbsp;</td>
 				<td>
@@ -638,7 +692,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</td>
 					<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Envato\'s API server.', 'Avada' ) . '">[?]</a>'; ?></td>
 					<td></td>
-				</tr>			
+				</tr>
 				<tr>
 					<td>
 						<a href="#" data-api_type="tf_updates" class="button button-primary fusion-check-api-status"><?php esc_html_e( 'Check Avada Server Status', 'Avada' ); ?></a>
@@ -654,25 +708,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</tr>
 			</tbody>
 		</table>
-
-		<?php if ( class_exists( 'Fusion_Form_Builder' ) && Fusion_Form_Builder::is_enabled() ) : ?>
-		<h2 class="avada-status-no-export" style="margin-top:40px;"><?php esc_html_e( 'Avada Forms', 'Avada' ); ?></h2>
-
-		<table class="widefat avada-status-no-export" cellspacing="0">
-			<tbody>
-				<tr>
-					<td>
-						<a href="#" class="button button-primary fusion-create-forms-tables"><?php esc_html_e( 'Re-Create Avada Forms Database Tables', 'Avada' ); ?></a>
-						<span class="fusion-system-status-spinner" style="display: none;">
-							<img src="<?php echo esc_url( admin_url( 'images/spinner.gif' ) ); ?>" />
-						</span>
-					</td>
-					<td class="help"><?php echo '<a href="#" class="help_tip" data-tip="' . esc_attr__( 'Try to re-create Avada Forms database tables.', 'Avada' ) . '">[?]</a>'; ?></td>
-					<td></td>
-				</tr>
-			</tbody>
-		</table>
-		<?php endif; ?>
 	</section>
 
 	<section class="avada-db-card">
@@ -775,4 +810,3 @@ if ( ! defined( 'ABSPATH' ) ) {
 	});
 <?php endif; ?>
 </script>
-

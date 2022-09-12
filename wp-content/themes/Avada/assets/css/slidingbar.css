@@ -36,10 +36,15 @@
   content: "\e61c";
 }
 .fusion-sliding-bar-content-wrapper {
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
   padding: 35px 30px;
   height: 100%;
+  scrollbar-width: none;
+}
+.fusion-sliding-bar-content-wrapper::-webkit-scrollbar {
+  display: none;
 }
 .fusion-sliding-bar-toggle-triangle .fusion-sb-toggle-wrapper {
   width: 36px;
@@ -317,19 +322,19 @@
   float: none;
   padding: 15px 0;
 }
-.fusion-flyout-menu-icons .fusion-icon-sliding-bar:before,
-.fusion-main-menu .fusion-icon-sliding-bar:before,
-.fusion-mobile-menu-icons .fusion-icon-sliding-bar:before,
-.fusion-mobile-nav-holder .fusion-icon-sliding-bar:before {
+.fusion-flyout-menu-icons .awb-icon-sliding-bar:before,
+.fusion-main-menu .awb-icon-sliding-bar:before,
+.fusion-mobile-menu-icons .awb-icon-sliding-bar:before,
+.fusion-mobile-nav-holder .awb-icon-sliding-bar:before {
   font-family: "awb-icons";
   border-radius: 50%;
   content: "\e61d";
   color: inherit;
 }
-.fusion-flyout-menu-icons .fusion-icon-sliding-bar.fusion-main-menu-icon-active:before,
-.fusion-main-menu .fusion-icon-sliding-bar.fusion-main-menu-icon-active:before,
-.fusion-mobile-menu-icons .fusion-icon-sliding-bar.fusion-main-menu-icon-active:before,
-.fusion-mobile-nav-holder .fusion-icon-sliding-bar.fusion-main-menu-icon-active:before {
+.fusion-flyout-menu-icons .awb-icon-sliding-bar.fusion-main-menu-icon-active:before,
+.fusion-main-menu .awb-icon-sliding-bar.fusion-main-menu-icon-active:before,
+.fusion-mobile-menu-icons .awb-icon-sliding-bar.fusion-main-menu-icon-active:before,
+.fusion-mobile-nav-holder .awb-icon-sliding-bar.fusion-main-menu-icon-active:before {
   content: "\e61c";
   color: inherit;
 }

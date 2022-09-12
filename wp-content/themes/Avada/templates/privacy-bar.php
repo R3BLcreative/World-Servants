@@ -14,14 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit( 'Direct script access denied.' );
 }
 
-$text            = Avada()->settings->get( 'privacy_bar_text' );
-$content         = Avada()->privacy_embeds->get_privacy_content();
-$content_count   = is_array( $content ) ? count( $content ) : 0;
-$column_size     = 0 !== $content_count ? 12 / $content_count : 0;
-$more            = '0' !== Avada()->settings->get( 'privacy_bar_more' ) && 0 !== $content_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
-$button_text     = Avada()->settings->get( 'privacy_bar_button_text' );
-$button_alt_text = Avada()->settings->get( 'privacy_bar_update_text' );
-$settings_text   = Avada()->settings->get( 'privacy_bar_more_text' );
+$text               = Avada()->settings->get( 'privacy_bar_text' );
+$content            = Avada()->privacy_embeds->get_privacy_content();
+$content_count      = is_array( $content ) ? count( $content ) : 0;
+$column_size        = 0 !== $content_count ? 12 / $content_count : 0;
+$more               = '0' !== Avada()->settings->get( 'privacy_bar_more' ) && 0 !== $content_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+$button_text        = Avada()->settings->get( 'privacy_bar_button_text' );
+$button_alt_text    = Avada()->settings->get( 'privacy_bar_update_text' );
+$settings_text      = Avada()->settings->get( 'privacy_bar_more_text' );
+$privacy_embed      = Avada()->settings->get( 'privacy_embeds' );
+$reject_button      = '0' !== Avada()->settings->get( 'privacy_bar_reject' ) && '0' !== $privacy_embed; // phpcs:ignore WordPress.WP.GlobalVariablesOverride
+$reject_button_text = Avada()->settings->get( 'privacy_bar_reject_text' );
 ?>
 <div class="fusion-privacy-bar fusion-privacy-bar-bottom">
 	<div class="fusion-privacy-bar-main">
@@ -33,6 +36,11 @@ $settings_text   = Avada()->settings->get( 'privacy_bar_more_text' );
 		<a href="#" class="fusion-privacy-bar-acceptance fusion-button fusion-button-default fusion-button-default-size fusion-button-span-no" data-alt-text="<?php echo esc_attr( $button_alt_text ); ?>" data-orig-text="<?php echo esc_attr( $button_text ); ?>">
 			<?php echo esc_html( $button_text ); ?>
 		</a>
+		<?php if ( $reject_button ) : ?>
+		<a href="#" class="fusion-privacy-bar-reject fusion-button fusion-button-default fusion-button-default-size fusion-button-span-no">
+			<?php echo esc_html( $reject_button_text ); ?>
+		</a>
+		<?php endif; ?>
 	</div>
 	<?php if ( $more ) : ?>
 	<div class="fusion-privacy-bar-full">

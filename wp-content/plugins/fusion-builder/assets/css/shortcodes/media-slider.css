@@ -41,6 +41,5 @@
   height: 100%;
 }
 .fusion-slider-sc .fusion-slider-sc-cover .slides .image img {
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
 }

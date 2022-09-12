@@ -91,6 +91,10 @@ if ( fusion_is_element_enabled( 'fusion_widget_area' ) ) {
 					'id'               => '',
 					'background_color' => '',
 					'name'             => '',
+					'margin_top'       => '',
+					'margin_right'     => '',
+					'margin_bottom'    => '',
+					'margin_left'      => '',
 					'padding'          => '',
 					'title_color'      => $fusion_settings->get( 'widget_area_title_color' ),
 					'title_size'       => $fusion_settings->get( 'widget_area_title_size' ),
@@ -142,6 +146,11 @@ if ( fusion_is_element_enabled( 'fusion_widget_area' ) ) {
 
 				$this->args = $defaults;
 
+				$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+				$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+				$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+				$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
+
 				$html  = '<div ' . FusionBuilder::attributes( 'widget-area-shortcode' ) . '>';
 				$html .= $this->get_styles();
 
@@ -178,8 +187,11 @@ if ( fusion_is_element_enabled( 'fusion_widget_area' ) ) {
 					$hide_on_mobile,
 					[
 						'class' => 'fusion-widget-area fusion-widget-area-' . $this->widget_counter . ' fusion-content-widget-area',
+						'style' => '',
 					]
 				);
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( isset( $this->args['class'] ) && $this->args['class'] ) {
 					$attr['class'] .= ' ' . $this->args['class'];
@@ -263,7 +275,7 @@ if ( fusion_is_element_enabled( 'fusion_widget_area' ) ) {
 								'label'       => esc_html__( 'Widget Title Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of widget titles.', 'fusion-builder' ),
 								'id'          => 'widget_area_title_color',
-								'default'     => apply_filters( 'fusion_builder_widget_area_title_color', '' ),
+								'default'     => apply_filters( 'fusion_builder_widget_area_title_color', 'var(--awb-color8)' ),
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -294,7 +306,7 @@ function fusion_element_widget_area() {
 				'name'      => esc_attr__( 'Widget Area', 'fusion-builder' ),
 				'shortcode' => 'fusion_widget_area',
 				'icon'      => 'fusiona-sidebar',
-				'help_url'  => 'https://theme-fusion.com/documentation/fusion-builder/elements/widget-area-element/',
+				'help_url'  => 'https://theme-fusion.com/documentation/avada/elements/widget-area-element/',
 				'params'    => [
 					[
 						'type'        => 'select',
@@ -342,6 +354,16 @@ function fusion_element_widget_area() {
 							'padding_right'  => '',
 							'padding_bottom' => '',
 							'padding_left'   => '',
+						],
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
 						],
 					],
 					[

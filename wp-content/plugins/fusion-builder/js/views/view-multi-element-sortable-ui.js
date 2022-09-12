@@ -418,6 +418,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				} );
 
+				setTimeout( function() {
+					// Update preview.
+					FusionPageBuilderEvents.trigger( 'fusion-multi-child-update-preview' );
+				}, 200 );
+
 				if ( 'fusion_gallery' === thisEl.model.attributes[ 'data-element_type' ] ) {
 
 					// Fetch attachments if neccessary.

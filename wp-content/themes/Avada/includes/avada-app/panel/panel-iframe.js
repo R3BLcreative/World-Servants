@@ -541,7 +541,11 @@
 
 					// Get sub-value if we have a 3rd argument.
 					if ( _.isObject( varVal ) && ! _.isUndefined( cssVar.choice ) && ! _.isUndefined( varVal[ cssVar.choice ] ) ) {
-						varVal = varVal[ cssVar.choice ];
+						if ( ( 'font-style' === cssVar.choice || 'font-weight' === cssVar.choice ) && 'string' === typeof varVal[ 'font-family' ] && varVal[ 'font-family' ].includes( 'var(' ) ) {
+							varVal = window.awbTypographySelect.getVarString( parentValue[ 'font-family' ], cssVar.choice );
+						} else {
+							varVal = varVal[ cssVar.choice ];
+						}
 					}
 
 					// Make sure we have a pattern.
@@ -572,6 +576,11 @@
 					// If a selector is set use that, since it is more performant.
 					if ( 'string' === typeof cssVar.element ) {
 						selector = cssVar.element;
+					}
+
+					// For live editor, if the text-transform is not set, then override with inherit to display like in front-end.
+					if ( 'text-transform' === cssVar.choice && '' === varVal  ) {
+						varVal = 'inherit';
 					}
 
 					css += selector + '{' + cssVar.name + ':' + varVal + ';}';

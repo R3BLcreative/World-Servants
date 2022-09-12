@@ -507,6 +507,19 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 							'dynamic_data' => true,
 						],
 						[
+							'type'             => 'dimension',
+							'remove_from_atts' => true,
+							'heading'          => esc_attr__( 'Margin', 'fusion-builder' ),
+							'description'      => esc_attr__( 'In pixels or percentage, ex: 10px or 10%.', 'fusion-builder' ),
+							'param_name'       => 'margin',
+							'value'            => [
+								'margin_top'    => '',
+								'margin_right'  => '',
+								'margin_bottom' => '',
+								'margin_left'   => '',
+							],
+						],
+						[
 							'type'        => 'checkbox_button_set',
 							'heading'     => esc_attr__( 'Element Visibility', 'fusion-builder' ),
 							'param_name'  => 'hide_on_mobile',
@@ -801,7 +814,7 @@ if ( fusion_is_element_enabled( 'fusion_blog' ) ) {
 						[
 							'type'        => 'select',
 							'heading'     => esc_attr__( 'Grid Separator Style', 'fusion-builder' ),
-							'description' => __( 'Controls the line style of grid separators. <strong>Note:</strong> Separators will display, when excerpt/content or meta data below the separators is displayed.', 'fusion-builder' ),
+							'description' => __( 'Controls the line style of grid separators. <strong>NOTE:</strong> Separators will display, when excerpt/content or meta data below the separators is displayed.', 'fusion-builder' ),
 							'param_name'  => 'grid_separator_style_type',
 							'value'       => [
 								''              => esc_attr__( 'Default', 'fusion-builder' ),

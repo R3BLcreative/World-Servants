@@ -42,6 +42,15 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 		private $nested_counter = 0;
 
 		/**
+		 * The internal container counter for nesting depth.
+		 *
+		 * @access private
+		 * @since 3.8
+		 * @var int
+		 */
+		private $nesting_depth = -1;
+
+		/**
 		 * Styles for style block.
 		 *
 		 * @access protected
@@ -334,6 +343,25 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 				'video_loop_refinement'                 => '',
 				'video_aspect_ratio'                    => '16:9',
 
+				// Background Pattern.
+				'pattern_bg'                            => '',
+				'pattern_custom_bg'                     => '',
+				'pattern_bg_color'                      => '',
+				'pattern_bg_opacity'                    => '',
+				'pattern_bg_size'                       => '',
+				'pattern_bg_blend_mode'                 => '',
+				'pattern_bg_style'                      => '',
+
+				// Background Mask.
+				'mask_bg'                               => '',
+				'mask_custom_bg'                        => '',
+				'mask_bg_color'                         => '',
+				'mask_bg_accent_color'                  => '',
+				'mask_bg_opacity'                       => '',
+				'mask_bg_blend_mode'                    => '',
+				'mask_bg_style'                         => '',
+				'mask_bg_transform'                     => '',
+
 				// Animations.
 				'animation_type'                        => '',
 				'animation_direction'                   => 'left',
@@ -472,7 +500,6 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 			$content = apply_filters( 'fusion_add_globals', $content, 0 );
 
 			$column_opening_positions_index = [];
-			$php_version                    = phpversion();
 
 			foreach ( $needles as $needle ) {
 				$column_array                 = [];
@@ -495,9 +522,8 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 					// Search within this range/row.
 					$range = $row_closing_position - $position + 1;
 					// Row content.
-					$row_content          = substr( $content, $position + strlen( $needle['row_opening'] ), $range );
-					$original_row_content = $row_content;
-
+					$row_content              = substr( $content, $position + strlen( $needle['row_opening'] ), $range );
+					$original_row_content     = $row_content;
 					$row_last_pos             = -1;
 					$row_position_change      = 0;
 					$element_positions        = [];
@@ -708,6 +734,8 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 
 			// If we are inside another container render, then we count nested.
 			$rendering = $this->rendering;
+			$this->nesting_depth++;
+
 			if ( ! $this->rendering ) {
 				$this->scope_container_counter++;
 				$this->container_counter++;
@@ -787,6 +815,18 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 		public function is_nested() {
 			return isset( $this->data['is_nested'] ) ? $this->data['is_nested'] : false;
 		}
+
+		/**
+		 * Returns the container nesting depth.
+		 *
+		 * @access public
+		 * @since 3.8
+		 * @return int The nesting depth.
+		 */
+		public function get_nesting_depth() {
+			return $this->nesting_depth;
+		}
+
 
 		/**
 		 * Legacy inherit mode. When old containers are now using flex.
@@ -881,8 +921,12 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 			$this->args['lazy_load']        = ! $this->args['background_image'] || '' === $this->args['background_image'] ? false : $this->args['lazy_load'];
 			$this->args['video_bg']         = false;
 			$this->args['width_100']        = false;
-			$this->args['background_color'] = ( '' !== $this->args['overlay_color'] ) ? fusion_library()->sanitize->get_rgba( $this->args['overlay_color'], $this->args['overlay_opacity'] ) : $this->args['background_color'];
-			$this->args['css_id']           = '';
+			$this->args['background_color'] = $this->args['background_color'];
+			if ( '' !== $this->args['overlay_color'] ) {
+				$overlay_alpha                  = ( 1 < $this->args['overlay_opacity'] ) ? $this->args['overlay_opacity'] / 100 : $this->args['overlay_opacity'];
+				$this->args['background_color'] = Fusion_Color::new_color( $this->args['overlay_color'] )->get_new( 'alpha', $overlay_alpha )->to_css( 'rgba' );
+			}
+			$this->args['css_id'] = '';
 
 			$this->args['alpha_background_color']     = 1;
 			$this->args['alpha_gradient_start_color'] = 1;
@@ -1004,6 +1048,16 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 				$html .= $this->create_video_background();
 			}
 
+			// Pattern Background.
+			if ( $this->args['pattern_bg'] ) {
+				$html .= Fusion_Builder_Pattern_Helper::get_element( $this->args );
+			}
+
+			// Mask Background.
+			if ( $this->args['mask_bg'] ) {
+				$html .= Fusion_Builder_Mask_Helper::get_element( $this->args );
+			}
+
 			// Fading Background.
 			if ( 'yes' === $this->args['fade'] && ! empty( $this->args['background_image'] ) && false === $this->args['video_bg'] ) {
 				$html .= '<div ' . FusionBuilder::attributes( 'container-shortcode-fading-background' ) . ' ></div>';
@@ -1066,6 +1120,8 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 
 				$this->update_fusion_fwc_type();
 			}
+
+			$this->nesting_depth--;
 
 			$this->on_render();
 
@@ -1479,8 +1535,6 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 		 * @return array
 		 */
 		public function attr() {
-			global $is_edge;
-
 			$c_page_id = fusion_library()->get_page_id();
 
 			$attr = [
@@ -1606,8 +1660,12 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 				$attr['class'] .= ' video-background';
 			}
 
-			if ( $is_edge && 1 > $this->args['alpha_background_color'] ) {
-				$attr['class'] .= ' fusion-ie-mode';
+			if ( $this->args['pattern_bg'] ) {
+				$attr['class'] .= ' has-pattern-background';
+			}
+
+			if ( $this->args['mask_bg'] ) {
+				$attr['class'] .= ' has-mask-background';
 			}
 
 			// Fading Background.
@@ -1957,7 +2015,7 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 							'label'       => esc_html__( 'Container Border Color', 'fusion-builder' ),
 							'description' => esc_html__( 'Controls the border color of the container element.', 'fusion-builder' ),
 							'id'          => 'full_width_border_color',
-							'default'     => '#e2e2e2',
+							'default'     => 'var(--awb-color3)',
 							'type'        => 'color-alpha',
 							'transport'   => 'postMessage',
 						],
@@ -1965,7 +2023,7 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 							'label'       => esc_html__( 'Container 100% Height Navigation Background Color', 'fusion-builder' ),
 							'description' => esc_html__( 'Controls the background colors of the navigation area and name box when using 100% height containers.', 'fusion-builder' ),
 							'id'          => 'container_scroll_nav_bg_color',
-							'default'     => 'rgba(0,0,0,0.2)',
+							'default'     => 'hsla(var(--awb-color8-h),var(--awb-color8-s),var(--awb-color8-l),calc(var(--awb-color8-a) - 80%))',
 							'type'        => 'color-alpha',
 							'css_vars'    => [
 								[
@@ -1979,7 +2037,7 @@ if ( ! class_exists( 'FusionSC_Container' ) ) {
 							'label'       => esc_html__( 'Container 100% Height Navigation Element Color', 'fusion-builder' ),
 							'description' => esc_html__( 'Controls the color of the navigation circles and text name when using 100% height containers.', 'fusion-builder' ),
 							'id'          => 'container_scroll_nav_bullet_color',
-							'default'     => '#e2e2e2',
+							'default'     => 'var(--awb-color3)',
 							'type'        => 'color-alpha',
 							'css_vars'    => [
 								[
@@ -2149,7 +2207,7 @@ function fusion_builder_add_section() {
 				'name'              => esc_attr__( 'Container', 'fusion-builder' ),
 				'shortcode'         => 'fusion_builder_container',
 				'hide_from_builder' => true,
-				'help_url'          => 'https://theme-fusion.com/documentation/fusion-builder/elements/container-element/',
+				'help_url'          => 'https://theme-fusion.com/documentation/avada/elements/container-element/',
 				'subparam_map'      => [
 					'margin_top'            => 'spacing',
 					'margin_bottom'         => 'spacing',
@@ -2187,8 +2245,8 @@ function fusion_builder_add_section() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Height', 'fusion-builder' ),
-						/* translators: URL. */
-						'description' => sprintf( __( 'Select if the container should be fixed to 100%% height of the viewport. Larger content that is taller than the screen height will be cut off, this option works best with minimal content. <strong>IMPORTANT:</strong> Mobile devices are even shorter in height so this option can be disabled on mobile in %s while still being active on desktop.', 'fusion-builder' ), $to_link ),
+						/* translators: 1. Percentage value 2. URL. */
+						'description' => sprintf( __( 'Select if the container should be fixed to %1$s height of the viewport. Larger content that is taller than the screen height will be cut off, this option works best with minimal content. <strong>IMPORTANT:</strong> Mobile devices are even shorter in height so this option can be disabled on mobile in %2$s while still being active on desktop.', 'fusion-builder' ), '100%', $to_link ),
 						'param_name'  => 'hundred_percent_height',
 						'value'       => [
 							'no'  => esc_attr__( 'Auto', 'fusion-builder' ),
@@ -2219,7 +2277,7 @@ function fusion_builder_add_section() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Enable 100% Height Scroll', 'fusion-builder' ),
-						'description' => __( 'Select to add this container to a collection of 100% height containers that share scrolling navigation. <strong>IMPORTANT:</strong> When this option is used, the mobile visibility settings are disabled.', 'fusion-builder' ),
+						'description' => __( 'Select to add this container to a collection of 100% height containers that share scrolling navigation. <strong>IMPORTANT:</strong> When this option is used, the mobile visibility settings are disabled. This option will not work within off canvas.', 'fusion-builder' ),
 						'param_name'  => 'hundred_percent_height_scroll',
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
@@ -2724,6 +2782,7 @@ function fusion_builder_add_section() {
 							'scroll'  => esc_attr__( 'Scroll', 'fusion-builder' ),
 							'hidden'  => esc_attr__( 'Hidden', 'fusion-builder' ),
 							'auto'    => esc_attr__( 'Auto', 'fusion-builder' ),
+							'clip'    => esc_attr__( 'Clip', 'fusion-builder' ),
 						],
 						'default'     => '',
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
@@ -2741,12 +2800,16 @@ function fusion_builder_add_section() {
 							'gradient' => esc_attr__( 'Gradient', 'fusion-builder' ),
 							'image'    => esc_attr__( 'Image', 'fusion-builder' ),
 							'video'    => esc_attr__( 'Video', 'fusion-builder' ),
+							'pattern'  => esc_attr__( 'Pattern', 'fusion-builder' ),
+							'mask'     => esc_attr__( 'Mask', 'fusion-builder' ),
 						],
 						'icons'            => [
 							'single'   => '<span class="fusiona-fill-drip-solid" style="font-size:18px;"></span>',
 							'gradient' => '<span class="fusiona-gradient-fill" style="font-size:18px;"></span>',
 							'image'    => '<span class="fusiona-image" style="font-size:18px;"></span>',
 							'video'    => '<span class="fusiona-video" style="font-size:18px;"></span>',
+							'pattern'  => '<span class="fusiona-background-pattern" style="font-size:18px;"></span>',
+							'mask'     => '<span class="fusiona-background-mask" style="font-size:18px;"></span>',
 						],
 					],
 					'fusion_gradient_placeholder'   => [
@@ -3061,49 +3124,53 @@ function fusion_builder_add_section() {
 						],
 					],
 					[
-						'type'        => 'uploadfile',
-						'heading'     => esc_attr__( 'Video MP4 Upload', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add your MP4 video file. This format must be included to render your video with cross-browser compatibility. WebM and OGV are optional. Using videos in a 16:9 aspect ratio is recommended.', 'fusion-builder' ),
-						'param_name'  => 'video_mp4',
-						'value'       => '',
-						'group'       => esc_attr__( 'Background', 'fusion-builder' ),
-						'subgroup'    => [
+						'type'         => 'uploadfile',
+						'heading'      => esc_attr__( 'Video MP4 Upload', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add your MP4 video file. This format must be included to render your video with cross-browser compatibility. WebM and OGV are optional. Using videos in a 16:9 aspect ratio is recommended.', 'fusion-builder' ),
+						'param_name'   => 'video_mp4',
+						'dynamic_data' => true,
+						'value'        => '',
+						'group'        => esc_attr__( 'Background', 'fusion-builder' ),
+						'subgroup'     => [
 							'name' => 'background_type',
 							'tab'  => 'video',
 						],
 					],
 					[
-						'type'        => 'uploadfile',
-						'heading'     => esc_attr__( 'Video WebM Upload', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add your WebM video file. This is optional, only MP4 is required to render your video with cross-browser compatibility. Using videos in a 16:9 aspect ratio is recommended.', 'fusion-builder' ),
-						'param_name'  => 'video_webm',
-						'value'       => '',
-						'group'       => esc_attr__( 'Background', 'fusion-builder' ),
-						'subgroup'    => [
+						'type'         => 'uploadfile',
+						'heading'      => esc_attr__( 'Video WebM Upload', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add your WebM video file. This is optional, only MP4 is required to render your video with cross-browser compatibility. Using videos in a 16:9 aspect ratio is recommended.', 'fusion-builder' ),
+						'param_name'   => 'video_webm',
+						'dynamic_data' => true,
+						'value'        => '',
+						'group'        => esc_attr__( 'Background', 'fusion-builder' ),
+						'subgroup'     => [
 							'name' => 'background_type',
 							'tab'  => 'video',
 						],
 					],
 					[
-						'type'        => 'uploadfile',
-						'heading'     => esc_attr__( 'Video OGV Upload', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add your OGV video file. This is optional, only MP4 is required to render your video with cross-browser compatibility. Using videos in a 16:9 aspect ratio is recommended.', 'fusion-builder' ),
-						'param_name'  => 'video_ogv',
-						'value'       => '',
-						'group'       => esc_attr__( 'Background', 'fusion-builder' ),
-						'subgroup'    => [
+						'type'         => 'uploadfile',
+						'heading'      => esc_attr__( 'Video OGV Upload', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add your OGV video file. This is optional, only MP4 is required to render your video with cross-browser compatibility. Using videos in a 16:9 aspect ratio is recommended.', 'fusion-builder' ),
+						'param_name'   => 'video_ogv',
+						'dynamic_data' => true,
+						'value'        => '',
+						'group'        => esc_attr__( 'Background', 'fusion-builder' ),
+						'subgroup'     => [
 							'name' => 'background_type',
 							'tab'  => 'video',
 						],
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'YouTube/Vimeo Video URL or ID', 'fusion-builder' ),
-						'description' => esc_attr__( "Enter the URL to the video or the video ID of your YouTube or Vimeo video you want to use as your background. If your URL isn't showing a video, try inputting the video ID instead. Ads will show up in the video if it has them.", 'fusion-builder' ),
-						'param_name'  => 'video_url',
-						'value'       => '',
-						'group'       => esc_attr__( 'Background', 'fusion-builder' ),
-						'subgroup'    => [
+						'type'         => 'textfield',
+						'heading'      => esc_attr__( 'YouTube/Vimeo Video URL or ID', 'fusion-builder' ),
+						'description'  => esc_attr__( "Enter the URL to the video or the video ID of your YouTube or Vimeo video you want to use as your background. If your URL isn't showing a video, try inputting the video ID instead. Ads will show up in the video if it has them.", 'fusion-builder' ),
+						'param_name'   => 'video_url',
+						'dynamic_data' => true,
+						'value'        => '',
+						'group'        => esc_attr__( 'Background', 'fusion-builder' ),
+						'subgroup'     => [
 							'name' => 'background_type',
 							'tab'  => 'video',
 						],
@@ -3255,6 +3322,8 @@ function fusion_builder_add_section() {
 							],
 						],
 					],
+					'fusion_pattern_placeholder'    => [],
+					'fusion_mask_placeholder'       => [],
 					'fusion_conditional_render_placeholder' => [],
 					[
 						'type'        => 'radio_button_set',
@@ -3417,4 +3486,4 @@ function fusion_builder_add_section() {
 		)
 	);
 }
-add_action( 'fusion_builder_before_init', 'fusion_builder_add_section' );
+add_action( 'wp_loaded', 'fusion_builder_add_section' );

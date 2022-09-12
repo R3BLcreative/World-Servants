@@ -43,7 +43,7 @@ class Fusion_Dynamic_Data {
 	 * @since 2.1
 	 * @var array
 	 */
-	private $text_fields = [ 'textfield', 'textarea', 'tinymce', 'raw_textarea' ];
+	private $text_fields = [ 'textfield', 'textarea', 'tinymce', 'raw_textarea', 'raw_text' ];
 
 	/**
 	 * Array of image fields.
@@ -70,7 +70,7 @@ class Fusion_Dynamic_Data {
 	 * @since 2.1
 	 * @var array
 	 */
-	private $link_and_text_fields = [ 'link_selector', 'textfield', 'textarea', 'tinymce', 'raw_textarea', 'date_time_picker' ];
+	private $link_and_text_fields = [ 'link_selector', 'textfield', 'textarea', 'tinymce', 'raw_textarea', 'raw_text', 'date_time_picker' ];
 
 	/**
 	 * Date time picker.
@@ -80,6 +80,24 @@ class Fusion_Dynamic_Data {
 	 * @var array
 	 */
 	private $date_time_picker = [ 'date_time_picker' ];
+
+	/**
+	 * Array of image/video or any type of file fields.
+	 *
+	 * @access private
+	 * @since 2.1
+	 * @var array
+	 */
+	private $file_fields = [ 'uploadfile', 'upload' ];
+
+	/**
+	 * Array of image/video or any type of file fields.
+	 *
+	 * @access private
+	 * @since 2.1
+	 * @var array
+	 */
+	private $number_fields = [ 'range' ];
 
 	/**
 	 * Class constructor.
@@ -376,7 +394,7 @@ class Fusion_Dynamic_Data {
 	 * @return void
 	 */
 	public function maybe_store_value( $value, $dynamic_arg ) {
-		if ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() ) {
+		if ( function_exists( 'fusion_is_preview_frame' ) && fusion_is_preview_frame() && ( ! FusionBuilder()->post_card_data['is_rendering'] || FusionBuilder()->editing_post_card ) ) {
 			$this->values[ $dynamic_arg['data'] ][] = [
 				'value' => $value,
 				'args'  => $dynamic_arg,
@@ -397,6 +415,11 @@ class Fusion_Dynamic_Data {
 	public function filter_preview_data( $data, $page_id, $post_type ) {
 		$page_id = apply_filters( 'fusion_dynamic_post_id', $page_id );
 		$user    = wp_get_current_user();
+
+		// Avoid duplicate values.
+		foreach ( $this->values as $key => $val ) {
+			$this->values[ $key ] = array_unique( $val, SORT_REGULAR );
+		}
 
 		$data['dynamicValues'][ $page_id ] = $this->values;
 		$data['dynamicOptions']            = $this->get_params();
@@ -546,6 +569,11 @@ class Fusion_Dynamic_Data {
 			return true;
 		}
 
+		// Editing an off canvas.
+		if ( 'awb_off_canvas' === $post_type ) {
+			return true;
+		}
+
 		// Editing a post card.
 		if ( 'fusion_element' === $post_type ) {
 			$terms = get_the_terms( get_the_ID(), 'element_category' );
@@ -568,7 +596,6 @@ class Fusion_Dynamic_Data {
 		$fusion_settings = awb_get_fusion_settings();
 
 		$post_taxonomies = [];
-		$post_meta       = [];
 		$params          = [];
 		$featured_images = [
 			'main' => esc_html__( 'Main Featured Image', 'fusion-builder' ),
@@ -593,11 +620,6 @@ class Fusion_Dynamic_Data {
 					$post_taxonomies[ $tax_slug ] = $tax->labels->name;
 				}
 			}
-
-			// Create an array of our post-meta keys.
-			$meta_fields      = maybe_unserialize( fusion_data()->post_meta( $post_data['id'] )->get_all_meta() );
-			$meta_fields_keys = array_keys( $meta_fields );
-			$post_meta        = array_combine( $meta_fields_keys, $meta_fields_keys );
 		}
 
 		if ( 'fusion_element' === $post_data['post_type'] ) {
@@ -742,7 +764,7 @@ class Fusion_Dynamic_Data {
 			'label'    => esc_html__( 'ID', 'fusion-builder' ),
 			'id'       => 'post_id',
 			'group'    => $single_label,
-			'options'  => $this->text_fields,
+			'options'  => array_unique( array_merge( $this->text_fields, $this->number_fields ) ),
 			'callback' => [
 				'function' => 'fusion_get_post_id',
 				'ajax'     => false,
@@ -804,44 +826,57 @@ class Fusion_Dynamic_Data {
 			],
 		];
 
-		$params['post_views'] = [
-			'label'    => esc_html__( 'Total Views', 'fusion-builder' ),
-			'id'       => 'post_views',
-			'group'    => $single_label,
-			'options'  => $this->text_fields,
-			'callback' => [
-				'function' => 'get_post_total_views',
-				'ajax'     => true,
-			],
-		];
+		if ( 'disabled' !== $fusion_settings->get( 'post_views' ) ) {
+			$params['post_views'] = [
+				'label'    => esc_html__( 'Total Views', 'fusion-builder' ),
+				'id'       => 'post_views',
+				'group'    => $single_label,
+				'options'  => array_unique( array_merge( $this->text_fields, $this->number_fields ) ),
+				'callback' => [
+					'function' => 'get_post_total_views',
+					'ajax'     => true,
+				],
+			];
 
-		$params['post_today_views'] = [
-			'label'    => esc_html__( 'Today Views', 'fusion-builder' ),
-			'id'       => 'post_today_views',
-			'group'    => $single_label,
-			'options'  => $this->text_fields,
-			'callback' => [
-				'function' => 'get_post_today_views',
-				'ajax'     => true,
-			],
-		];
+			$params['post_today_views'] = [
+				'label'    => esc_html__( 'Today Views', 'fusion-builder' ),
+				'id'       => 'post_today_views',
+				'group'    => $single_label,
+				'options'  => array_unique( array_merge( $this->text_fields, $this->number_fields ) ),
+				'callback' => [
+					'function' => 'get_post_today_views',
+					'ajax'     => true,
+				],
+			];
+		}
 
 		$params['post_reading_time'] = [
 			'label'    => esc_html__( 'Reading Time', 'fusion-builder' ),
 			'id'       => 'post_reading_time',
 			'group'    => $single_label,
-			'options'  => $this->text_fields,
+			'options'  => array_unique( array_merge( $this->text_fields, $this->number_fields ) ),
 			'callback' => [
 				'function' => 'get_post_reading_time',
 				'ajax'     => true,
 			],
 			'fields'   => [
-				'reading_speed' => [
-					'heading'     => esc_html__( 'Reading speed', 'fusion-builder' ),
+				'reading_speed'         => [
+					'heading'     => esc_html__( 'Reading Speed', 'fusion-builder' ),
 					'description' => esc_html__( 'Average words read per minute. Reading time will be displayed in minutes based on this value.' ),
 					'param_name'  => 'reading_speed',
 					'type'        => 'text',
 					'value'       => '200',
+				],
+				'use_decimal_precision' => [
+					'type'        => 'radio_button_set',
+					'heading'     => esc_html__( 'Use Decimal Precision', 'fusion-builder' ),
+					'description' => esc_html__( 'Whether to use decimal precision(ex 2.3 min) or not(2 min).' ),
+					'param_name'  => 'use_decimal_precision',
+					'default'     => 'yes',
+					'value'       => [
+						'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
+						'no'  => esc_attr__( 'No', 'fusion-builder' ),
+					],
 				],
 			],
 		];
@@ -863,7 +898,7 @@ class Fusion_Dynamic_Data {
 			'label'    => esc_html__( 'Custom Field', 'fusion-builder' ),
 			'id'       => 'post_custom_field',
 			'group'    => $single_label,
-			'options'  => $this->link_and_text_fields,
+			'options'  => array_unique( array_merge( $this->link_and_text_fields, $this->number_fields ) ),
 			'default'  => __( 'Custom Field Value Here', 'fusion-builder' ),
 			'callback' => [
 				'function' => 'fusion_get_post_custom_field',
@@ -875,8 +910,7 @@ class Fusion_Dynamic_Data {
 					'description' => esc_html__( 'Custom field ID key.' ),
 					'param_name'  => 'key',
 					'default'     => '',
-					'type'        => $this->is_template_edited() ? 'text' : 'select',
-					'value'       => $post_meta,
+					'type'        => 'text',
 				],
 			],
 		];
@@ -1096,7 +1130,7 @@ class Fusion_Dynamic_Data {
 			'label'    => esc_html__( 'Request Parameter', 'fusion-builder' ),
 			'id'       => 'site_request_param',
 			'group'    => esc_attr__( 'Other', 'fusion-builder' ),
-			'options'  => $this->text_fields,
+			'options'  => $this->link_and_text_fields,
 			'callback' => [
 				'function' => 'fusion_get_site_request_param',
 				'ajax'     => true,
@@ -1140,8 +1174,10 @@ class Fusion_Dynamic_Data {
 			],
 		];
 
+		$params = $this->maybe_add_off_canvas_fields( $params, $post_data['id'], $post_data['post_type'] );
 		$params = $this->maybe_add_acf_fields( $params, $post_data['id'], $post_data['post_type'] );
 		$params = $this->maybe_add_woo_fields( $params, $post_data['id'], $post_data['post_type'] );
+		$params = $this->maybe_add_hubspot_fields( $params, $post_data['id'], $post_data['post_type'] );
 
 		// Skip target post data.
 		$params = $this->maybe_add_page_title_bar_fields( $params, get_the_ID(), get_post_type() );
@@ -1161,6 +1197,88 @@ class Fusion_Dynamic_Data {
 
 		$this->params = apply_filters( 'fusion_set_dynamic_params', $params );
 
+	}
+
+	/**
+	 * Adds Off Canvas fields to dynamic sources
+	 *
+	 * @param array  $params    The params.
+	 * @param int    $post_id   The post ID.
+	 * @param string $post_type The post type.
+	 * @return array
+	 */
+	public function maybe_add_off_canvas_fields( $params, $post_id, $post_type ) {
+
+		if ( class_exists( 'AWB_Off_Canvas_Front_End' ) && false !== AWB_Off_Canvas::is_enabled() ) {
+			$off_canvas_items = AWB_Off_Canvas_Front_End()->get_available_items();
+
+			$params['toggle_off_canvas'] = [
+				'label'    => esc_html__( 'Toggle Off Canvas', 'fusion-builder' ),
+				'id'       => 'toggle_off_canvas',
+				'group'    => esc_attr__( 'Off Canvas', 'fusion-builder' ),
+				'options'  => $this->link_fields,
+				'exclude'  => [ 'before', 'after', 'fallback' ],
+				'callback' => [
+					'function' => 'fusion_toggle_off_canvas',
+					'ajax'     => false,
+				],
+				'fields'   => [
+					'off_canvas_id' => [
+						'heading'     => esc_html__( 'Off Canvas', 'fusion-builder' ),
+						'description' => esc_html__( 'Select off canvas.' ),
+						'param_name'  => 'off_canvas_id',
+						'default'     => '',
+						'type'        => 'select',
+						'value'       => $off_canvas_items,
+					],
+				],
+			];
+			$params['open_off_canvas']   = [
+				'label'    => esc_html__( 'Open Off Canvas', 'fusion-builder' ),
+				'id'       => 'open_off_canvas',
+				'group'    => esc_attr__( 'Off Canvas', 'fusion-builder' ),
+				'options'  => $this->link_fields,
+				'exclude'  => [ 'before', 'after', 'fallback' ],
+				'callback' => [
+					'function' => 'fusion_open_off_canvas',
+					'ajax'     => false,
+				],
+				'fields'   => [
+					'off_canvas_id' => [
+						'heading'     => esc_html__( 'Off Canvas', 'fusion-builder' ),
+						'description' => esc_html__( 'Select off canvas.' ),
+						'param_name'  => 'off_canvas_id',
+						'default'     => '',
+						'type'        => 'select',
+						'value'       => $off_canvas_items,
+					],
+				],
+			];
+			$params['close_off_canvas']  = [
+				'label'    => esc_html__( 'Close Off Canvas', 'fusion-builder' ),
+				'id'       => 'close_off_canvas',
+				'group'    => esc_attr__( 'Off Canvas', 'fusion-builder' ),
+				'options'  => $this->link_fields,
+				'exclude'  => [ 'before', 'after', 'fallback' ],
+				'callback' => [
+					'function' => 'fusion_close_off_canvas',
+					'ajax'     => false,
+				],
+				'fields'   => [
+					'off_canvas_id' => [
+						'heading'     => esc_html__( 'Off Canvas', 'fusion-builder' ),
+						'description' => esc_html__( 'Select off canvas.' ),
+						'param_name'  => 'off_canvas_id',
+						'default'     => '',
+						'type'        => 'select',
+						'value'       => $off_canvas_items,
+					],
+				],
+			];
+
+		}
+
+		return $params;
 	}
 
 	/**
@@ -1305,6 +1423,17 @@ class Fusion_Dynamic_Data {
 			],
 		];
 
+		$params['woo_cart_total'] = [
+			'label'    => esc_html__( 'Cart Total', 'fusion-builder' ),
+			'id'       => 'woo_get_cart_total',
+			'group'    => esc_attr__( 'WooCommerce', 'fusion-builder' ),
+			'options'  => $this->text_fields,
+			'callback' => [
+				'function' => 'woo_get_cart_total',
+				'ajax'     => true,
+			],
+		];
+
 		return $params;
 	}
 
@@ -1411,8 +1540,9 @@ class Fusion_Dynamic_Data {
 			$fields              = [];
 			$text_options        = false;
 			$image_options       = false;
+			$file_options        = false;
 			$link_options        = false;
-			$string_option_types = [ 'text', 'textarea', 'number', 'range', 'wysiwyg', 'raw_textarea' ];
+			$string_option_types = [ 'text', 'textarea', 'number', 'range', 'wysiwyg', 'raw_textarea', 'raw_text' ];
 			$bulk_image_options  = false;
 
 			// In builder get fields active for post type for each group.
@@ -1428,6 +1558,8 @@ class Fusion_Dynamic_Data {
 								$text_options[ $field['name'] ] = $field['label'];
 							} elseif ( 'image' === $field['type'] ) {
 								$image_options[ $field['name'] ] = $field['label'];
+							} elseif ( 'file' === $field['type'] ) {
+								$file_options[ $field['name'] ] = $field['label'];
 							} elseif ( 'url' === $field['type'] ) {
 								$link_options[ $field['name'] ] = $field['label'];
 							} elseif ( 'gallery' === $field['type'] ) {
@@ -1444,7 +1576,7 @@ class Fusion_Dynamic_Data {
 					'label'    => esc_html__( 'ACF Text', 'fusion-builder' ),
 					'id'       => 'acf_text',
 					'group'    => esc_attr__( 'Advanced Custom Fields', 'fusion-builder' ),
-					'options'  => $this->text_fields,
+					'options'  => array_unique( array_merge( $this->link_and_text_fields, $this->file_fields, $this->number_fields ) ),
 					'default'  => __( 'Custom Field Value Here', 'fusion-builder' ),
 					'callback' => [
 						'function' => 'acf_get_field',
@@ -1488,6 +1620,31 @@ class Fusion_Dynamic_Data {
 				];
 			}
 
+			// In builder and have video options add option, on front-end add for callback availability.
+			if ( ! $this->get_builder_status() || $file_options || $this->is_template_edited() ) {
+				$params['acf_file'] = [
+					'label'    => esc_html__( 'ACF File', 'fusion-builder' ),
+					'id'       => 'acf_file',
+					'group'    => esc_attr__( 'Advanced Custom Fields', 'fusion-builder' ),
+					'callback' => [
+						'function' => 'acf_get_file_field',
+						'ajax'     => true,
+					],
+					'exclude'  => [ 'before', 'after', 'fallback' ],
+					'options'  => array_unique( array_merge( $this->link_and_text_fields, $this->file_fields ) ),
+					'fields'   => [
+						'field' => [
+							'heading'     => esc_html__( 'Field', 'fusion-builder' ),
+							'description' => $this->is_template_edited() ? esc_html__( 'Enter field name you want to use.', 'fusion-builder' ) : esc_html__( 'Which field you want to use.', 'fusion-builder' ),
+							'param_name'  => 'field',
+							'default'     => '',
+							'type'        => $this->is_template_edited() ? 'text' : 'select',
+							'value'       => $file_options,
+						],
+					],
+				];
+			}
+
 			// In builder and have image options add option, on front-end add for callback availability.
 			if ( ! $this->get_builder_status() || $link_options || $this->is_template_edited() ) {
 				$params['acf_link'] = [
@@ -1495,11 +1652,11 @@ class Fusion_Dynamic_Data {
 					'id'       => 'acf_link',
 					'group'    => esc_attr__( 'Advanced Custom Fields', 'fusion-builder' ),
 					'callback' => [
-						'function' => 'acf_get_field',
+						'function' => 'acf_get_link_field',
 						'ajax'     => true,
 					],
 					'exclude'  => [ 'before', 'after', 'fallback' ],
-					'options'  => $this->link_fields,
+					'options'  => array_unique( array_merge( $this->link_and_text_fields, $this->file_fields ) ),
 					'fields'   => [
 						'field' => [
 							'heading'     => esc_html__( 'Field', 'fusion-builder' ),
@@ -1696,6 +1853,62 @@ class Fusion_Dynamic_Data {
 			];
 		}
 
+		$params['woo_shop_page_url'] = [
+			'label'    => esc_html__( 'Shop Page URL', 'fusion-builder' ),
+			'id'       => 'woo_shop_page_url',
+			'group'    => esc_attr__( 'WooCommerce', 'fusion-builder' ),
+			'options'  => $this->link_fields,
+			'callback' => [
+				'function' => 'woo_shop_page_url',
+				'ajax'     => true,
+			],
+		];
+
+		$params['woo_cart_page_url'] = [
+			'label'    => esc_html__( 'Cart Page URL', 'fusion-builder' ),
+			'id'       => 'woo_cart_page_url',
+			'group'    => esc_attr__( 'WooCommerce', 'fusion-builder' ),
+			'options'  => $this->link_fields,
+			'callback' => [
+				'function' => 'woo_cart_page_url',
+				'ajax'     => true,
+			],
+		];
+
+		$params['woo_checkout_page_url'] = [
+			'label'    => esc_html__( 'Checkout Page URL', 'fusion-builder' ),
+			'id'       => 'woo_checkout_page_url',
+			'group'    => esc_attr__( 'WooCommerce', 'fusion-builder' ),
+			'options'  => $this->link_fields,
+			'callback' => [
+				'function' => 'woo_checkout_page_url',
+				'ajax'     => true,
+			],
+		];
+
+		$params['woo_myaccount_page_url'] = [
+			'label'    => esc_html__( 'My Account Page URL', 'fusion-builder' ),
+			'id'       => 'woo_myaccount_page_url',
+			'group'    => esc_attr__( 'WooCommerce', 'fusion-builder' ),
+			'options'  => $this->link_fields,
+			'callback' => [
+				'function' => 'woo_myaccount_page_url',
+				'ajax'     => true,
+			],
+		];
+
+		// Terms & Conditions.
+		$params['woo_tnc_page_url'] = [
+			'label'    => esc_html__( 'Terms & Conditions URL', 'fusion-builder' ),
+			'id'       => 'woo_tnc_page_url',
+			'group'    => esc_attr__( 'WooCommerce', 'fusion-builder' ),
+			'options'  => $this->link_fields,
+			'callback' => [
+				'function' => 'woo_tnc_page_url',
+				'ajax'     => true,
+			],
+		];
+
 		return $params;
 	}
 
@@ -1783,6 +1996,33 @@ class Fusion_Dynamic_Data {
 				],
 			];
 		}
+
+		return $params;
+	}
+
+	/**
+	 * Adds hubspot actions ( only chat for now ) to dynamic data.
+	 *
+	 * @since 3.7.1
+	 * @access public
+	 * @param array  $params    The params.
+	 * @param int    $post_id   The post ID.
+	 * @param string $post_type The post type.
+	 * @return array
+	 */
+	public function maybe_add_hubspot_fields( $params, $post_id, $post_type ) {
+
+		$params['hubspot_chat'] = [
+			'label'    => esc_html__( 'Open Live Chat', 'fusion-builder' ),
+			'id'       => 'hubspot_chat',
+			'group'    => esc_attr__( 'HubSpot', 'fusion-builder' ),
+			'options'  => $this->link_fields,
+			'exclude'  => [ 'before', 'after', 'fallback' ],
+			'callback' => [
+				'function' => 'fusion_open_hubspot_chat',
+				'ajax'     => false,
+			],
+		];
 
 		return $params;
 	}

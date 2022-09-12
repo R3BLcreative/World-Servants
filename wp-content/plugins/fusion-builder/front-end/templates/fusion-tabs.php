@@ -20,22 +20,23 @@
 
 <script type="text/html" id="tmpl-fusion_tab-shortcode">
 <#
+var titleTag   = values.title_tag;
 var icon   = '';
 if ( 'none' !== values.icon ) {
 	icon = '<i ' + _.fusionGetAttributes( tabsShortcodeIcon ) + '></i>';
 }
-var tab_nav = '<a ' + _.fusionGetAttributes( tabsShortcodeLink ) + '><h4 class="fusion-tab-heading">';
+var tab_nav = '<a ' + _.fusionGetAttributes( tabsShortcodeLink ) + '><' + titleTag + ' class="fusion-tab-heading">';
 if ( 'right' === parentValues.icon_position ) {
 	tab_nav +=  values.title + icon;
 } else {
 	tab_nav += icon + values.title;
 }
-tab_nav += '</h4></a>';
+tab_nav += '</' + titleTag + '></a>';
 html = tab_nav;
 
 // Change ID for mobile to ensure no duplicate ID.
 tab_nav = tab_nav.replace( 'id="fusion-tab-', 'id="mobile-fusion-tab-' );
-var tabNavContents  = '<div class="nav fusion-mobile-tab-nav fusion-mobile-extra-' + cid + '"><ul class="nav-tabs ' + justifiedClass + '"><li>' + tab_nav + '</li></ul></div>';
+var tabNavContents  = 'accordion' === values.mobile_mode || 'toggle' === values.mobile_mode ? '<div class="nav fusion-mobile-tab-nav fusion-mobile-extra-' + cid + '"><ul class="nav-tabs ' + justifiedClass + '"><li>' + tab_nav + '</li></ul></div>' : '';
 var tabContents     = '<div ' + _.fusionGetAttributes( tabsShortcodeTab ) + '>' + FusionPageBuilderApp.renderContent( values.element_content, cid, false ) + '</div>';
 
 var contentsEl = '.fusion-child-contents-' + parentModel.attributes.cid;

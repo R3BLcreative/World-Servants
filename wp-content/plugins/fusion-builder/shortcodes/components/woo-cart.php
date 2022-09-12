@@ -75,8 +75,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 				// Ajax mechanism for live editor.
 				add_action( 'wp_ajax_get_fusion_tb_woo_cart', [ $this, 'ajax_render' ] );
 
-				// WooCommerce Paypal Payments plugin.
-				add_filter( 'woocommerce_paypal_payments_single_product_renderer_hook', [ $this, 'woocommerce_paypal_payments_button' ] );
+				$this->add_third_party_hooks();
 			}
 
 			/**
@@ -192,6 +191,9 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					'text_align'                           => '',
 					'label_color'                          => '',
 					'label_font_size'                      => '',
+					'label_text_transform'                 => '',
+					'label_line_height'                    => '',
+					'label_letter_spacing'                 => '',
 					'fusion_font_family_label_typography'  => 'inherit',
 					'fusion_font_variant_label_typography' => '400',
 					'select_style'                         => '',
@@ -273,6 +275,9 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					'info_align'                           => 'flex-start',
 					'description_color'                    => '',
 					'description_font_size'                => '',
+					'description_text_transform'           => '',
+					'description_line_height'              => '',
+					'description_letter_spacing'           => '',
 					'fusion_font_family_description_typography' => 'inherit',
 					'fusion_font_variant_description_typography' => '400',
 					'description_order'                    => 'before',
@@ -280,11 +285,20 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					'sale_order'                           => 'after',
 					'show_price'                           => 'yes',
 					'price_font_size'                      => '',
+					'price_text_transform'                 => '',
+					'price_line_height'                    => '',
+					'price_letter_spacing'                 => '',
 					'price_color'                          => '',
 					'sale_font_size'                       => '',
+					'sale_text_transform'                  => '',
+					'sale_line_height'                     => '',
+					'sale_letter_spacing'                  => '',
 					'sale_color'                           => '',
 					'show_stock'                           => 'yes',
 					'stock_font_size'                      => '',
+					'stock_text_transform'                 => '',
+					'stock_line_height'                    => '',
+					'stock_letter_spacing'                 => '',
 					'stock_color'                          => '',
 					'fusion_font_family_price_typography'  => 'inherit',
 					'fusion_font_variant_price_typography' => '400',
@@ -385,6 +399,10 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					$this->args['button_border_left']   = $this->args['button_border_top'];
 				}
 
+				if ( 'always' === $this->args['show_price'] ) {
+					add_filter( 'woocommerce_show_variation_price', [ $this, 'always_show_price' ], 10, 3 );
+				}
+
 				if ( ! empty( $this->args['button_icon'] ) ) {
 					add_filter( 'woocommerce_product_single_add_to_cart_text', [ $this, 'add_icon_placeholder' ], 20 );
 				}
@@ -398,6 +416,10 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					$html = $this->get_cart();
 				} else {
 					$html = '<div ' . FusionBuilder::attributes( 'fusion_tb_woo_cart-shortcode' ) . '>' . $this->get_cart() . $this->get_styles() . '</div>';
+				}
+
+				if ( 'always' === $this->args['show_price'] ) {
+					remove_filter( 'woocommerce_show_variation_price', [ $this, 'always_show_price' ], 10, 3 );
 				}
 
 				if ( ! empty( $this->args['button_icon'] ) ) {
@@ -417,6 +439,36 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 				$this->on_render();
 
 				return apply_filters( 'fusion_component_' . $this->shortcode_handle . '_content', $html, $args );
+			}
+
+			/**
+			 * Show the variation price, even if all variations share the same price.
+			 *
+			 * @access public
+			 * @since 3.7
+			 * @param bool                $show_price Holds if the variation price should be shown.
+			 * @param WC_Product_Variable $variation Current product variation.
+			 * @param WC_Product          $product The current variable product.
+			 * @return bool Will always be true to make sure price is shown regardless.
+			 */
+			public function always_show_price( $show_price, $variation, $product ) {
+				return true;
+			}
+
+
+			/**
+			 * Add an icon to the button text.
+			 *
+			 * @access public
+			 * @since 3.2
+			 * @param string $text Button text.
+			 * @return string
+			 */
+			public function add_icon_placeholder( $text = '' ) {
+				if ( 'left' === $this->args['icon_position'] ) {
+					return '@|@' . $text;
+				}
+				return $text . '@|@';
 			}
 
 			/**
@@ -451,23 +503,12 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 			public function get_cart() {
 				$content = '';
 				ob_start();
+				do_action( 'awb_before_woo_add_to_cart_content' );
 				woocommerce_template_single_add_to_cart();
 				do_action( 'awb_after_woo_add_to_cart_content' );
 				$content .= ob_get_clean();
 
 				return apply_filters( 'fusion_woo_component_content', $content, $this->shortcode_handle, $this->args );
-			}
-
-			/**
-			 * Change action for the WooCommerce Paypal Payments plugin.
-			 *
-			 * @access public
-			 * @since 3.2
-			 * @param string $action The initial action name.
-			 * @return string
-			 */
-			public function woocommerce_paypal_payments_button( $action ) {
-				return 'awb_after_woo_add_to_cart_content';
 			}
 
 			/**
@@ -497,7 +538,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					$this->add_css_property( $table, 'margin-left', fusion_library()->sanitize->get_value_with_unit( $this->args['margin_left'] ) );
 				}
 
-				$table_td = $this->base_selector . ' table td';
+				$table_td = $this->base_selector . ' table tr > *';
 
 				// Border size.
 				if ( ! $this->is_default( 'border_sizes_top' ) ) {
@@ -538,7 +579,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 				}
 
 				// Variation layout.
-				$label = $this->base_selector . ' td.label';
+				$label = $this->base_selector . ' tr .label';
 				if ( 'floated' !== $this->args['variation_layout'] ) {
 					$table_tr = $this->base_selector . ' table tr';
 					$this->add_css_property( $table_tr, 'display', 'flex' );
@@ -562,7 +603,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 
 				// Label text styling, share with grouped.
 				$label = [
-					$this->base_selector . ' td.label',
+					$this->base_selector . ' tr .label',
 					$this->base_selector . ' .woocommerce-grouped-product-list label',
 					$this->base_selector . ' .woocommerce-grouped-product-list label a',
 					$this->base_selector . ' .woocommerce-grouped-product-list .amount',
@@ -576,6 +617,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 				// Label font size.
 				if ( ! $this->is_default( 'label_font_size' ) ) {
 					$this->add_css_property( $label, 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['label_font_size'] ) );
+				}
+
+				if ( ! $this->is_default( 'label_line_height' ) ) {
+					$this->add_css_property( $label, 'line-height', $this->args['label_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'label_letter_spacing' ) ) {
+					$this->add_css_property( $label, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['label_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'label_text_transform' ) ) {
+					$this->add_css_property( $label, 'text-transform', $this->args['label_text_transform'] );
 				}
 
 				// Font family and weight.
@@ -721,7 +774,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					if ( ! $this->is_default( 'swatch_border_color_active' ) ) {
 						$this->add_css_property( $active_swatches, 'border-color', $this->args['swatch_border_color_active'] );
 
-						$hover_color = fusion_library()->sanitize->get_rgba( $this->args['swatch_border_color_active'], '0.5' );
+						$hover_color = Fusion_Color::new_color( $this->args['swatch_border_color_active'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 						$this->add_css_property( $hover_swatches, 'border-color', $hover_color );
 					}
 
@@ -938,6 +991,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					$this->add_css_property( $description, 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['description_font_size'] ) );
 				}
 
+				if ( ! $this->is_default( 'description_line_height' ) ) {
+					$this->add_css_property( $description, 'line-height', $this->args['description_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'description_letter_spacing' ) ) {
+					$this->add_css_property( $description, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['description_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'description_text_transform' ) ) {
+					$this->add_css_property( $description, 'text-transform', $this->args['description_text_transform'] );
+				}
+
 				// Description font family and weight.
 				$text_styles = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'description_typography', 'array' );
 				foreach ( $text_styles as $rule => $value ) {
@@ -972,6 +1037,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					$this->add_css_property( $prices, 'font-size', $this->args['price_font_size'] );
 				}
 
+				if ( ! $this->is_default( 'price_line_height' ) ) {
+					$this->add_css_property( $prices, 'line-height', $this->args['price_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'price_letter_spacing' ) ) {
+					$this->add_css_property( $prices, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['price_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'price_text_transform' ) ) {
+					$this->add_css_property( $prices, 'text-transform', $this->args['price_text_transform'] );
+				}
+
 				// Price font color.
 				if ( ! $this->is_default( 'price_color' ) ) {
 					$this->add_css_property( $prices, 'color', $this->args['price_color'] );
@@ -992,6 +1069,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 					$this->add_css_property( $sales, 'font-size', $this->args['sale_font_size'] );
 				}
 
+				if ( ! $this->is_default( 'sale_line_height' ) ) {
+					$this->add_css_property( $sales, 'line-height', $this->args['sale_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'sale_letter_spacing' ) ) {
+					$this->add_css_property( $sales, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['sale_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'sale_text_transform' ) ) {
+					$this->add_css_property( $sales, 'text-transform', $this->args['sale_text_transform'] );
+				}
+
 				// Sale font color.
 				if ( ! $this->is_default( 'sale_color' ) ) {
 					$this->add_css_property( $sales, 'color', $this->args['sale_color'] );
@@ -1010,6 +1099,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 				];
 				if ( ! $this->is_default( 'stock_font_size' ) ) {
 					$this->add_css_property( $stock, 'font-size', $this->args['stock_font_size'] );
+				}
+
+				if ( ! $this->is_default( 'stock_line_height' ) ) {
+					$this->add_css_property( $stock, 'line-height', $this->args['stock_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'stock_letter_spacing' ) ) {
+					$this->add_css_property( $stock, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['stock_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'stock_text_transform' ) ) {
+					$this->add_css_property( $stock, 'text-transform', $this->args['stock_text_transform'] );
 				}
 
 				// Stock font color.
@@ -1037,7 +1138,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 						if ( 'floated' === $this->args['variation_layout'] ) {
 							$top_margin    = empty( $this->args['clear_margin_top'] ) ? '0px' : fusion_library()->sanitize->get_value_with_unit( $this->args['clear_margin_top'] );
 							$bottom_margin = empty( $this->args['clear_margin_bottom'] ) ? '0px' : fusion_library()->sanitize->get_value_with_unit( $this->args['clear_margin_bottom'] );
-							$this->add_css_property( $this->base_selector . ' .variations tr:last-of-type td.label', 'padding-bottom', Fusion_Sanitize::add_css_values( [ $this->extras['body_font_size'], $top_margin, $bottom_margin ] ) );
+							$this->add_css_property( $this->base_selector . ' .variations tr:last-of-type .label', 'padding-bottom', Fusion_Sanitize::add_css_values( [ $this->extras['body_font_size'], $top_margin, $bottom_margin ] ) );
 						}
 					}
 
@@ -1375,21 +1476,6 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 			}
 
 			/**
-			 * Add an icon to the button text.
-			 *
-			 * @access public
-			 * @since 3.2
-			 * @param string $text Button text.
-			 * @return string
-			 */
-			public function add_icon_placeholder( $text = '' ) {
-				if ( 'left' === $this->args['icon_position'] ) {
-					return '@|@' . $text;
-				}
-				return $text . '@|@';
-			}
-
-			/**
 			 * Builds the attributes array.
 			 *
 			 * @access public
@@ -1437,6 +1523,111 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_cart' ) ) {
 			public function add_css_files() {
 				FusionBuilder()->add_element_css( FUSION_BUILDER_PLUGIN_DIR . 'assets/css/components/woo-cart.min.css' );
 			}
+
+			/**
+			 * Add third party hooks to our awb_after_woo_add_to_cart_content action.
+			 *
+			 * @access public
+			 * @since 3.2
+			 * @return void
+			 */
+			public function add_third_party_hooks() {
+
+				// Change action for the WooCommerce Paypal Payments plugin.
+				if ( class_exists( 'WooCommerce\PayPalCommerce\Button\Assets\SmartButton' ) ) {
+					add_filter(
+						'woocommerce_paypal_payments_single_product_renderer_hook',
+						function() {
+							return 'awb_woocommerce_paypal_payments_single_product_renderer_hook';
+						}
+					);
+					add_action( 'wp', [ $this, 'catch_woocommerce_paypal_payments_single_product' ], 20 );
+				}
+
+				if ( class_exists( 'Woocommerce_Catalog_Enquiry' ) && ! is_admin() && ! fusion_doing_ajax() ) {
+					add_action( 'wp', [ $this, 'change_woocommerce_catalog_enquiry_action' ] );
+				}
+
+				if ( class_exists( 'YITH_YWGC_Frontend' ) ) {
+					add_action( 'awb_after_woo_add_to_cart_content', [ $this, 'change_yith_ywgc_action' ] );
+				}
+			}
+
+			/**
+			 * Catches the PayPal button render from WooCommerce Paypal Payments plugin and moves it to correct hook.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @return void
+			 */
+			public function catch_woocommerce_paypal_payments_single_product() {
+				ob_start();
+				do_action( 'awb_woocommerce_paypal_payments_single_product_renderer_hook' );
+				$paypal_button = ob_get_clean();
+
+				$action_name    = 'woocommerce_single_product_summary';
+				$layout_product = function_exists( 'Fusion_Builder_WooCommerce' ) && Fusion_Builder_WooCommerce()->is_layout_product();
+
+				if ( $layout_product ) {
+					$action_name = 'awb_after_woo_add_to_cart_content';
+				}
+
+				add_action(
+					$action_name,
+					function() use ( $paypal_button ) {
+						echo $paypal_button; // phpcs:ignore WordPress.Security.EscapeOutput
+					}
+				);
+			}
+
+
+			/**
+			 * Add Woocommerce Catalog Enquiry plugin hooks to our awb_after_woo_add_to_cart_content action.
+			 *
+			 * @access public
+			 * @since 3.2
+			 * @return void
+			 */
+			public function change_woocommerce_catalog_enquiry_action() {
+				global $wp_filter;
+
+				// phpcs:disable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+				if ( class_exists( 'Woocommerce_Catalog_Enquiry_Pro' ) ) {
+					global $Woocommerce_Catalog_Enquiry_Pro;
+					$Woocommerce_Catalog_Enquiry_Pro->frontend->catalog_woocommerce_template_single();
+				} else {
+					global $Woocommerce_Catalog_Enquiry;
+					$Woocommerce_Catalog_Enquiry->frontend->catalog_woocommerce_template_single();
+				}
+				// phpcs:enable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
+
+				if ( isset( $wp_filter['woocommerce_single_product_summary'] ) ) {
+					foreach ( $wp_filter['woocommerce_single_product_summary'] as $index => $actions ) {
+						foreach ( $actions as $name => $action ) {
+							if ( false !== strpos( $name, 'add_form_for_enquiry' ) || false !== strpos( $name, 'add_form_for_enquiry_without_popup' ) ) {
+								add_action( 'awb_before_woo_add_to_cart_content', $action['function'] );
+							}
+						}
+					}
+				}
+			}
+
+			/**
+			 * Add YITH Gift Cards plugin hooks to our awb_after_woo_add_to_cart_content action.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @return void
+			 */
+			public function change_yith_ywgc_action() {
+				$yith_gift_cards_class = YITH_YWGC_Frontend::get_instance();
+				ob_start();
+				$yith_gift_cards_class->show_gift_card_product_template();
+				$gift_card = ob_get_clean();
+				$gift_card = str_replace( 'gift_card_template_button', 'gift_card_template_button fusion-button-wrapper', $gift_card );
+
+				echo $gift_card; // phpcs:ignore WordPress.Security.EscapeOutput
+			}
 		}
 	}
 
@@ -1461,62 +1652,97 @@ function fusion_component_woo_cart() {
 				'component'    => true,
 				'templates'    => [ 'content' ],
 				'subparam_map' => [
-					'margin_top'                      => 'margin',
-					'margin_right'                    => 'margin',
-					'margin_bottom'                   => 'margin',
-					'margin_left'                     => 'margin',
-					'border_sizes_top'                => 'border_sizes',
-					'border_sizes_right'              => 'border_sizes',
-					'border_sizes_bottom'             => 'border_sizes',
-					'border_sizes_left'               => 'border_sizes',
-					'cell_padding_top'                => 'padding_dimensions',
-					'cell_padding_right'              => 'padding_dimensions',
-					'cell_padding_bottom'             => 'padding_dimensions',
-					'cell_padding_left'               => 'padding_dimensions',
-					'label_area_width'                => 'label_width',
-					'select_height'                   => 'field_height',
-					'select_border_sizes_top'         => 'select_border_sizes',
-					'select_border_sizes_right'       => 'select_border_sizes',
-					'select_border_sizes_bottom'      => 'select_border_sizes',
-					'select_border_sizes_left'        => 'select_border_sizes',
-					'border_radius_top_left'          => 'border_radius',
-					'border_radius_top_right'         => 'border_radius',
-					'border_radius_bottom_right'      => 'border_radius',
-					'border_radius_bottom_left'       => 'border_radius',
-					'clear_margin_top'                => 'clear_margin_dimensions',
-					'clear_margin_right'              => 'clear_margin_dimensions',
-					'clear_margin_bottom'             => 'clear_margin_dimensions',
-					'clear_margin_left'               => 'clear_margin_dimensions',
-					'info_padding_top'                => 'info_padding_dimensions',
-					'info_padding_right'              => 'info_padding_dimensions',
-					'info_padding_bottom'             => 'info_padding_dimensions',
-					'info_padding_left'               => 'info_padding_dimensions',
-					'info_border_sizes_top'           => 'info_border_sizes',
-					'info_border_sizes_right'         => 'info_border_sizes',
-					'info_border_sizes_bottom'        => 'info_border_sizes',
-					'info_border_sizes_left'          => 'info_border_sizes',
-					'info_border_radius_top_left'     => 'info_border_radius',
-					'info_border_radius_top_right'    => 'info_border_radius',
-					'info_border_radius_bottom_right' => 'info_border_radius',
-					'info_border_radius_bottom_left'  => 'info_border_radius',
-					'button_margin_top'               => 'button_margin',
-					'button_margin_right'             => 'button_margin',
-					'button_margin_bottom'            => 'button_margin',
-					'button_margin_left'              => 'button_margin',
-					'quantity_width'                  => 'quantity_height_field',
-					'quantity_height'                 => 'quantity_height_field',
-					'quantity_radius_top_left'        => 'quantity_border_radius',
-					'quantity_radius_top_right'       => 'quantity_border_radius',
-					'quantity_radius_bottom_right'    => 'quantity_border_radius',
-					'quantity_radius_bottom_left'     => 'quantity_border_radius',
-					'quantity_border_sizes_top'       => 'quantity_border_sizes',
-					'quantity_border_sizes_right'     => 'quantity_border_sizes',
-					'quantity_border_sizes_bottom'    => 'quantity_border_sizes',
-					'quantity_border_sizes_left'      => 'quantity_border_sizes',
-					'qbutton_border_sizes_top'        => 'qbutton_border_sizes',
-					'qbutton_border_sizes_right'      => 'qbutton_border_sizes',
-					'qbutton_border_sizes_bottom'     => 'qbutton_border_sizes',
-					'qbutton_border_sizes_left'       => 'qbutton_border_sizes',
+					'margin_top'                           => 'margin',
+					'margin_right'                         => 'margin',
+					'margin_bottom'                        => 'margin',
+					'margin_left'                          => 'margin',
+					'border_sizes_top'                     => 'border_sizes',
+					'border_sizes_right'                   => 'border_sizes',
+					'border_sizes_bottom'                  => 'border_sizes',
+					'border_sizes_left'                    => 'border_sizes',
+					'cell_padding_top'                     => 'padding_dimensions',
+					'cell_padding_right'                   => 'padding_dimensions',
+					'cell_padding_bottom'                  => 'padding_dimensions',
+					'cell_padding_left'                    => 'padding_dimensions',
+					'label_area_width'                     => 'label_width',
+					'select_height'                        => 'field_height',
+					'select_border_sizes_top'              => 'select_border_sizes',
+					'select_border_sizes_right'            => 'select_border_sizes',
+					'select_border_sizes_bottom'           => 'select_border_sizes',
+					'select_border_sizes_left'             => 'select_border_sizes',
+					'border_radius_top_left'               => 'border_radius',
+					'border_radius_top_right'              => 'border_radius',
+					'border_radius_bottom_right'           => 'border_radius',
+					'border_radius_bottom_left'            => 'border_radius',
+					'clear_margin_top'                     => 'clear_margin_dimensions',
+					'clear_margin_right'                   => 'clear_margin_dimensions',
+					'clear_margin_bottom'                  => 'clear_margin_dimensions',
+					'clear_margin_left'                    => 'clear_margin_dimensions',
+					'info_padding_top'                     => 'info_padding_dimensions',
+					'info_padding_right'                   => 'info_padding_dimensions',
+					'info_padding_bottom'                  => 'info_padding_dimensions',
+					'info_padding_left'                    => 'info_padding_dimensions',
+					'info_border_sizes_top'                => 'info_border_sizes',
+					'info_border_sizes_right'              => 'info_border_sizes',
+					'info_border_sizes_bottom'             => 'info_border_sizes',
+					'info_border_sizes_left'               => 'info_border_sizes',
+					'info_border_radius_top_left'          => 'info_border_radius',
+					'info_border_radius_top_right'         => 'info_border_radius',
+					'info_border_radius_bottom_right'      => 'info_border_radius',
+					'info_border_radius_bottom_left'       => 'info_border_radius',
+					'button_margin_top'                    => 'button_margin',
+					'button_margin_right'                  => 'button_margin',
+					'button_margin_bottom'                 => 'button_margin',
+					'button_margin_left'                   => 'button_margin',
+					'quantity_width'                       => 'quantity_height_field',
+					'quantity_height'                      => 'quantity_height_field',
+					'quantity_radius_top_left'             => 'quantity_border_radius',
+					'quantity_radius_top_right'            => 'quantity_border_radius',
+					'quantity_radius_bottom_right'         => 'quantity_border_radius',
+					'quantity_radius_bottom_left'          => 'quantity_border_radius',
+					'quantity_border_sizes_top'            => 'quantity_border_sizes',
+					'quantity_border_sizes_right'          => 'quantity_border_sizes',
+					'quantity_border_sizes_bottom'         => 'quantity_border_sizes',
+					'quantity_border_sizes_left'           => 'quantity_border_sizes',
+					'qbutton_border_sizes_top'             => 'qbutton_border_sizes',
+					'qbutton_border_sizes_right'           => 'qbutton_border_sizes',
+					'qbutton_border_sizes_bottom'          => 'qbutton_border_sizes',
+					'qbutton_border_sizes_left'            => 'qbutton_border_sizes',
+					'fusion_font_family_label_typography'  => 'label_fonts',
+					'fusion_font_variant_label_typography' => 'label_fonts',
+					'label_font_size'                      => 'label_fonts',
+					'label_text_transform'                 => 'label_fonts',
+					'label_line_height'                    => 'label_fonts',
+					'label_letter_spacing'                 => 'label_fonts',
+					'label_color'                          => 'label_fonts',
+					'fusion_font_family_price_typography'  => 'price_fonts',
+					'fusion_font_variant_price_typography' => 'price_fonts',
+					'price_font_size'                      => 'price_fonts',
+					'price_text_transform'                 => 'price_fonts',
+					'price_line_height'                    => 'price_fonts',
+					'price_letter_spacing'                 => 'price_fonts',
+					'price_color'                          => 'price_fonts',
+					'fusion_font_family_sale_typography'   => 'sale_fonts',
+					'fusion_font_variant_sale_typography'  => 'sale_fonts',
+					'sale_font_size'                       => 'sale_fonts',
+					'sale_text_transform'                  => 'sale_fonts',
+					'sale_line_height'                     => 'sale_fonts',
+					'sale_letter_spacing'                  => 'sale_fonts',
+					'sale_color'                           => 'sale_fonts',
+					'fusion_font_family_stock_typography'  => 'stock_fonts',
+					'fusion_font_variant_stock_typography' => 'stock_fonts',
+					'stock_font_size'                      => 'stock_fonts',
+					'stock_text_transform'                 => 'stock_fonts',
+					'stock_line_height'                    => 'stock_fonts',
+					'stock_letter_spacing'                 => 'stock_fonts',
+					'stock_color'                          => 'stock_fonts',
+					'description_font_size'                => 'description_fonts',
+					'description_text_transform'           => 'description_fonts',
+					'description_line_height'              => 'description_fonts',
+					'description_letter_spacing'           => 'description_fonts',
+					'description_color'                    => 'description_fonts',
+					'fusion_font_family_description_typography' => 'description_fonts',
+					'fusion_font_variant_description_typography' => 'description_fonts',
 				],
 				'params'       => [
 					[
@@ -1681,42 +1907,32 @@ function fusion_component_woo_cart() {
 						],
 					],
 					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Label Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Controls the text color of the variation labels.', 'fusion-builder' ),
-						'param_name'  => 'label_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'body_typography', 'color' ),
-						'group'       => esc_attr__( 'Variations', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Label Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the label text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'label_fonts',
+						'choices'          => [
+							'font-family'    => 'label_typography',
+							'font-size'      => 'label_font_size',
+							'text-transform' => 'label_text_transform',
+							'line-height'    => 'label_line_height',
+							'letter-spacing' => 'label_letter_spacing',
+							'color'          => 'label_color',
 						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Label Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the label text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'label_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Variations', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'body_typography', 'color' ),
 						],
-					],
-					[
-						'type'             => 'font_family',
 						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Label Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the label text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'label_typography',
+						'global'           => true,
 						'group'            => esc_attr__( 'Variations', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
-						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
 						],
 					],
 					[
@@ -2574,42 +2790,32 @@ function fusion_component_woo_cart() {
 						],
 					],
 					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Description Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Controls the text color of the variation description.', 'fusion-builder' ),
-						'param_name'  => 'description_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'body_typography', 'color' ),
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'type'             => 'typography',
+						'heading'          => esc_attr__( ' Description Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the description text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'description_fonts',
+						'choices'          => [
+							'font-family'    => 'description_typography',
+							'font-size'      => 'description_font_size',
+							'text-transform' => 'description_text_transform',
+							'line-height'    => 'description_line_height',
+							'letter-spacing' => 'description_letter_spacing',
+							'color'          => 'description_color',
 						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Description Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the variation description. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'description_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'body_typography', 'color' ),
 						],
-					],
-					[
-						'type'             => 'font_family',
 						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Description Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the variation description.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'description_typography',
+						'global'           => true,
 						'group'            => esc_attr__( 'Details', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
-						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
 						],
 					],
 					[
@@ -2630,13 +2836,14 @@ function fusion_component_woo_cart() {
 					[
 						'type'        => 'radio_button_set',
 						'heading'     => esc_attr__( 'Show Price', 'fusion-builder' ),
-						'description' => esc_attr__( 'Make a selection to show or hide the variation price.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Make a selection to show or hide the variation price. "Always" will display the price even if all variations share the same. "Auto" will only display the price when variations have different prices.', 'fusion-builder' ),
 						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
 						'param_name'  => 'show_price',
 						'default'     => 'yes',
 						'value'       => [
-							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
-							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+							'always' => esc_attr__( 'Always', 'fusion-builder' ),
+							'yes'    => esc_attr__( 'Auto', 'fusion-builder' ),
+							'no'     => esc_attr__( 'No', 'fusion-builder' ),
 						],
 						'callback'    => [
 							'function' => 'fusion_cart_hide',
@@ -2646,56 +2853,32 @@ function fusion_component_woo_cart() {
 						],
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Price Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the price text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'price_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Price Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the price text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'price_fonts',
+						'choices'          => [
+							'font-family'    => 'price_typography',
+							'font-size'      => 'price_font_size',
+							'text-transform' => 'price_text_transform',
+							'line-height'    => 'price_line_height',
+							'letter-spacing' => 'price_letter_spacing',
+							'color'          => 'price_color',
 						],
-						'dependency'  => [
-							[
-								'element'  => 'show_price',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'primary_color' ),
 						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Price Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select a color for the price text.', 'fusion-builder' ),
-						'param_name'  => 'price_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'primary_color' ),
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-						'dependency'  => [
-							[
-								'element'  => 'show_price',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'             => 'font_family',
 						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Price Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the price text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'price_typography',
+						'global'           => true,
 						'group'            => esc_attr__( 'Details', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
-						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
 						],
 						'dependency'       => [
 							[
@@ -2755,66 +2938,32 @@ function fusion_component_woo_cart() {
 						],
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Sale Old Price Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the sale old price text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'sale_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Sale Old Price Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the sale old price text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'sale_fonts',
+						'choices'          => [
+							'font-family'    => 'sale_typography',
+							'font-size'      => 'sale_font_size',
+							'text-transform' => 'sale_text_transform',
+							'line-height'    => 'sale_line_height',
+							'letter-spacing' => 'sale_letter_spacing',
+							'color'          => 'sale_color',
 						],
-						'dependency'  => [
-							[
-								'element'  => 'show_price',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-							[
-								'element'  => 'show_sale',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'body_typography', 'color' ),
 						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Sale Old Price Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select a color for the sale old price text.', 'fusion-builder' ),
-						'param_name'  => 'sale_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'body_typography', 'color' ),
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-						'dependency'  => [
-							[
-								'element'  => 'show_price',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-							[
-								'element'  => 'show_sale',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'             => 'font_family',
 						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Sale Old Price Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the sale old price text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'sale_typography',
+						'global'           => true,
 						'group'            => esc_attr__( 'Details', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
-						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
 						],
 						'dependency'       => [
 							[
@@ -2848,53 +2997,31 @@ function fusion_component_woo_cart() {
 						],
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Stock Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the stock text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'stock_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_stock',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Stock Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the stock text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'stock_fonts',
+						'choices'          => [
+							'font-family'    => 'stock_typography',
+							'font-size'      => 'stock_font_size',
+							'text-transform' => 'stock_text_transform',
+							'line-height'    => 'stock_line_height',
+							'letter-spacing' => 'stock_letter_spacing',
+							'color'          => 'stock_color',
 						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Stock Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select a color for the stock text.', 'fusion-builder' ),
-						'param_name'  => 'stock_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'body_typography', 'color' ),
-						'group'       => esc_attr__( 'Details', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'body_typography', 'color' ),
 						],
-						'dependency'  => [
-							[
-								'element'  => 'show_stock',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'             => 'font_family',
 						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Stock Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the stock text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'stock_typography',
+						'global'           => true,
 						'group'            => esc_attr__( 'Details', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
-						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
 						],
 						'dependency'       => [
 							[

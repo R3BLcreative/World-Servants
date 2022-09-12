@@ -47,6 +47,9 @@
 				'multiple_select',
 				'ajax_select',
 				'iconpicker',
+				'repeater',
+				'mailchimp_map',
+				'hubspot_map',
 			];
 
 			// Redux on left, template on right.

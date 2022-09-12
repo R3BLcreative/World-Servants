@@ -89,6 +89,10 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				$parent = [
+					'margin_top'      => '',
+					'margin_right'    => '',
+					'margin_bottom'   => '',
+					'margin_left'     => '',
 					'hide_on_mobile'  => fusion_builder_default_visibility( 'string' ),
 					'class'           => '',
 					'id'              => '',
@@ -164,6 +168,11 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 
 				$this->parent_args = $defaults;
 
+				$this->parent_args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_bottom'], 'px' );
+				$this->parent_args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_left'], 'px' );
+				$this->parent_args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_right'], 'px' );
+				$this->parent_args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_top'], 'px' );
+
 				$styles  = '<style type="text/css">';
 				$styles .= '#fusion-testimonials-' . $this->testimonials_counter . ' a{border-color:' . $textcolor . ';}';
 				$styles .= '#fusion-testimonials-' . $this->testimonials_counter . ' a:hover, #fusion-testimonials-' . $this->testimonials_counter . ' .activeSlide{background-color: ' . $textcolor . ';}';
@@ -172,14 +181,17 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 
 				$pagination = '';
 				if ( 'yes' === $this->parent_args['navigation'] ) {
-					preg_match_all( '/\[fusion_testimonial .*\].*(.|\s|\S)*\/fusion_testimonial\]/U', $content, $single_testimonials );
+					preg_match_all( '/\[fusion_testimonial [^\/]*\/\]|\[fusion_testimonial .*\].*(.|\s|\S)*\/fusion_testimonial\]/U', $content, $single_testimonials );
 
 					if ( isset( $single_testimonials[0] ) ) {
 						$pagination = '<div ' . FusionBuilder::attributes( 'testimonials-shortcode-pagination' ) . '>';
 						$count      = count( $single_testimonials[0] );
-						for ( $i = 0; $i < $count; $i++ ) {
-							$active_class = 0 === $i ? ' class="activeSlide"' : '';
-							$pagination  .= '<a href="#" aria-label="' . esc_attr__( 'Testimonial Pagination', 'fusion-builder' ) . '" ' . $active_class . '></a>';
+
+						if ( 1 < $count ) {
+							for ( $i = 0; $i < $count; $i++ ) {
+								$active_class = 0 === $i ? ' class="activeSlide"' : '';
+								$pagination  .= '<a href="#" aria-label="' . esc_attr__( 'Testimonial Pagination', 'fusion-builder' ) . '" ' . $active_class . '></a>';
+							}
 						}
 						$pagination .= '</div>';
 					}
@@ -187,7 +199,7 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 
 				if ( $this->parent_args['random'] ) {
 					if ( ! isset( $single_testimonials[0] ) ) {
-						preg_match_all( '/\[fusion_testimonial .*\].*(.|\s|\S)*\/fusion_testimonial\]/U', $content, $single_testimonials );
+						preg_match_all( '/\[fusion_testimonial [^\/]*\/\]|\[fusion_testimonial .*\].*(.|\s|\S)*\/fusion_testimonial\]/U', $content, $single_testimonials );
 					}
 
 					if ( isset( $single_testimonials[0] ) ) {
@@ -229,11 +241,14 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 					$this->parent_args['hide_on_mobile'],
 					[
 						'class' => 'fusion-testimonials ' . $this->parent_args['design'] . ' fusion-testimonials-' . $this->testimonials_counter,
+						'style' => '',
 					]
 				);
 
 				$attr['data-random'] = $this->parent_args['random'];
 				$attr['data-speed']  = $this->parent_args['speed'];
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->parent_args );
 
 				if ( $this->parent_args['class'] ) {
 					$attr['class'] .= ' ' . $this->parent_args['class'];
@@ -456,7 +471,7 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 			public function blockquote_attr() {
 				$attr = [];
 
-				if ( fusion_is_color_transparent( $this->parent_args['backgroundcolor'] ) ) {
+				if ( Fusion_Color::new_color( $this->parent_args['backgroundcolor'] )->is_color_transparent() && 'none' !== $this->child_args['avatar'] ) {
 					$attr['style'] = 'margin: -25px;';
 				}
 
@@ -609,7 +624,7 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 								'label'       => esc_html__( 'Testimonial Background Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the testimonial background.', 'fusion-builder' ),
 								'id'          => 'testimonial_bg_color',
-								'default'     => '#f9f9fb',
+								'default'     => 'var(--awb-color2)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -622,7 +637,7 @@ if ( fusion_is_element_enabled( 'fusion_testimonials' ) ) {
 								'label'       => esc_html__( 'Testimonial Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the testimonial text.', 'fusion-builder' ),
 								'id'          => 'testimonial_text_color',
-								'default'     => '#4a4e57',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -720,7 +735,7 @@ function fusion_element_testimonials() {
 				'preview_id'    => 'fusion-builder-block-module-testimonials-preview-template',
 				'child_ui'      => true,
 				'sortable'      => false,
-				'help_url'      => 'https://theme-fusion.com/documentation/fusion-builder/elements/testimonials-element/',
+				'help_url'      => 'https://theme-fusion.com/documentation/avada/elements/testimonials-element/',
 				'params'        => [
 					[
 						'type'        => 'tinymce',
@@ -788,6 +803,16 @@ function fusion_element_testimonials() {
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
 						],
 						'default'     => '',
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

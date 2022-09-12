@@ -36,6 +36,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				attributes.attr          = this.buildAttr( atts.values );
 				attributes.styles        = this.buildStyleBlock( atts );
 				attributes.productsLoop  = this.buildOutput( atts );
+				attributes.filters       = this.buildFilters( atts );
 				attributes.productsAttrs = this.buildProductsAttrs( atts.values );
 				attributes.query_data    = atts.query_data;
 				attributes.values        = atts.values;
@@ -79,12 +80,44 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					values.margin_left = _.fusionGetValueWithUnit( values.margin_left );
 				}
 
+				if ( 'undefined' !== typeof values.filters_font_size && '' !== values.filters_font_size ) {
+					values.filters_font_size = _.fusionGetValueWithUnit( values.filters_font_size );
+				}
+
+				if ( 'undefined' !== typeof values.filters_letter_spacing && '' !== values.filters_letter_spacing ) {
+					values.filters_letter_spacing = _.fusionGetValueWithUnit( values.filters_letter_spacing );
+				}
+
+				if ( 'undefined' !== typeof values.active_filter_border_size && '' !== values.active_filter_border_size ) {
+					values.active_filter_border_size = _.fusionGetValueWithUnit( values.active_filter_border_size );
+				}
+
+				if ( 'undefined' !== typeof values.filters_border_bottom && '' !== values.filters_border_bottom ) {
+					values.filters_border_bottom = _.fusionGetValueWithUnit( values.filters_border_bottom );
+				}
+
+				if ( 'undefined' !== typeof values.filters_border_top && '' !== values.filters_border_top ) {
+					values.filters_border_top = _.fusionGetValueWithUnit( values.filters_border_top );
+				}
+
+				if ( 'undefined' !== typeof values.filters_border_left && '' !== values.filters_border_left ) {
+					values.filters_border_left = _.fusionGetValueWithUnit( values.filters_border_left );
+				}
+
+				if ( 'undefined' !== typeof values.filters_height && '' !== values.filters_height ) {
+					values.filters_height = _.fusionGetValueWithUnit( values.filters_height );
+				}
+
+				if ( 'undefined' !== typeof values.filters_border_right && '' !== values.filters_border_right ) {
+					values.filters_border_right = _.fusionGetValueWithUnit( values.filters_border_right );
+				}
+
 				if ( 'undefined' !== typeof values.nav_margin_top && '' !== values.nav_margin_top ) {
 					values.nav_margin_top = _.fusionGetValueWithUnit( this.getReverseNum( values.nav_margin_top ) );
 				}
 
-				if ( 1 === parseInt( values.columns ) && 'grid' === values.layout ) {
-					values.column_spacing = '0px';
+				if ( 1 === parseInt( values.columns ) && ( 'grid' === values.layout || 'masonry' === values.layout ) ) {
+					values.column_spacing = '0';
 				}
 
 				// No delay offering for carousels and sliders.
@@ -138,8 +171,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					attr[ 'data-touchscroll' ]   = values.mouse_scroll;
 					attr[ 'data-imagesize' ]     = 'auto';
 					attr[ 'data-scrollitems' ]   = values.scroll_items;
-				} else if ( 'grid' === values.layout && 'terms' !== values.source ) {
+				} else if ( ( 'grid' === values.layout || 'masonry' === values.layout ) && 'terms' !== values.source ) {
 					attr[ 'class' ] += ' fusion-grid-archive';
+					attr[ 'class' ] += 'masonry' === values.layout ? ' fusion-post-cards-masonry' : '';
 				}
 
 				if ( '' !== values[ 'class' ] ) {
@@ -165,8 +199,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				var output = '';
 
 				output += '<div class="fusion-carousel-nav">';
-				output += '<span class="fusion-nav-prev"></span>';
-				output += '<span class="fusion-nav-next"></span>';
+				output += '<button class="fusion-nav-prev" aria-label="Previous"></button>';
+				output += '<button class="fusion-nav-next" aria-label="Next"></button>';
 				output += '</div>';
 
 				return output;
@@ -184,8 +218,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					class: ''
 				};
 
-				if ( 'grid' === values.layout ) {
-					attr[ 'class' ] += 'fusion-grid fusion-grid-' + values.columns + ' fusion-flex-align-items-' + values.flex_align_items;
+				if ( 'grid' === values.layout || 'masonry' === values.layout ) {
+					attr[ 'class' ] += 'fusion-grid fusion-grid-' + values.columns + ' fusion-flex-align-items-' + values.flex_align_items + ' fusion-' + values.layout + '-posts-cards';
 				} else if ( 'slider' === values.layout ) {
 					attr[ 'class' ] += 'slides';
 				} else if ( 'carousel' === values.layout ) {
@@ -212,7 +246,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			buildColumnClasses: function( atts ) {
 				var classes = '';
 
-				if ( 'grid' === atts.values.layout ) {
+				if ( 'grid' === atts.values.layout || 'masonry' === atts.values.layout ) {
 					classes += 'fusion-grid-column fusion-post-cards-grid-column';
 				} else if ( 'carousel' === atts.values.layout ) {
 					classes += 'fusion-carousel-item';
@@ -338,6 +372,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				return output;
 			},
 
+			buildFilters: function( atts ) {
+				var output = '';
+				if ( 'undefined' !== typeof atts.markup && 'undefined' !== typeof atts.markup.output && 'undefined' === typeof atts.query_data ) {
+					output = jQuery( jQuery.parseHTML( atts.markup.output ) );
+					output = ( 'undefined' === typeof output ) ? '' : '<div role="menubar">' + output.find( 'div[role="menubar"]' ).html() + '</div>';
+				} else if ( 'undefined' !== typeof atts.query_data && 'undefined' !== typeof atts.query_data.filters ) {
+					output = atts.query_data.filters;
+				}
+
+				return output;
+			},
+
 			/**
 			 * Builds styles.
 			 *
@@ -346,20 +392,104 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 * @return {String}
 			 */
 			buildStyleBlock: function( atts ) {
-				var css, selectors, media, column_spacing, row_spacing,
-					self             = this,
-					values           = atts.values,
-					responsive_style = '',
-					nestedCSS        = 'undefined' !== typeof atts.query_data && 'undefined' !== typeof atts.query_data.nested_css ? atts.query_data.nested_css : null;
+				var css, selectors, media, column_spacing, row_spacing, text_styles,
+					self                = this,
+					values              = atts.values,
+					responsive_style    = '',
+					buttonSelector      = '',
+					buttonHoverSelector = '',
+					nestedCSS           = 'undefined' !== typeof atts.query_data && 'undefined' !== typeof atts.query_data.nested_css ? atts.query_data.nested_css : null;
 
 				this.baseSelector = '.fusion-post-cards.fusion-post-cards-' +  this.model.get( 'cid' );
 				this.dynamic_css  = {};
+
+				if ( 'no' !== values.filters && ( 'grid' === values.layout || 'masonry' === values.layout ) && 'posts' === values.source ) {
+
+					selectors   = [ this.baseSelector + ' ul.fusion-filters li a' ];
+					text_styles = _.fusionGetFontStyle( 'filters_font', values, 'object' );
+
+					jQuery.each( text_styles, function( rule, value ) {
+						self.addCssProperty( selectors, rule, value );
+					} );
+
+					if ( ! this.isDefault( 'filters_font_size' ) ) {
+						this.addCssProperty( selectors, 'font-size', values.filters_font_size );
+					}
+
+					if ( ! this.isDefault( 'filters_line_height' ) ) {
+						this.addCssProperty( selectors, 'line-height', values.filters_line_height );
+					}
+
+					if ( ! this.isDefault( 'filters_letter_spacing' ) ) {
+						this.addCssProperty( selectors, 'letter-spacing', values.filters_letter_spacing );
+					}
+
+					if ( ! this.isDefault( 'filters_text_transform' ) ) {
+						this.addCssProperty( selectors, 'text-transform', values.filters_text_transform );
+					}
+
+					if ( ! this.isDefault( 'filters_color' ) ) {
+						this.addCssProperty( selectors, 'color', values.filters_color );
+					}
+
+					selectors = [ this.baseSelector + ' ul.fusion-filters li a:hover' ];
+
+					if ( '' !== values.filters_hover_color ) {
+						this.addCssProperty( selectors, 'color', values.filters_hover_color );
+					}
+
+					selectors = [ this.baseSelector + ' ul.fusion-filters li.fusion-active a' ];
+
+					if ( '' !== values.filters_active_color ) {
+						this.addCssProperty( selectors, 'color', values.filters_active_color );
+					}
+
+					if ( ! this.isDefault( 'active_filter_border_size' ) ) {
+						this.addCssProperty( selectors, 'border-top-width', values.active_filter_border_size );
+					}
+
+					if ( ! this.isDefault( 'active_filter_border_color' ) ) {
+						this.addCssProperty( selectors, 'border-color', values.active_filter_border_color );
+					}
+
+					selectors = [ this.baseSelector + ' ul.fusion-filters' ];
+
+					if ( ! this.isDefault( 'filters_border_bottom' ) ) {
+						this.addCssProperty( selectors, 'border-bottom-width', values.filters_border_bottom );
+					}
+
+					if ( ! this.isDefault( 'filters_border_top' ) ) {
+						this.addCssProperty( selectors, 'border-top-width', values.filters_border_top );
+					}
+
+					if ( ! this.isDefault( 'filters_border_left' ) ) {
+						this.addCssProperty( selectors, 'border-left-width', values.filters_border_left );
+						this.addCssProperty( selectors, 'border-left-style', 'solid' );
+					}
+
+					if ( ! this.isDefault( 'filters_border_right' ) ) {
+						this.addCssProperty( selectors, 'border-right-width', values.filters_border_right );
+						this.addCssProperty( selectors, 'border-right-style', 'solid' );
+					}
+
+					if ( ! this.isDefault( 'filters_border_color' ) ) {
+						this.addCssProperty( selectors, 'border-color', values.filters_border_color );
+					}
+
+					if ( ! this.isDefault( 'filters_height' ) ) {
+						this.addCssProperty( selectors, 'min-height', values.filters_height );
+					}
+
+					if ( ! this.isDefault( 'filters_alignment' ) ) {
+						this.addCssProperty( selectors, 'justify-content', values.filters_alignment );
+					}
+				}
 
 				selectors = [ this.baseSelector + ' .infinite-scroll-hide' ];
 				if ( this.isLoadMore() ) {
 					this.addCssProperty( selectors, 'display', 'none' );
 				}
-				if ( 1 < parseInt( values.columns ) ) {
+				if ( 1 < parseInt( values.columns ) && '0' !== this.values.column_spacing ) {
 					selectors = [ this.baseSelector + ' ul.fusion-grid' ];
 					column_spacing = _.fusionGetValueWithUnit( this.values.column_spacing );
 					  this.addCssProperty( selectors, 'margin-right', 'calc((' + column_spacing + ')/ -2)' );
@@ -372,7 +502,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					  this.addCssProperty( selectors, 'margin-right', 'calc((' + column_spacing + ')/ 2)' );
 				}
 
-				if ( 'grid' === this.values.layout ) {
+				if ( ( 'grid' === this.values.layout || 'masonry' === this.values.layout ) && '0' !== this.values.row_spacing ) {
 				  row_spacing =  _.fusionGetValueWithUnit( this.values.row_spacing );
 				  selectors = [ this.baseSelector + ' ul.fusion-grid' ];
 				  this.addCssProperty( selectors, 'margin-top', 'calc((' + row_spacing + ')/ -2)' );
@@ -404,6 +534,30 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.addCssProperty( selectors, 'bottom', values.nav_margin_top );
 				}
 
+				if ( 'load_more_button' === values.scrolling ) {
+					buttonSelector = this.baseSelector + ' .fusion-load-more-button';
+					buttonHoverSelector = [
+						this.baseSelector + ' .fusion-load-more-button:hover',
+						this.baseSelector + ' .fusion-load-more-button:focus'
+					];
+
+					if ( values.load_more_btn_color ) {
+						this.addCssProperty( buttonSelector, 'color', values.load_more_btn_color );
+					}
+
+					if ( values.load_more_btn_bg_color ) {
+						this.addCssProperty( buttonSelector, 'background-color', values.load_more_btn_bg_color );
+					}
+
+					if ( values.load_more_btn_hover_color ) {
+						this.addCssProperty( buttonHoverSelector, 'color', values.load_more_btn_hover_color );
+					}
+
+					if ( values.load_more_btn_hover_bg_color ) {
+						this.addCssProperty( buttonHoverSelector, 'background-color', values.load_more_btn_hover_bg_color );
+					}
+				}
+
 				// Process children css if it's there.
 				if ( Array.isArray( nestedCSS ) ) {
 					jQuery.each( nestedCSS, function( index, rules ) {
@@ -420,7 +574,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				css = this.parseCSS();
 
-				if ( 'grid' === values.layout ) {
+				if ( 'grid' === values.layout || 'masonry' === values.layout ) {
 					_.each( [ 'medium', 'small' ], function( size ) {
 						var key = 'columns_' + size;
 
@@ -439,6 +593,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						responsive_style += media + '{' + this.parseCSS() + '}';
 					}, this );
 					css += responsive_style;
+				}
+
+				// Responsive Filters Alignment.
+				if ( 'no' !== values.filters && ( 'grid' === values.layout || 'masonry' === values.layout ) && 'posts' === values.source ) {
+					_.each( [ 'medium', 'small' ], function( size ) {
+						var key = 'filters_alignment_' + size;
+						media = '@media only screen and (max-width:' + this.extras[ 'visibility_' + size ] + 'px)';
+
+						if ( '' === this.values[ key ] ) {
+							return;
+						}
+
+						this.dynamic_css = {};
+						this.addCssProperty( [ this.baseSelector + ' ul.fusion-filters' ], 'justify-content', this.values[ key ] );
+						css += media + '{' + this.parseCSS() + '}';
+					}, this );
 				}
 				return ( css ) ? '<style>' + css + '</style>' : '';
 			},

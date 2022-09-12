@@ -412,7 +412,7 @@ class Fusion_Hubspot {
 	 * @return string
 	 */
 	public function maybe_render_button() {
-		$auth_url = 'https://app.hubspot.com/oauth/authorize?client_id=999cc7c3-e358-4a3b-9984-a37dfbd319fa&redirect_uri=' . FUSION_UPDATES_URL . '/hubspot-api&scope=contacts%20actions%20timeline%20forms&state=' . rawurlencode( admin_url( 'admin.php?page=avada' ) );
+		$auth_url = 'https://app.hubspot.com/oauth/authorize?client_id=999cc7c3-e358-4a3b-9984-a37dfbd319fa&redirect_uri=' . FUSION_UPDATES_URL . '/hubspot-api&scope=actions%20timeline%20oauth%20forms%20crm.objects.contacts.write%20crm.schemas.contacts.read%20crm.schemas.companies.read%20crm.schemas.deals.read&state=' . rawurlencode( admin_url( 'admin.php?page=avada' ) );
 
 		$type = 'connected';
 		if ( isset( $_GET['error'] ) && ! empty( $_GET['error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput
@@ -588,8 +588,14 @@ class Fusion_Hubspot {
 
 		// Token invalid, reset token.  Next request will then trigger refresh if possible.
 		if ( 401 === (int) wp_remote_retrieve_response_code( $response ) ) {
-			$this->reset_token();
-			$this->api_request( $action, $options );
+			switch ( $this->type ) {
+				case 'auth':
+					$this->reset_token();
+					$this->api_request( $action, $options );
+					break;
+				case 'key':
+					return false;
+			}
 		}
 
 		// Check for error.
@@ -1058,49 +1064,90 @@ class Fusion_Hubspot {
 				/* translators: 1: HubSpot link. 2: Documentation link. */
 				'description' => '<div class="fusion-redux-important-notice">' . sprintf( __( 'Sign up for a %1$s and manage your contacts in their free CRM.  For more information check out our %2$s. ', 'fusion-builder' ), $hubspot_link, $document_link ) . '</div>',
 				'id'          => 'hubspot_info',
+				'dependency'  => [
+					[
+						'field'      => 'form_type',
+						'value'      => 'ajax',
+						'comparison' => '==',
+					],
+					[
+						'field'      => 'form_actions',
+						'value'      => 'hubspot',
+						'comparison' => 'contains',
+					],
+				],
 			];
 
 			return $sections;
 		}
 
-		$properties = $this->get_properties();
+		$properties   = $this->get_properties();
+		$hubspot_link = '<a target="_blank" rel="noopener noreferrer" href="' . esc_url( admin_url( 'themes.php?page=avada_options#hubspot_api' ) ) . '">HubSpot</a>';
+
 		if ( $this->can_connect() && $properties ) {
-			$sections['form_submission']['fields']['hubspot_info']   = [
-				'type'        => 'custom',
-				'label'       => '',
-				'description' => '<div class="fusion-redux-important-notice">' . __( 'You are currently connected to the HubSpot API.', 'fusion-builder' ) . '</div>',
-				'id'          => 'hubspot_info',
-			];
-			$sections['form_submission']['fields']['hubspot_action'] = [
-				'type'        => 'radio-buttonset',
-				'label'       => esc_html__( 'HubSpot Action', 'fusion-builder' ),
-				'description' => esc_html__( 'Select if you want to perform a HubSpot action after form submission.', 'fusion-builder' ),
-				'id'          => 'hubspot_action',
-				'default'     => 'no',
-				'transport'   => 'postMessage',
-				'choices'     => [
-					'no'      => esc_html__( 'None', 'fusion-builder' ),
-					'contact' => esc_html__( 'Create/Update Contact', 'fusion-builder' ),
-				],
-			];
-			$sections['form_submission']['fields']['hubspot_map']    = [
-				'type'        => 'hubspot_map',
-				'label'       => esc_html__( 'HubSpot Mapping', 'fusion-builder' ),
-				'description' => __( 'Map fields from the form to HubSpot contact properties.  <strong>Note</strong>, the email property is required for creating or updating a contact. When mapping is set to "Automatic", Avada will try to map based on field label, name and tags.', 'fusion-builder' ),
-				'id'          => 'hubspot_map',
-				'transport'   => 'postMessage',
-				'dependency'  => [
+			$sections['form_submission']['fields']['hubspot_options'] = [
+				'type'       => 'toggle',
+				'row_title'  => esc_html__( 'Hubspot', 'fusion-builder' ),
+				'id'         => 'hubspot_options',
+				'dependency' => [
 					[
-						'field'      => 'hubspot_action',
-						'value'      => 'contact',
+						'field'      => 'form_type',
+						'value'      => 'ajax',
 						'comparison' => '==',
+					],
+					[
+						'field'      => 'form_actions',
+						'value'      => 'hubspot',
+						'comparison' => 'contains',
+					],
+				],
+				'fields'     => [
+					'hubspot_info'   => [
+						'type'        => 'custom',
+						'label'       => '',
+						'description' => '<div class="fusion-redux-important-notice">' . __( 'You are currently connected to the HubSpot API.', 'fusion-builder' ) . '</div>',
+						'id'          => 'hubspot_info',
+					],
+					'hubspot_action' => [
+						'type'        => 'radio-buttonset',
+						'label'       => esc_html__( 'HubSpot Action', 'fusion-builder' ),
+						'description' => esc_html__( 'Select if you want to perform a HubSpot action after form submission.', 'fusion-builder' ),
+						'id'          => 'hubspot_action',
+						'default'     => 'no',
+						'transport'   => 'postMessage',
+						'choices'     => [
+							'no'      => esc_html__( 'None', 'fusion-builder' ),
+							'contact' => esc_html__( 'Create/Update Contact', 'fusion-builder' ),
+						],
+					],
+					'hubspot_map'    => [
+						'type'        => 'hubspot_map',
+						'label'       => esc_html__( 'HubSpot Mapping', 'fusion-builder' ),
+						'description' => __( 'Map fields from the form to HubSpot contact properties.  <strong>Note</strong>, the email property is required for creating or updating a contact. When mapping is set to "Automatic", Avada will try to map based on field label, name and tags.', 'fusion-builder' ),
+						'id'          => 'hubspot_map',
+						'transport'   => 'postMessage',
+						'dependency'  => [
+							[
+								'field'      => 'hubspot_action',
+								'value'      => 'contact',
+								'comparison' => '==',
+							],
+						],
 					],
 				],
 			];
 			return $sections;
+		} elseif ( $this->can_connect() && 'key' === $this->type && ! $properties ) {
+			$sections['form_submission']['fields']['hubspot_error'] = [
+				'type'        => 'custom',
+				'label'       => '',
+				/* translators: Global link. */
+				'description' => '<div class="fusion-redux-important-notice">' . sprintf( __( 'You are using invalid or expired HubSpot API key. Pleasse update your %s configurations.', 'fusion-builder' ), $hubspot_link ) . '</div>',
+				'id'          => 'hubspot_error',
+			];
+			return $sections;
 		}
 
-		$hubspot_link = '<a target="_blank" rel="noopener noreferrer" href="' . esc_url( admin_url( 'themes.php?page=avada_options#hubspot_api' ) ) . '">HubSpot</a>';
 		$sections['form_submission']['fields']['hubspot_info'] = [
 			'type'        => 'custom',
 			'label'       => '',

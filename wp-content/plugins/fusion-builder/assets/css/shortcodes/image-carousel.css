@@ -42,6 +42,9 @@
   text-align: center;
   max-width: 100%;
 }
+.fusion-carousel .fusion-carousel-item .fusion-image-wrapper .fusion-placeholder-image {
+  width: 1500px !important;
+}
 .fusion-carousel .fusion-carousel-item .fusion-image-wrapper.fusion-video {
   display: block;
 }
@@ -74,13 +77,15 @@
   position: absolute;
   top: 50%;
   margin-top: -14px;
+  padding: 0;
   height: 29px;
   width: 29px;
   text-align: center;
   cursor: pointer;
   color: transparent;
-  background-color: var(--carousel_nav_color);
+  background-color: rgba(0, 0, 0, 0.5);
   background-repeat: no-repeat;
+  border: none;
 }
 .fusion-carousel .fusion-carousel-nav .fusion-nav-next:before,
 .fusion-carousel .fusion-carousel-nav .fusion-nav-prev:before {

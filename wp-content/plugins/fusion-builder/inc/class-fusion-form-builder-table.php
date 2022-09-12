@@ -31,6 +31,14 @@ class Fusion_Form_Builder_Table extends WP_List_Table {
 	public $columns = [];
 
 	/**
+	 * Number of total table items.
+	 *
+	 * @since 3.6
+	 * @var int
+	 */
+	public $total_items = -1;
+
+	/**
 	 * Class constructor.
 	 *
 	 * @since 1.0
@@ -75,11 +83,9 @@ class Fusion_Form_Builder_Table extends WP_List_Table {
 		$hidden       = $this->get_hidden_columns();
 		$sortable     = $this->get_sortable_columns();
 
-		$total_items = count( $this->table_data() );
-
 		$this->set_pagination_args(
 			[
-				'total_items' => $total_items,
+				'total_items' => -1 !== $this->total_items ? $this->total_items : count( $this->table_data() ),
 				'per_page'    => $per_page,
 			]
 		);
@@ -145,7 +151,7 @@ class Fusion_Form_Builder_Table extends WP_List_Table {
 	private function table_data( $per_page = -1, $current_page = 0 ) {
 		$data          = [];
 		$library_query = [];
-		$status        = [ 'publish', 'draft' ];
+		$status        = [ 'publish', 'draft', 'private' ];
 
 		// Make sure current-page and per-page are integers.
 		$per_page     = (int) $per_page;
@@ -174,6 +180,9 @@ class Fusion_Form_Builder_Table extends WP_List_Table {
 
 		// Check if there are items available.
 		if ( $library_query->have_posts() ) {
+
+			$this->total_items = $library_query->found_posts;
+
 			// The loop.
 			while ( $library_query->have_posts() ) :
 				$library_query->the_post();
@@ -249,33 +258,22 @@ class Fusion_Form_Builder_Table extends WP_List_Table {
 	 */
 	public function column_title( $item ) {
 		$wpnonce = wp_create_nonce( 'fusion-form-builder' );
+		$actions = [];
 
 		if ( isset( $_GET['status'] ) && 'trash' === $_GET['status'] ) { // phpcs:ignore WordPress.Security.NonceVerification
 			$actions['restore'] = sprintf( '<a href="?_wpnonce=%s&action=%s&post=%s">' . esc_html__( 'Restore', 'fusion-builder' ) . '</a>', esc_attr( $wpnonce ), 'fusion_restore_element', esc_attr( $item['id'] ) );
 			$actions['delete']  = sprintf( '<a href="?_wpnonce=%s&action=%s&post=%s">' . esc_html__( 'Delete Permanently', 'fusion-builder' ) . '</a>', esc_attr( $wpnonce ), 'fusion_delete_element', esc_attr( $item['id'] ) );
 		} else {
-			$live_editor     = apply_filters( 'fusion_load_live_editor', true );
-			$actions['edit'] = sprintf( '<a href="post.php?post=%s&action=%s">' . esc_html__( 'Edit', 'fusion-builder' ) . '</a>', esc_attr( $item['id'] ), 'edit' );
+			$actions = awb_get_list_table_edit_links( $actions, $item );
 
 			if ( current_user_can( 'edit_others_posts' ) ) {
 				$actions['clone_section'] = '<a href="' . $this->get_section_clone_link( $item['id'] ) . '" title="' . esc_attr( __( 'Clone this form', 'fusion-builder' ) ) . '">' . __( 'Clone', 'fusion-builder' ) . '</a>';
 			}
 
-			if ( $live_editor ) {
-				/* translators: The title. */
-				$actions['fusion_builder_live'] = '<a href="' . esc_url_raw( add_query_arg( 'fb-edit', '1', get_the_permalink( $item['id'] ) ) ) . '" aria-label="' . sprintf( esc_attr__( 'Edit %s with Avada Live', 'fusion-builder' ), '&#8220;' . get_the_title( $item['id'] ) . '&#8221;' ) . '">' . esc_html__( 'Avada Live', 'fusion-builder' ) . '</a>';
-			}
 			$actions['trash'] = sprintf( '<a href="?_wpnonce=%s&action=%s&post=%s">' . esc_html__( 'Trash', 'fusion-builder' ) . '</a>', esc_attr( $wpnonce ), 'fusion_trash_element', esc_attr( $item['id'] ) );
 		}
 
-		$status = '';
-		if ( 'draft' === $item['status'] ) {
-			$status = ' &mdash; <span class="post-state">' . ucwords( $item['status'] ) . '</span>';
-		}
-
-		$title = '<strong><a href="post.php?post=' . esc_attr( $item['id'] ) . '&action=edit">' . esc_html( $item['title'] ) . '</a>' . $status . '</strong>';
-
-		return $title . ' ' . $this->row_actions( $actions );
+		return awb_get_list_table_title( $item ) . ' ' . $this->row_actions( $actions );
 	}
 
 

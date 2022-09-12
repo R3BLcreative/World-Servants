@@ -145,6 +145,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				  this.addCssProperty( selector, 'font-size',  this.values.header_font_size );
 				}
 
+				if ( !this.isDefault( 'header_line_height' ) ) {
+					this.addCssProperty( selector, 'line-height', this.values.header_line_height );
+				}
+
+				if ( !this.isDefault( 'header_text_transform' ) ) {
+					this.addCssProperty( selector, 'text-transform', this.values.header_text_transform );
+				}
+
+				if ( !this.isDefault( 'header_letter_spacing' ) ) {
+					this.addCssProperty( selector, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.header_letter_spacing ) );
+				}
+
 				selector = this.baseSelector + ' tbody tr td';
 				if ( !this.isDefault( 'table_cell_backgroundcolor' ) ) {
 				  this.addCssProperty( selector, 'background-color',  this.values.table_cell_backgroundcolor );
@@ -164,6 +176,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( !this.isDefault( 'text_font_size' ) ) {
 				  this.addCssProperty( selector, 'font-size',  this.values.text_font_size );
+				}
+
+				if ( !this.isDefault( 'text_line_height' ) ) {
+					this.addCssProperty( selector, 'line-height', this.values.text_line_height );
+				}
+
+				if ( !this.isDefault( 'text_text_transform' ) ) {
+					this.addCssProperty( selector, 'text-transform', this.values.text_text_transform );
+				}
+
+				if ( !this.isDefault( 'text_letter_spacing' ) ) {
+					this.addCssProperty( selector, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.text_letter_spacing ) );
 				}
 
 				selector = this.baseSelector + ' tr, ' +  this.baseSelector + ' tr td, ' +  this.baseSelector + ' tr th, ' +  this.baseSelector + ' tfoot';
@@ -191,6 +215,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( !this.isDefault( 'footer_font_size' ) ) {
 				  this.addCssProperty( selector, 'font-size',  this.values.footer_font_size );
+				}
+
+				if ( !this.isDefault( 'footer_line_height' ) ) {
+					this.addCssProperty( selector, 'line-height', this.values.footer_line_height );
+				}
+
+				if ( !this.isDefault( 'footer_text_transform' ) ) {
+					this.addCssProperty( selector, 'text-transform', this.values.footer_text_transform );
+				}
+
+				if ( !this.isDefault( 'footer_letter_spacing' ) ) {
+					this.addCssProperty( selector, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.footer_letter_spacing ) );
 				}
 
 				if ( 'show' !== this.values.table_header ) {

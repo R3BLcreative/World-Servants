@@ -268,8 +268,8 @@ if ( ! class_exists( 'Fusion_Woo_Products_Component' ) ) {
 			 */
 			if ( 'carousel' === $this->args['products_layout'] && 'yes' === $this->args['products_navigation'] && ! $this->live_ajax ) {
 				$html .= '<div class="fusion-carousel-nav">';
-				$html .= '<span class="fusion-nav-prev"></span>';
-				$html .= '<span class="fusion-nav-next"></span>';
+				$html .= '<button class="fusion-nav-prev"></button>';
+				$html .= '<button class="fusion-nav-next"></button>';
 				$html .= '</div>';
 			}
 

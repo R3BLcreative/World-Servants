@@ -126,6 +126,9 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_tabs' ) ) {
 					'fusion_font_family_text_font'   => '',
 					'fusion_font_variant_text_font'  => '',
 					'text_font_size'                 => '',
+					'text_text_transform'            => '',
+					'text_line_height'               => '',
+					'text_letter_spacing'            => '',
 
 					'link_color'                     => $fusion_settings->get( 'link_color' ),
 					'link_hover_color'               => $fusion_settings->get( 'primary_color' ),
@@ -135,6 +138,9 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_tabs' ) ) {
 					'fusion_font_family_title_font'  => '',
 					'fusion_font_variant_title_font' => '',
 					'title_font_size'                => '',
+					'title_text_transform'           => '',
+					'title_line_height'              => '',
+					'title_letter_spacing'           => '',
 
 					// Payment Label.
 					'payment_label_padding_top'      => '',
@@ -406,6 +412,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_tabs' ) ) {
 					$this->add_css_property( $this->base_selector . ' .avada-checkout', 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['text_font_size'] ) );
 				}
 
+				if ( ! $this->is_default( 'text_line_height' ) ) {
+					$this->add_css_property( $this->base_selector, 'line-height', $this->args['text_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'text_letter_spacing' ) ) {
+					$this->add_css_property( $this->base_selector, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['text_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'text_text_transform' ) ) {
+					$this->add_css_property( $this->base_selector, 'text-transform', $this->args['text_text_transform'] );
+				}
+
 				// Text typography styles.
 				$text_styles = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'text_font', 'array' );
 				foreach ( $text_styles as $rule => $value ) {
@@ -432,6 +450,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_tabs' ) ) {
 
 				if ( ! $this->is_default( 'title_font_size' ) ) {
 					$this->add_css_property( $title_selectors, 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['title_font_size'] ) );
+				}
+
+				if ( ! $this->is_default( 'title_line_height' ) ) {
+					$this->add_css_property( $title_selectors, 'line-height', $this->args['title_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'title_letter_spacing' ) ) {
+					$this->add_css_property( $title_selectors, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['title_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'title_text_transform' ) ) {
+					$this->add_css_property( $title_selectors, 'text-transform', $this->args['title_text_transform'] );
 				}
 
 				// Title typography styles.
@@ -467,7 +497,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_tabs' ) ) {
 						$this->add_css_property( $this->base_selector . ' .avada-select-parent .select-arrow', 'color', $this->args['field_text_color'] );
 					}
 
-					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$placeholder_inputs = [
 						$this->base_selector . ' input::placeholder',
 						$this->base_selector . ' textarea::placeholder',
@@ -494,7 +524,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_tabs' ) ) {
 				}
 
 				if ( ! $this->is_default( 'field_border_focus_color' ) ) {
-					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$hover_inputs = [
 						$this->base_selector . ' input:hover',
 						$this->base_selector . ' select:hover',
@@ -639,26 +669,40 @@ function fusion_component_woo_checkout_tabs() {
 				'shortcode'    => 'fusion_tb_woo_checkout_tabs',
 				'icon'         => 'fusiona-checkout-tabs',
 				'subparam_map' => [
-					'margin_top'                   => 'margin',
-					'margin_right'                 => 'margin',
-					'margin_bottom'                => 'margin',
-					'margin_left'                  => 'margin',
-					'nav_padding_top'              => 'nav_padding',
-					'nav_padding_right'            => 'nav_padding',
-					'nav_padding_bottom'           => 'nav_padding',
-					'nav_padding_left'             => 'nav_padding',
-					'content_padding_top'          => 'content_padding',
-					'content_padding_right'        => 'content_padding',
-					'content_padding_bottom'       => 'content_padding',
-					'content_padding_left'         => 'content_padding',
-					'payment_label_padding_top'    => 'payment_label_padding',
-					'payment_label_padding_right'  => 'payment_label_padding',
-					'payment_label_padding_bottom' => 'payment_label_padding',
-					'payment_label_padding_left'   => 'payment_label_padding',
-					'payment_padding_top'          => 'payment_padding',
-					'payment_padding_right'        => 'payment_padding',
-					'payment_padding_bottom'       => 'payment_padding',
-					'payment_padding_left'         => 'payment_padding',
+					'margin_top'                     => 'margin',
+					'margin_right'                   => 'margin',
+					'margin_bottom'                  => 'margin',
+					'margin_left'                    => 'margin',
+					'nav_padding_top'                => 'nav_padding',
+					'nav_padding_right'              => 'nav_padding',
+					'nav_padding_bottom'             => 'nav_padding',
+					'nav_padding_left'               => 'nav_padding',
+					'content_padding_top'            => 'content_padding',
+					'content_padding_right'          => 'content_padding',
+					'content_padding_bottom'         => 'content_padding',
+					'content_padding_left'           => 'content_padding',
+					'payment_label_padding_top'      => 'payment_label_padding',
+					'payment_label_padding_right'    => 'payment_label_padding',
+					'payment_label_padding_bottom'   => 'payment_label_padding',
+					'payment_label_padding_left'     => 'payment_label_padding',
+					'payment_padding_top'            => 'payment_padding',
+					'payment_padding_right'          => 'payment_padding',
+					'payment_padding_bottom'         => 'payment_padding',
+					'payment_padding_left'           => 'payment_padding',
+					'fusion_font_family_title_font'  => 'title_fonts',
+					'fusion_font_variant_title_font' => 'title_fonts',
+					'title_font_size'                => 'title_fonts',
+					'title_text_transform'           => 'title_fonts',
+					'title_line_height'              => 'title_fonts',
+					'title_letter_spacing'           => 'title_fonts',
+					'title_color'                    => 'title_fonts',
+					'fusion_font_family_text_font'   => 'text_fonts',
+					'fusion_font_variant_text_font'  => 'text_fonts',
+					'text_font_size'                 => 'text_fonts',
+					'text_text_transform'            => 'text_fonts',
+					'text_line_height'               => 'text_fonts',
+					'text_letter_spacing'            => 'text_fonts',
+					'text_color'                     => 'text_fonts',
 				],
 				'params'       => [
 					[
@@ -841,33 +885,29 @@ function fusion_component_woo_checkout_tabs() {
 						],
 					],
 					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_html__( 'Content Heading Color', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the color of the content heading, ex: #000.' ),
-						'param_name'  => 'title_color',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_tab_titles',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Content Heading Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the content heading. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'title_fonts',
+						'choices'          => [
+							'font-family'    => 'title_font',
+							'font-size'      => 'title_font_size',
+							'text-transform' => 'title_text_transform',
+							'line-height'    => 'title_line_height',
+							'letter-spacing' => 'title_letter_spacing',
+							'color'          => 'title_color',
 						],
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_html__( 'Content Heading Font Family', 'fusion-builder' ),
-						'description'      => esc_html__( 'Controls the font family of the content heading.', 'fusion-builder' ),
-						'param_name'       => 'title_font',
 						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '',
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => '',
 						],
+						'remove_from_atts' => true,
+						'global'           => true,
 						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'dependency'       => [
 							[
@@ -881,57 +921,31 @@ function fusion_component_woo_checkout_tabs() {
 						],
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_html__( 'Content Heading Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the content heading. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'title_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_tab_titles',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Content Text Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the content text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'text_fonts',
+						'choices'          => [
+							'font-family'    => 'text_font',
+							'font-size'      => 'text_font_size',
+							'text-transform' => 'text_text_transform',
+							'line-height'    => 'text_line_height',
+							'letter-spacing' => 'text_letter_spacing',
+							'color'          => 'text_color',
 						],
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_html__( 'Content Text Color', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the color of the content text, ex: #000.' ),
-						'param_name'  => 'text_color',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_html__( 'Content Text Font Family', 'fusion-builder' ),
-						'description'      => esc_html__( 'Controls the font family of the content text.', 'fusion-builder' ),
-						'param_name'       => 'text_font',
 						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '',
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => '',
 						],
+						'remove_from_atts' => true,
+						'global'           => true,
 						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'callback'         => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_html__( 'Content Text Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the content text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'text_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
 							'function' => 'fusion_style_block',
 						],
 					],

@@ -10,7 +10,7 @@ if ( portfolio_posts ) {
 					<ul class="fusion-carousel-holder">{{{ portfolio_posts }}}</ul>
 
 					<# if ( 'yes' === show_nav ) { #>
-						<div class="fusion-carousel-nav"><span class="fusion-nav-prev"></span><span class="fusion-nav-next"></span></div>
+						<div class="fusion-carousel-nav"><button class="fusion-nav-prev" aria-label="Previous"></button><button class="fusion-nav-next" aria-label="Next"></button></div>
 					<# } #>
 
 				</div>

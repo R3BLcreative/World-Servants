@@ -65,3 +65,13 @@
 .fusion-post-card-image.fusion-disable-link[data-layout="rollover"] .fusion-link-wrapper {
   pointer-events: none;
 }
+.fusion-post-card-image.has-aspect-ratio {
+  position: relative;
+}
+.fusion-post-card-image.has-aspect-ratio img {
+  aspect-ratio: 1;
+  /* stylelint-disable-line */
+  width: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}

@@ -206,6 +206,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.addCssProperty( selectors, 'font-size', values.price_font_size );
 				}
 
+				if ( !this.isDefault( 'price_line_height' ) ) {
+					this.addCssProperty( selectors, 'line-height', this.values.price_line_height );
+				}
+
+				if ( !this.isDefault( 'price_text_transform' ) ) {
+					this.addCssProperty( selectors, 'text-transform', this.values.price_text_transform );
+				}
+
+				if ( !this.isDefault( 'price_letter_spacing' ) ) {
+					this.addCssProperty( selectors, 'letter-spacing',  _.fusionGetValueWithUnit( this.values.price_letter_spacing ) );
+				}
+
 				if ( ! this.isDefault( 'price_color' ) ) {
 					this.addCssProperty( selectors, 'color', values.price_color );
 				}
@@ -217,6 +229,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( ! this.isDefault( 'sale_font_size' ) ) {
 					this.addCssProperty( this.baseSelector + ' .price del .amount', 'font-size', values.sale_font_size );
+				}
+
+				if ( !this.isDefault( 'sale_line_height' ) ) {
+					this.addCssProperty( this.baseSelector + ' .price del .amount', 'line-height', this.values.sale_line_height );
+				}
+
+				if ( !this.isDefault( 'sale_text_transform' ) ) {
+					this.addCssProperty( this.baseSelector + ' .price del .amount', 'text-transform', this.values.sale_text_transform );
+				}
+
+				if ( !this.isDefault( 'sale_letter_spacing' ) ) {
+					this.addCssProperty( this.baseSelector + ' .price del .amount', 'letter-spacing',  _.fusionGetValueWithUnit( this.values.sale_letter_spacing ) );
 				}
 
 				if ( ! this.isDefault( 'sale_color' ) ) {
@@ -232,6 +256,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.addCssProperty( this.baseSelector + ' p.stock', 'font-size', values.stock_font_size );
 				}
 
+				if ( !this.isDefault( 'stock_line_height' ) ) {
+					this.addCssProperty( this.baseSelector + ' p.stock', 'line-height', this.values.stock_line_height );
+				}
+
+				if ( !this.isDefault( 'stock_text_transform' ) ) {
+					this.addCssProperty( this.baseSelector + ' p.stock', 'text-transform', this.values.stock_text_transform );
+				}
+
+				if ( !this.isDefault( 'stock_letter_spacing' ) ) {
+					this.addCssProperty( this.baseSelector + ' p.stock', 'letter-spacing',  _.fusionGetValueWithUnit( this.values.stock_letter_spacing ) );
+				}
+
 				if ( ! this.isDefault( 'stock_color' ) ) {
 					this.addCssProperty( this.baseSelector + ' p.stock', 'color', values.stock_color );
 				}
@@ -243,6 +279,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( ! this.isDefault( 'badge_font_size' ) ) {
 					this.addCssProperty( this.baseSelector + ' .fusion-onsale', 'font-size', values.badge_font_size );
+				}
+
+				if ( !this.isDefault( 'badge_line_height' ) ) {
+					this.addCssProperty( this.baseSelector + ' .fusion-onsale', 'line-height', this.values.badge_line_height );
+				}
+
+				if ( !this.isDefault( 'badge_text_transform' ) ) {
+					this.addCssProperty( this.baseSelector + ' .fusion-onsale', 'text-transform', this.values.badge_text_transform );
+				}
+
+				if ( !this.isDefault( 'badge_letter_spacing' ) ) {
+					this.addCssProperty( this.baseSelector + ' .fusion-onsale', 'letter-spacing',  _.fusionGetValueWithUnit( this.values.badge_letter_spacing ) );
 				}
 
 				if ( ! this.isDefault( 'badge_text_color' ) ) {

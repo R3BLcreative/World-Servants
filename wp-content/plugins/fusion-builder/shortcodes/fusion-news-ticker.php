@@ -206,8 +206,8 @@ if ( fusion_is_element_enabled( 'fusion_news_ticker' ) ) {
 			 */
 			public function ticker_attr() {
 				$attr = [
-					'class'     => 'awb-news-ticker awb-news-ticker-' . $this->element_id,
-					'aria-role' => 'marquee',
+					'class' => 'awb-news-ticker awb-news-ticker-' . $this->element_id,
+					'role'  => 'marquee',
 				];
 
 				if ( 'marquee' === $this->args['ticker_type'] ) {
@@ -582,7 +582,7 @@ if ( fusion_is_element_enabled( 'fusion_news_ticker' ) ) {
 
 				$query_needs_custom_event_calendar_function = 'tribe_events' === $args['post_type'] && function_exists( 'tribe_get_events' ) && 'upcoming_events' === $args['orderby'];
 				if ( $query_needs_custom_event_calendar_function ) {
-					$query_args['start_date'] = 'now';
+					$query_args['ends_after'] = 'now';
 					$query_args['orderby']    = 'event_date';
 					$query_args['order']      = 'ASC';
 

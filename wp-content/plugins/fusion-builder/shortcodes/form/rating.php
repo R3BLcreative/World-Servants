@@ -58,6 +58,7 @@ if ( fusion_is_element_enabled( 'fusion_form_rating' ) ) {
 					'label'             => '',
 					'name'              => '',
 					'required'          => '',
+					'empty_notice'      => '',
 					'placeholder'       => '',
 					'icon'              => '',
 					'limit'             => '5',
@@ -115,7 +116,9 @@ if ( fusion_is_element_enabled( 'fusion_form_rating' ) ) {
 
 				while ( $limit > 0 ) {
 					$option   = $limit;
-					$options .= '<input id="' . $option . '-' . $this->counter . '" type="radio" value="' . $option . '" name="' . $element_name . '"' . $element_data['class'] . $element_data['required'] . $element_data['checked'] . $element_data['holds_private_data'] . '/>';
+					$options .= '<input ';
+					$options .= '' !== $element_data['empty_notice'] ? 'data-empty-notice="' . $element_data['empty_notice'] . '" ' : '';
+					$options .= 'id="' . $option . '-' . $this->counter . '" type="radio" value="' . $option . '" name="' . $element_name . '"' . $element_data['class'] . $element_data['required'] . $element_data['checked'] . $element_data['holds_private_data'] . '/>';
 					$options .= '<label for="' . $option . '-' . $this->counter . '" class="fusion-form-rating-icon">';
 					$options .= '<i class="' . $this->args['icon'] . '"></i>';
 					$options .= '</label>';
@@ -138,7 +141,7 @@ if ( fusion_is_element_enabled( 'fusion_form_rating' ) ) {
 
 				// CSS for .rating-icon:hover, .rating-icon:checked.
 				if ( $this->args['active_icon_color'] ) {
-					$hover_color = Fusion_Color::new_color( $this->args['active_icon_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$hover_color = Fusion_Color::new_color( $this->args['active_icon_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 
 					$styles .= '.fusion-form-' . $form_id . '.fusion-form-form-wrapper .fusion-form-field .fusion-form-rating-area-' . $this->counter . '.fusion-form-rating-area .fusion-form-input:checked~label i{ color: ' . $this->args['active_icon_color'] . ';}';
 
@@ -214,7 +217,7 @@ function fusion_form_rating() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Field Name', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the field name. Should be single word without spaces. Underscores and dashes are allowed.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter the field name. Please use only lowercase alphanumeric characters, dashes, and underscores.', 'fusion-builder' ),
 						'param_name'  => 'name',
 						'value'       => '',
 						'placeholder' => true,
@@ -228,6 +231,20 @@ function fusion_form_rating() {
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Empty Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter text validation notice that should display if data input is empty.', 'fusion-builder' ),
+						'param_name'  => 'empty_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'required',
+								'value'    => 'yes',
+								'operator' => '==',
+							],
 						],
 					],
 					[

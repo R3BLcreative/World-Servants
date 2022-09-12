@@ -14,6 +14,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 			this.listenTo( FusionEvents, 'fusion-form-styles', this.buildStyles );
 			this.listenTo( FusionEvents, 'fusion-builder-loaded', this.buildStyles );
+			this.listenTo( FusionEvents, 'fusion-preview-refreshed', this.updateFormData );
+		},
+
+		updateFormData: function() {
+			this.formData = FusionApp.data.postMeta._fusion;
 		},
 
 		addCssProperty: function ( selectors, property, value, important ) {
@@ -82,7 +87,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.baseSelector + ' input[type="password"]',
 					this.baseSelector + ' input[type="search"]',
 					this.baseSelector + ' input[type="tel"]',
-					this.baseSelector + ' input[type="phone-number"]',
 					this.baseSelector + ' input[type="text"]',
 					this.baseSelector + ' input[type="time"]',
 					this.baseSelector + ' input[type="url"]',
@@ -135,7 +139,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			if ( '' !== this.formData.form_placeholder_color ) {
 				placeholderColor = this.formData.form_placeholder_color;
 			} else if ( ! this.isDefault( 'form_text_color' ) ) {
-				placeholderColor = jQuery.Color( this.formData.form_text_color ).alpha( 0.5 ).toRgbaString();
+				placeholderColor = jQuery.AWB_Color( this.formData.form_text_color ).alpha( 0.5 ).toRgbaString();
 			}
 
 			if ( placeholderColor ) {
@@ -162,7 +166,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			}
 
 			if ( !this.isDefault( 'form_label_color' ) ) {
-				this.addCssProperty( this.baseSelector + ' label, ' + this.baseSelector + ' .label', 'color',  this.formData.form_label_color );
+				this.addCssProperty( this.baseSelector + ' label, ' + this.baseSelector + ' .label, ' + this.baseSelector + ' .fusion-form-tooltip > i', 'color',  this.formData.form_label_color );
 			}
 
 			if (!this.isDefault('form_border_width', 'top')) {
@@ -220,7 +224,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			}
 
 			if (!this.isDefault('form_focus_border_color')) {
-				hoverColor = jQuery.Color( this.formData.form_focus_border_color ).alpha( 0.5 ).toRgbaString();
+				hoverColor = jQuery.AWB_Color( this.formData.form_focus_border_color ).alpha( 0.5 ).toRgbaString();
 
 				selectors = [
 					this.baseSelector + ' input:not([type="submit"]):focus',

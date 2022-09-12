@@ -262,7 +262,7 @@ class Fusion_Data_PostMeta {
 			}
 		}
 
-		return apply_filters( 'fusion_get_all_meta', $this->data, $this->post_id );
+		return (array) apply_filters( 'fusion_get_all_meta', (array) $this->data, $this->post_id );
 	}
 
 	/**

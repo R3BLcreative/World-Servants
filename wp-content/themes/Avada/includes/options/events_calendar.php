@@ -64,7 +64,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Primary Color Overlay Text Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of text when primary color is the background.', 'Avada' ),
 						'id'          => 'primary_overlay_text_color',
-						'default'     => '#ffffff',
+						'default'     => 'var(--awb-color1)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -77,7 +77,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Filter Bar Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color for the events calendar filter bar.', 'Avada' ),
 						'id'          => 'ec_bar_bg_color',
-						'default'     => '#efeded',
+						'default'     => 'var(--awb-color2)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -102,7 +102,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Event Filter Bar Text Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of the event filter bar text.', 'Avada' ),
 						'id'          => 'ec_bar_text_color',
-						'default'     => '#747474',
+						'default'     => 'var(--awb-color8)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -115,7 +115,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Monthly Calendar Heading Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color of the numbered heading in the calendar.', 'Avada' ),
 						'id'          => 'ec_calendar_heading_bg_color',
-						'default'     => '#b2b2b2',
+						'default'     => 'var(--awb-color3)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -132,7 +132,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Monthly Calendar Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color of each day in the calendar.', 'Avada' ),
 						'id'          => 'ec_calendar_bg_color',
-						'default'     => '#b2b2b2',
+						'default'     => 'var(--awb-color3)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -157,7 +157,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Popover/Drop-down Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color for the event popover/drop-down background.', 'Avada' ),
 						'id'          => 'ec_tooltip_bg_color',
-						'default'     => '#ffffff',
+						'default'     => 'var(--awb-color1)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -170,7 +170,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Popover/Drop-down Background Hover Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the hover color for the event popover/drop-down background.', 'Avada' ),
 						'id'          => 'ec_tooltip_bg_hover_color',
-						'default'     => '#f6f6f6',
+						'default'     => 'var(--awb-color2)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -183,7 +183,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Popover/Drop-down Body Text Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of the popover/drop-down text.', 'Avada' ),
 						'id'          => 'ec_tooltip_body_color',
-						'default'     => '#747474',
+						'default'     => 'var(--awb-color8)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -196,7 +196,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Border Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the various border colors around the calendar.', 'Avada' ),
 						'id'          => 'ec_border_color',
-						'default'     => '#e0dede',
+						'default'     => 'var(--awb-color3)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -349,7 +349,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Sidebar / Meta Content Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color of the single event post sidebar(s) / meta content.', 'Avada' ),
 						'id'          => 'ec_sidebar_bg_color',
-						'default'     => '#f6f6f6',
+						'default'     => 'var(--awb-color2)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -391,7 +391,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Sidebar Widget / Meta Content Title Background Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color of the sidebar widget / meta content title for single event posts.', 'Avada' ),
 						'id'          => 'ec_sidebar_widget_bg_color',
-						'default'     => '#65bc7b',
+						'default'     => 'var(--awb-color4)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -414,7 +414,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Sidebar Widget / Meta Content Headings Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of the sidebar widget / meta content heading for single event posts.', 'Avada' ),
 						'id'          => 'ec_sidebar_heading_color',
-						'default'     => '#333333',
+						'default'     => 'var(--awb-color8)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -445,7 +445,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Sidebar / Meta Content Text Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of the text in the single event post sidebar / meta content.', 'Avada' ),
 						'id'          => 'ec_sidebar_text_color',
-						'default'     => '#747474',
+						'default'     => 'var(--awb-color8)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -458,7 +458,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Sidebar / Meta Content Link Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of the link text in the single event post sidebar / meta content.', 'Avada' ),
 						'id'          => 'ec_sidebar_link_color',
-						'default'     => '#333333',
+						'default'     => 'var(--awb-color5)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -471,7 +471,7 @@ function avada_options_section_events_calendar( $sections ) {
 						'label'       => esc_html__( 'Events Sidebar / Meta Content Divider Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of the dividers in the single event post sidebar / meta content.', 'Avada' ),
 						'id'          => 'ec_sidebar_divider_color',
-						'default'     => '#e8e8e8',
+						'default'     => 'var(--awb-color3)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[

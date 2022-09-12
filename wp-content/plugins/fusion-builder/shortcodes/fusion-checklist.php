@@ -98,6 +98,10 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 					'class'               => '',
 					'divider'             => $fusion_settings->get( 'checklist_divider' ),
 					'divider_color'       => $fusion_settings->get( 'checklist_divider_color' ),
+					'margin_top'          => '',
+					'margin_right'        => '',
+					'margin_bottom'       => '',
+					'margin_left'         => '',
 					'hide_on_mobile'      => fusion_builder_default_visibility( 'string' ),
 					'icon'                => 'awb-icon-check',
 					'iconcolor'           => $fusion_settings->get( 'checklist_icons_color' ),
@@ -173,6 +177,36 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 			}
 
 			/**
+			 * Used to set any other variables for use on front-end editor template.
+			 *
+			 * @static
+			 * @access public
+			 * @since 2.0.0
+			 * @return array
+			 */
+			public static function get_element_extras() {
+				$fusion_settings = awb_get_fusion_settings();
+				return [
+					'body_font_size' => $fusion_settings->get( 'body_typography', 'font-size' ),
+				];
+			}
+
+			/**
+			 * Maps settings to extra variables.
+			 *
+			 * @static
+			 * @access public
+			 * @since 2.0.0
+			 * @return array
+			 */
+			public static function settings_to_extras() {
+
+				return [
+					'body_typography' => 'body_font_size',
+				];
+			}
+
+			/**
 			 * Render the parent shortcode.
 			 *
 			 * @access public
@@ -214,6 +248,11 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 				extract( $defaults );
 
 				$this->parent_args = $this->args = $defaults;
+
+				$this->parent_args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_bottom'], 'px' );
+				$this->parent_args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_left'], 'px' );
+				$this->parent_args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_right'], 'px' );
+				$this->parent_args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_top'], 'px' );
 
 				// Legacy checklist integration.
 				if ( strpos( $content, '<li>' ) && strpos( $content, '[fusion_li_item' ) === false ) {
@@ -260,6 +299,8 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 				$font_size     = str_replace( 'px', '', $this->parent_args['size'] );
 				$line_height   = (int) $font_size * 1.7;
 				$attr['style'] = 'font-size:' . $this->parent_args['size'] . ';line-height:' . $line_height . 'px;';
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( $this->parent_args['class'] ) {
 					$attr['class'] .= ' ' . $this->parent_args['class'];
@@ -459,7 +500,7 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 								'label'       => esc_html__( 'Checklist Icon Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the checklist icon.', 'fusion-builder' ),
 								'id'          => 'checklist_icons_color',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -480,7 +521,7 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 								'label'           => esc_html__( 'Checklist Icon Circle Color', 'fusion-builder' ),
 								'description'     => esc_html__( 'Controls the color of the checklist icon circle background.', 'fusion-builder' ),
 								'id'              => 'checklist_circle_color',
-								'default'         => '#65bc7b',
+								'default'         => 'var(--awb-color4)',
 								'type'            => 'color-alpha',
 								'soft_dependency' => true,
 								'css_vars'        => [
@@ -494,7 +535,7 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 								'label'       => esc_html__( 'Checklist Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the checklist text.', 'fusion-builder' ),
 								'id'          => 'checklist_text_color',
-								'default'     => $fusion_settings->get( 'body_typography', 'color' ),
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'css_vars'    => [
 									[
@@ -563,7 +604,7 @@ if ( fusion_is_element_enabled( 'fusion_checklist' ) ) {
 								'label'           => esc_html__( 'Divider Line Color', 'fusion-builder' ),
 								'description'     => esc_html__( 'Controls the color of the divider lines.', 'fusion-builder' ),
 								'id'              => 'checklist_divider_color',
-								'default'         => $fusion_settings->get( 'sep_color' ),
+								'default'         => 'var(--awb-color3)',
 								'type'            => 'color-alpha',
 								'soft_dependency' => true,
 								'css_vars'        => [
@@ -630,7 +671,7 @@ function fusion_element_checklist() {
 				'preview'       => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-checklist-preview.php',
 				'preview_id'    => 'fusion-builder-block-module-checklist-preview-template',
 				'child_ui'      => true,
-				'help_url'      => 'https://theme-fusion.com/documentation/fusion-builder/elements/checklist-element/',
+				'help_url'      => 'https://theme-fusion.com/documentation/avada/elements/checklist-element/',
 				'params'        => [
 					[
 						'type'        => 'tinymce',
@@ -649,7 +690,7 @@ function fusion_element_checklist() {
 					[
 						'type'        => 'colorpickeralpha',
 						'heading'     => esc_attr__( 'Checklist Icon Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Global setting for all list items.  Controls the color of the checklist icon.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Global setting for all list items. Controls the color of the checklist icon.', 'fusion-builder' ),
 						'param_name'  => 'iconcolor',
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'checklist_icons_color' ),
@@ -751,6 +792,16 @@ function fusion_element_checklist() {
 						'param_name'  => 'even_row_bgcolor',
 						'value'       => '',
 						'default'     => $fusion_settings->get( 'checklist_even_row_bgcolor' ),
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

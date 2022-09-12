@@ -24,7 +24,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			elementData: function( values ) {
-				var data  = {};
+				var data  = {},
+					patternFields = [ 'fusion_form_email', 'fusion_form_password', 'fusion_form_phone_number' ];
 
 				data.checked               = '';
 				data.required              = '';
@@ -38,15 +39,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				data.label_class           = '';
 				data.holds_private_data    = 'no';
 				data.upload_size           = '';
-				data.pattern			   = '';
+				data.pattern			         = '';
 
 				if ( 'undefined' === typeof values ) {
 					return data;
 				}
 
-				if ( 'fusion_form_phone_number' === this.model.get( 'element_type' ) ) {
-					data.pattern = ' pattern="[0-9()#&+*-=.]+" title="' + fusionBuilderText.phone_pattern_text + '"';
-				}
+				data.pattern = 'fusion_form_text' === this.model.get( 'element_type' ) && 'undefined' !== typeof values.pattern && '' !== values.pattern ? this.addPattern( values ) : '';
+				data.pattern = patternFields.includes( this.model.get( 'element_type' ) ) && 'undefined' !== typeof values.pattern && '' !== values.pattern ? ' pattern="' + this.decodePattern( values.pattern ) + '" ' : '';
 
 				if ( 'fusion_form_checkbox' === this.model.get( 'element_type' ) && 'undefined' !== typeof values.checked && values.checked ) {
 					data.checked = ' checked="checked"';
@@ -97,6 +97,21 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 
 				return data;
+			},
+
+			decodePattern: function( content ) {
+				let decodedPattern = '';
+
+				try {
+					if ( FusionPageBuilderApp.base64Encode( FusionPageBuilderApp.base64Decode( content ) ) === content ) {
+						decodedPattern = FusionPageBuilderApp.base64Decode( content );
+						decodedPattern = _.unescape( decodedPattern );
+					}
+				} catch ( error ) {
+					console.log( error ); // jshint ignore:line
+				}
+
+				return decodedPattern;
 			},
 
 			checkbox: function( values, type ) {
@@ -166,6 +181,20 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				html = this.generateLabelHtml( html, elementHtml, elementData.label );
 
 				return html;
+			},
+
+			addPattern: function( values ) {
+				var patterns = {
+					'letters': '[a-zA-Z]+',
+					'alpha_numeric': '[a-zA-Z0-9]+',
+					'number': '[0-9]+',
+					'credit_card_number': '[0-9]{13,16}',
+					'phone': '[0-9()#&+*-=.]+',
+					// eslint-disable-next-line no-useless-escape
+					'url': '(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)'
+				};
+
+				return 'undefined' !== typeof patterns[ values.pattern ] ? ' pattern="' + patterns[ values.pattern ] + '"' : ' pattern="' + this.decodePattern( values.custom_pattern ) + '"';
 			},
 
 			getFieldTooltip: function( values ) {

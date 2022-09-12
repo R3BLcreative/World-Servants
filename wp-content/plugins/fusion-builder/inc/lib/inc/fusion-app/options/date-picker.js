@@ -31,9 +31,10 @@ FusionPageBuilder.options.fusionDateTimePicker = {
 			time = jQuery( this ).closest( '.fusion-datetime-container' ).find( '.fusion-time-picker' ).val();
 			date = jQuery( this ).find( '.fusion-date-picker' ).val();
 
-			dateAndTime = date + ' ' + time;
+			dateAndTime += date ? date + ' ' : '';
+			dateAndTime += time ? time : '';
 
-			jQuery( this ).closest( '.option-field' ).find( '.fusion-date-time-picker' ).val( dateAndTime ).trigger( 'change' );
+			jQuery( this ).closest( '.option-field' ).find( '.fusion-date-time-picker' ).val( dateAndTime.trim() ).trigger( 'change' );
 		} );
 
 		jQuery( timePicker ).on( 'updateDateTime', function() {
@@ -44,9 +45,10 @@ FusionPageBuilder.options.fusionDateTimePicker = {
 			date = jQuery( this ).closest( '.fusion-datetime-container' ).find( '.fusion-date-picker' ).val();
 			time = jQuery( this ).find( '.fusion-time-picker' ).val();
 
-			dateAndTime = date + ' ' + time;
+			dateAndTime += date ? date + ' ' : '';
+			dateAndTime += time ? time : '';
 
-			jQuery( this ).closest( '.option-field' ).find( '.fusion-date-time-picker' ).val( dateAndTime ).trigger( 'change' );
+			jQuery( this ).closest( '.option-field' ).find( '.fusion-date-time-picker' ).val( dateAndTime.trim() ).trigger( 'change' );
 		} );
 	}
 };

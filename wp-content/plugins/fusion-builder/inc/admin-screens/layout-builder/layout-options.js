@@ -353,6 +353,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			} else {
 				conditions[ conditionId ] = {
 					label: input.dataset.label,
+					slug: input.dataset.slug,
 					type: input.dataset.type,
 					mode: conditionMode,
 					[ input.dataset.type ]: conditionId,

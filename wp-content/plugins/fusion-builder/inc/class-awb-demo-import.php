@@ -262,7 +262,7 @@ class AWB_Demo_Import {
 			}
 
 			#>
-			<li class="fusion-page-layout" data-website_id="{{ slug }}" data-website_title="{{{ post_title }}}" data-slug="{{ slugs }}">
+			<li class="fusion-page-layout awb-demo-pages-layout" data-website_id="{{ slug }}" data-website_title="{{{ post_title }}}" data-slug="{{ slugs }}">
 				<div class="preview lazy-load">
 					<# if ( 'undefined' !== typeof thumbnail ) { #>
 					<img src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27{{ thumbnail.width }}%27%20height%3D%27{{ thumbnail.height }}%27%20viewBox%3D%270%200%20{{ thumbnail.width }}%20{{ thumbnail.height }}%27%3E%3Crect%20width%3D%27{{ thumbnail.width }}%27%20height%3D%273{{ thumbnail.height }}%27%20fill-opacity%3D%220%22%2F%3E%3C%2Fsvg%3E" alt="" width="{{ thumbnail.width }}" height="{{ thumbnail.height }}" data-src="{{ thumbnail.url }}" data-alt="{{ post_title }}"/>
@@ -283,7 +283,7 @@ class AWB_Demo_Import {
 							_.each( pages, function( page, page_key ) {
 								var site_link = page.link.replace( /^(https?):\/\//, '' );
 						#>
-								<li data-page-link="{{{ site_link }}}"><span>{{{ page.name }}}</span> <a href="{{{ page.link }}}" class="awb-sites-preview" target="_blank"><span class="fusiona-eye"></span> <?php esc_html_e( 'Preview', 'fusion-builder' ); ?></a> <a href="#" data-demo-name="{{{ slug }}}" data-page-name="{{ page_key }}" data-page-id="{{ page.ID }}" data-post-id="{{ <?php echo ( 'front' === $this->location ) ? '0' : 'fusionBuilderConfig.post_id'; ?> }}" class="button button-primary awb-sites-import-js"><?php esc_html_e( 'Import', 'fusion-builder' ); ?></a></li>
+								<li class="awb-demo-page-link" data-page-link="{{{ site_link }}}"><span>{{{ page.name }}}</span> <a href="{{{ page.link }}}" class="awb-sites-preview" target="_blank"><span class="fusiona-eye"></span> <?php esc_html_e( 'Preview', 'fusion-builder' ); ?></a> <a href="#" data-demo-name="{{{ slug }}}" data-page-name="{{ page_key }}" data-page-id="{{ page.ID }}" data-post-id="{{ <?php echo ( 'front' === $this->location ) ? '0' : 'fusionBuilderConfig.post_id'; ?> }}" class="button button-primary awb-sites-import-js"><?php esc_html_e( 'Import', 'fusion-builder' ); ?></a></li>
 						<#
 							} );
 						} #>

@@ -58,6 +58,7 @@ if ( fusion_is_element_enabled( 'fusion_form_upload' ) ) {
 					'label'            => '',
 					'name'             => '',
 					'required'         => '',
+					'empty_notice'     => '',
 					'placeholder'      => '',
 					'input_field_icon' => '',
 					'upload_size'      => '',
@@ -97,7 +98,9 @@ if ( fusion_is_element_enabled( 'fusion_form_upload' ) ) {
 				$element_data['accept'] = ( isset( $this->args['extensions'] ) && '' !== $this->args['extensions'] ) ? 'accept="' . $this->args['extensions'] . '"' : '';
 
 				$element_html  = '<div class="fusion-form-upload-field-container">';
-				$element_html .= '<input type="file" id="' . $this->args['name'] . '" name="' . $name . '" value="' . $content . '" ' . $element_data['class'] . $element_data['accept'] . $element_data['required'] . $element_data['placeholder'] . $element_data['style'] . $element_data['upload_size'] . $multiple . '/>';
+				$element_html .= '<input type="file" ';
+				$element_html .= '' !== $element_data['empty_notice'] ? 'data-empty-notice="' . $element_data['empty_notice'] . '" ' : '';
+				$element_html .= 'id="' . $this->args['name'] . '" name="' . $name . '" value="' . $content . '" ' . $element_data['class'] . $element_data['accept'] . $element_data['required'] . $element_data['placeholder'] . $element_data['style'] . $element_data['upload_size'] . $multiple . '/>';
 				$element_html .= '<input type="text" disabled value="' . $content . '" class="fusion-form-upload-field" ' . $element_data['required'] . $element_data['placeholder'] . $element_data['style'] . $element_data['holds_private_data'] . '/>';
 				$element_html .= do_shortcode( '[fusion_button class="fusion-form-upload-field-button" size="medium" shape="square" link="javascript:void();" target="_self" hide_on_mobile="small-visibility,medium-visibility,large-visibility" color="default"  stretch="default"]' . __( 'Choose File', 'fusion-builder' ) . '[/fusion_button]' );
 				$element_html .= '</div>';
@@ -163,7 +166,7 @@ function fusion_form_upload() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Field Name', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the field name. Should be single word without spaces. Underscores and dashes are allowed.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter the field name. Please use only lowercase alphanumeric characters, dashes, and underscores.', 'fusion-builder' ),
 						'param_name'  => 'name',
 						'value'       => '',
 						'placeholder' => true,
@@ -177,6 +180,20 @@ function fusion_form_upload() {
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Empty Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter text validation notice that should display if data input is empty.', 'fusion-builder' ),
+						'param_name'  => 'empty_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'required',
+								'value'    => 'yes',
+								'operator' => '==',
+							],
 						],
 					],
 					[

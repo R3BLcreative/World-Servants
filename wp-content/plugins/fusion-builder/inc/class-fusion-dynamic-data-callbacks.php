@@ -424,7 +424,13 @@ class Fusion_Dynamic_Data_Callbacks {
 		}
 
 		$format = isset( $args['format'] ) ? $args['format'] : '';
-		return 'modified' === $args['type'] ? get_the_modified_date( $format, $post_id ) : get_the_date( $format, $post_id );
+		$date   = 'modified' === $args['type'] ? get_the_modified_date( $format, $post_id ) : get_the_date( $format, $post_id );
+
+		if ( ! $date ) {
+			$date = self::fusion_get_date( $args );
+		}
+
+		return $date;
 	}
 
 	/**
@@ -438,7 +444,7 @@ class Fusion_Dynamic_Data_Callbacks {
 	 */
 	public static function fusion_get_date( $args ) {
 		$format = isset( $args['format'] ) ? $args['format'] : '';
-		return date( $format );
+		return wp_date( $format );
 	}
 
 	/**
@@ -564,16 +570,14 @@ class Fusion_Dynamic_Data_Callbacks {
 	 * @since 3.5
 	 * @param array $args    Arguments.
 	 * @param int   $post_id The post-ID.
-	 * @return string Empty string if no today views exist.
+	 * @return string The reading time.
 	 */
 	public static function get_post_reading_time( $args, $post_id = 0 ) {
 		if ( ! $post_id ) {
 			$post_id = self::get_post_id();
 		}
 
-		$reading_time = awb_get_reading_time( $post_id, $args );
-
-		return (string) $reading_time;
+		return awb_get_reading_time_for_display( $post_id, $args );
 	}
 
 	/**
@@ -827,6 +831,62 @@ class Fusion_Dynamic_Data_Callbacks {
 	}
 
 	/**
+	 * Toggle Off Canvas.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function fusion_toggle_off_canvas( $args ) {
+		if ( ! isset( $args['off_canvas_id'] ) ) {
+			return '';
+		}
+
+		// Add Off Canvas to stack, so it's markup is added to the page.
+		AWB_Off_Canvas_Front_End::add_off_canvas_to_stack( $args['off_canvas_id'] );
+
+		return '#awb-oc__' . $args['off_canvas_id'];
+	}
+
+	/**
+	 * Open Off Canvas.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function fusion_open_off_canvas( $args ) {
+		if ( ! isset( $args['off_canvas_id'] ) ) {
+			return '';
+		}
+
+		// Add Off Canvas to stack, so it's markup is added to the page.
+		AWB_Off_Canvas_Front_End::add_off_canvas_to_stack( $args['off_canvas_id'] );
+
+		return '#awb-open-oc__' . $args['off_canvas_id'];
+	}
+
+	/**
+	 * Close Off Canvas.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function fusion_close_off_canvas( $args ) {
+		if ( ! isset( $args['off_canvas_id'] ) ) {
+			return '';
+		}
+		return '#awb-close-oc__' . $args['off_canvas_id'];
+	}
+
+	/**
 	 * ACF text field.
 	 *
 	 * @static
@@ -843,10 +903,47 @@ class Fusion_Dynamic_Data_Callbacks {
 		$post_id = self::get_post_id();
 
 		if ( false !== strpos( $post_id, '-archive' ) ) {
-			return get_field( $args['field'], get_term_by( 'term_taxonomy_id', str_replace( '-archive', '', $post_id ) ) );
+			if ( is_author() ) {
+				$post_id = 'user_' . str_replace( '-archive', '', $post_id );
+			} else {
+				$post_id = get_term_by( 'term_taxonomy_id', str_replace( '-archive', '', $post_id ) );
+			}
+
+			return get_field( $args['field'], $post_id );
 		}
 
 		return get_field( $args['field'], get_post( $post_id ) );
+	}
+
+	/**
+	 * ACF get link field.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function acf_get_link_field( $args ) {
+		if ( ! isset( $args['field'] ) ) {
+			return '';
+		}
+		$link = '';
+
+		$post_id = self::get_post_id();
+		if ( false !== strpos( $post_id, '-archive' ) ) {
+			$image_data = get_field( $args['field'], get_term_by( 'term_taxonomy_id', str_replace( '-archive', '', $post_id ) ) );
+		} else {
+			$image_data = get_field( $args['field'], get_post( $post_id ) );
+		}
+
+		if ( is_array( $image_data ) && isset( $image_data['url'] ) ) {
+			$link = $image_data['url'];
+		} elseif ( is_string( $image_data ) ) {
+			$link = $image_data;
+		}
+
+		return $link;
 	}
 
 	/**
@@ -876,6 +973,38 @@ class Fusion_Dynamic_Data_Callbacks {
 			return wp_get_attachment_url( $image_data );
 		} elseif ( is_string( $image_data ) ) {
 			return $image_data;
+		}
+
+		return '';
+	}
+
+	/**
+	 * ACF get file field.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function acf_get_file_field( $args ) {
+		if ( ! isset( $args['field'] ) ) {
+			return '';
+		}
+
+		$post_id = self::get_post_id();
+		if ( false !== strpos( $post_id, '-archive' ) ) {
+			$video_data = get_field( $args['field'], get_term_by( 'term_taxonomy_id', str_replace( '-archive', '', $post_id ) ) );
+		} else {
+			$video_data = get_field( $args['field'], get_post( $post_id ) );
+		}
+
+		if ( is_array( $video_data ) && isset( $video_data['url'] ) ) {
+			return $video_data['url'];
+		} elseif ( is_integer( $video_data ) ) {
+			return wp_get_attachment_url( $video_data );
+		} elseif ( is_string( $video_data ) ) {
+			return $video_data;
 		}
 
 		return '';
@@ -1195,6 +1324,27 @@ class Fusion_Dynamic_Data_Callbacks {
 	}
 
 	/**
+	 * Get cart total.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.6
+	 * @param array $args    Arguments.
+	 * @param int   $post_id The post-ID.
+	 * @return string
+	 */
+	public static function woo_get_cart_total( $args, $post_id = 0 ) {
+		$cart_total  = 0;
+		$opening_tag = '<span class="fusion-dynamic-cart-total-wrapper"';
+
+		if ( is_object( WC()->cart ) ) {
+			$cart_total = WC()->cart->get_cart_total();
+		}
+
+		return '<span class="fusion-dynamic-cart-total-wrapper"><span class="fusion-dynamic-cart-total">' . $cart_total . '</span></span>';
+	}
+
+	/**
 	 * Get add to cart link.
 	 *
 	 * @static
@@ -1241,8 +1391,16 @@ class Fusion_Dynamic_Data_Callbacks {
 	 * @return array
 	 */
 	public function woo_fragments( $fragments ) {
-		$cart_contents_count                     = is_object( WC()->cart ) ? WC()->cart->get_cart_contents_count() : '';
+		$cart_contents_count = '';
+		$cart_total          = '';
+
+		if ( is_object( WC()->cart ) ) {
+			$cart_contents_count = WC()->cart->get_cart_contents_count();
+			$cart_total          = WC()->cart->get_cart_total();
+		}
+
 		$fragments['.fusion-dynamic-cart-count'] = '<span class="fusion-dynamic-cart-count">' . $cart_contents_count . '</span>';
+		$fragments['.fusion-dynamic-cart-total'] = '<span class="fusion-dynamic-cart-total">' . $cart_total . '</span>';
 
 		return $fragments;
 	}
@@ -1464,5 +1622,94 @@ class Fusion_Dynamic_Data_Callbacks {
 
 		/* translators: 1: The search count, 2: The search string. */
 		return $space_before . sprintf( __( '%1$d %2$s', 'fusion-builder' ), $search_count, $search_string ) . $space_after;
+	}
+
+	/**
+	 * Woo Shop Page URL.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.7
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function woo_shop_page_url( $args ) {
+		return get_permalink( wc_get_page_id( 'shop' ) );
+	}
+
+	/**
+	 * Woo Cart Page URL.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.7
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function woo_cart_page_url( $args ) {
+		return wc_get_cart_url();
+	}
+
+	/**
+	 * Woo Checkout Page URL.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.7
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function woo_checkout_page_url( $args ) {
+		return wc_get_checkout_url();
+	}
+
+	/**
+	 * Woo My Account Page URL.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.7
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function woo_myaccount_page_url( $args ) {
+		return wc_get_page_permalink( 'myaccount' );
+	}
+
+	/**
+	 * Woo Terms & Conditions Page URL.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.7
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function woo_tnc_page_url( $args ) {
+		return get_permalink( wc_terms_and_conditions_page_id() );
+	}
+
+	/**
+	 * Open HubSpot chat.
+	 *
+	 * @static
+	 * @access public
+	 * @since 3.7.1
+	 * @param array $args Arguments.
+	 * @return string
+	 */
+	public static function fusion_open_hubspot_chat( $args ) {
+
+		// Enqueue js file.
+		Fusion_Dynamic_JS::enqueue_script(
+			'fusion-hubspot',
+			FusionBuilder::$js_folder_url . '/general/fusion-hubspot.js',
+			FusionBuilder::$js_folder_path . '/general/fusion-hubspot.js',
+			[ 'jquery' ],
+			'1.0',
+			true
+		);
+
+		return '#hubspot-open-chat';
 	}
 }

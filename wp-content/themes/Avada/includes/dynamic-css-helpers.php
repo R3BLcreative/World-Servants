@@ -45,7 +45,7 @@ function avada_custom_fonts_font_faces( $css = '' ) {
 				}
 			}
 			// If we don't have any files to process then skip this item.
-			if ( ! $process ) {
+			if ( ! $process || empty( $label ) ) {
 				continue;
 			}
 
@@ -260,7 +260,7 @@ function avada_get_h1_typography_elements() {
 
 	// CSS classes that inherit h1 size.
 	$typography_elements['size'] = [
-		// 'h1',
+		'h1',
 		'.post-content h1',
 		'.fusion-modal h1',
 		'.fusion-widget-area h1',
@@ -270,7 +270,7 @@ function avada_get_h1_typography_elements() {
 	];
 	// CSS classes that inherit h1 font family.
 	$typography_elements['family'] = [
-		// 'h1',
+		'h1',
 		'.post-content h1',
 		'.fusion-page-title-bar h1',
 		'.fusion-modal h1',
@@ -282,7 +282,7 @@ function avada_get_h1_typography_elements() {
 	];
 	// CSS classes that inherit h1 color.
 	$typography_elements['color'] = [
-		// 'h1',
+		'h1',
 		'.post-content h1',
 		'.title h1',
 		'.fusion-post-content h1',
@@ -306,7 +306,7 @@ function avada_get_h2_typography_elements() {
 
 	// CSS classes that inherit h2 size.
 	$typography_elements['size'] = [
-		// 'h2',
+		'h2',
 		'#wrapper .post-content h2',
 		'#wrapper .fusion-title h2',
 		'#wrapper #main .post-content .fusion-title h2',
@@ -323,7 +323,7 @@ function avada_get_h2_typography_elements() {
 	];
 	// CSS classes that inherit h2 color.
 	$typography_elements['color'] = [
-		// 'h2',
+		'h2',
 		'#main .post h2',
 		'.post-content h2',
 		'.fusion-title h2',
@@ -337,7 +337,7 @@ function avada_get_h2_typography_elements() {
 	];
 	// CSS classes that inherit h2 font family.
 	$typography_elements['family'] = [
-		// 'h2',
+		'h2',
 		'#main .post h2',
 		'.post-content h2',
 		'.fusion-title h2',
@@ -365,7 +365,7 @@ function avada_get_h3_typography_elements() {
 
 	// CSS classes that inherit h3 font family.
 	$typography_elements['family'] = [
-		// 'h3',
+		'h3',
 		'.post-content h3',
 		'.project-content h3',
 		'.sidebar .widget h3',
@@ -380,7 +380,7 @@ function avada_get_h3_typography_elements() {
 	];
 	// CSS classes that inherit h3 size.
 	$typography_elements['size'] = [
-		// 'h3',
+		'h3',
 		'.post-content h3',
 		'.project-content h3',
 		'.fusion-modal h3',
@@ -392,7 +392,7 @@ function avada_get_h3_typography_elements() {
 
 	// CSS classes that inherit h3 color.
 	$typography_elements['color'] = [
-		// 'h3',
+		'h3',
 		'.post-content h3',
 		'.sidebar .widget h3',
 		'.project-content h3',
@@ -424,7 +424,7 @@ function avada_get_h4_typography_elements() {
 
 	// CSS classes that inherit h4 size.
 	$typography_elements['size'] = [
-		// 'h4',
+		'h4',
 		'.post-content h4',
 		'.fusion-rollover .fusion-rollover-content .fusion-rollover-title',
 		'.fusion-carousel-title',
@@ -439,7 +439,7 @@ function avada_get_h4_typography_elements() {
 	];
 	// CSS classes that inherit h4 color.
 	$typography_elements['color'] = [
-		// 'h4',
+		'h4',
 		'.post-content h4',
 		'.project-content .project-info h4',
 		'.fusion-project-details-tb .project-info h4',
@@ -458,7 +458,7 @@ function avada_get_h4_typography_elements() {
 	];
 	// CSS classes that inherit h4 font family.
 	$typography_elements['family'] = [
-		// 'h4',
+		'h4',
 		'.post-content h4',
 		'table th',
 		'.fusion-megamenu-title',
@@ -477,7 +477,7 @@ function avada_get_h4_typography_elements() {
 	];
 
 	$typography_elements['line-height'] = [
-		// 'h4',
+		'h4',
 		'.project-content .project-info .project-terms',
 		'.fusion-project-details-tb .project-info .project-terms',
 		'.project-info-box span',
@@ -498,7 +498,7 @@ function avada_get_h5_typography_elements() {
 
 	// CSS classes that inherit h5 size.
 	$typography_elements['size'] = [
-		// 'h5',
+		'h5',
 		'.post-content h5',
 		'.fusion-modal h5',
 		'.fusion-widget-area h5',
@@ -507,7 +507,7 @@ function avada_get_h5_typography_elements() {
 	];
 	// CSS classes that inherit h5 color.
 	$typography_elements['color'] = [
-		// 'h5',
+		'h5',
 		'.post-content h5',
 		'.fusion-title h5',
 		'.title h5',
@@ -519,7 +519,7 @@ function avada_get_h5_typography_elements() {
 	];
 	// CSS classes that inherit h5 font family.
 	$typography_elements['family'] = [
-		// 'h5',
+		'h5',
 		'.post-content h5',
 		'.fusion-modal h5',
 		'.fusion-widget-area h5',
@@ -541,7 +541,7 @@ function avada_get_h6_typography_elements() {
 
 	// CSS classes that inherit h6 size.
 	$typography_elements['size'] = [
-		// 'h6',
+		'h6',
 		'.post-content h6',
 		'.fusion-modal h6',
 		'.fusion-widget-area h6',
@@ -550,7 +550,7 @@ function avada_get_h6_typography_elements() {
 	];
 	// CSS classes that inherit h6 color.
 	$typography_elements['color'] = [
-		// 'h6',
+		'h6',
 		'.post-content h6',
 		'.fusion-title h6',
 		'.title h6',
@@ -562,7 +562,7 @@ function avada_get_h6_typography_elements() {
 	];
 	// CSS classes that inherit h6 font family.
 	$typography_elements['family'] = [
-		// 'h6',
+		'h6',
 		'.post-content h6',
 		'.fusion-modal h6',
 		'.fusion-widget-area h6',

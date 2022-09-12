@@ -383,6 +383,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			FusionPageBuilderApp.clearBuilderLayout();
 			FusionPageBuilderApp.$el.find( '.fusion_builder_container' ).remove();
 
+			// Try to make the shortcode if the content does not contain them.
+			data = FusionPageBuilderApp.validateContent( data );
+
 			// Reset models with new elements
 			FusionPageBuilderApp.createBuilderLayout( data );
 		},
@@ -427,11 +430,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					}
 				}
 				this.updateActiveStyling();
-
-				// TODO: check what this is for.
-				if ( FusionPageBuilderApp.wireframeActive ) {
-					FusionEvents.trigger( 'fusion-undo-state' );
-				}
 			}
 		},
 
@@ -505,13 +503,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.currStep = step;
 				stepData      = 'object' === typeof this.fusionCommands[ this.currStep ] ? this.fusionCommands[ this.currStep ].allElements : false;
 				if ( stepData && '[]' !== stepData ) {
-
 					this.fullContentReplace( stepData );
-
-					// TODO: Check what this is for.
-					if ( FusionPageBuilderApp.wireframeActive ) {
-						FusionEvents.trigger( 'fusion-undo-state' );
-					}
 				}
 			}
 			this.updateActiveStyling();
@@ -617,9 +609,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		 * @return {void}
 		 */
 		closeNestedCols: function() {
-			var activeNestedCols = FusionPageBuilderApp.$el.find( '.fusion-nested-columns.editing' ).length;
+			var activeNestedCols = FusionPageBuilderApp.$el.find( '.fusion-nested-columns.editing' );
 
-			if ( activeNestedCols ) {
+			if ( activeNestedCols.length ) {
 				activeNestedCols.find( '.fusion-builder-cancel-row' ).trigger( 'click' );
 			}
 		}

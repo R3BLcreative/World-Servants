@@ -288,7 +288,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( 'link' === this.values.button_action ) {
 					popover.popover( 'destroy' );
 				} else {
-					popover.popover();
+					popover.popover( { html: true } );
 
 					// Change popover placement, via jquery data.
 					popoverData = popover.data( 'bs.popover' );

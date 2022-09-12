@@ -43,6 +43,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 			public function __construct() {
 				parent::__construct();
 				add_filter( 'fusion_attr_countdown-shortcode', [ $this, 'attr' ] );
+				add_filter( 'fusion_attr_countdown-shortcode-countdown-wrapper', [ $this, 'countdown_wrapper_attr' ] );
 				add_filter( 'fusion_attr_countdown-shortcode-counter-wrapper', [ $this, 'counter_wrapper_attr' ] );
 				add_filter( 'fusion_attr_countdown-shortcode-link', [ $this, 'link_attr' ] );
 
@@ -215,11 +216,15 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 				}
 
 				$html  = '<div ' . FusionBuilder::attributes( 'countdown-shortcode' ) . '>';
+				$html .= '<div ' . FusionBuilder::attributes( 'countdown-shortcode-countdown-wrapper' ) . '>';
 				$html .= $this->get_styles();
-				$html .= '<div ' . FusionBuilder::attributes( 'fusion-countdown-heading-wrapper' ) . '>';
-				$html .= '<div ' . FusionBuilder::attributes( 'fusion-countdown-subheading' ) . '>' . $this->args['subheading_text'] . '</div>';
-				$html .= '<div ' . FusionBuilder::attributes( 'fusion-countdown-heading' ) . '>' . $this->args['heading_text'] . '</div>';
-				$html .= '</div>';
+
+				if ( $this->args['subheading_text'] || $this->args['heading_text'] ) {
+					$html .= '<div ' . FusionBuilder::attributes( 'fusion-countdown-heading-wrapper' ) . '>';
+					$html .= '<div ' . FusionBuilder::attributes( 'fusion-countdown-subheading' ) . '>' . $this->args['subheading_text'] . '</div>';
+					$html .= '<div ' . FusionBuilder::attributes( 'fusion-countdown-heading' ) . '>' . $this->args['heading_text'] . '</div>';
+					$html .= '</div>';
+				}
 
 				$html .= '<div ' . FusionBuilder::attributes( 'countdown-shortcode-counter-wrapper' ) . '>';
 
@@ -301,6 +306,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 
 				$html .= do_shortcode( $content );
 				$html .= '</div>';
+				$html .= '</div>';
 
 				$this->countdown_counter++;
 
@@ -323,7 +329,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 					'class' => 'fusion-countdown fusion-countdown-' . $this->countdown_counter . ' fusion-countdown-' . $this->args['layout'] . ' fusion-countdown-label-' . $this->args['label_position'],
 				];
 
-				if ( $this->args['heading_text'] && $this->args['subheading_text'] ) {
+				if ( $this->args['heading_text'] || $this->args['subheading_text'] ) {
 					$attr['class'] .= ' fusion-countdown-has-heading';
 				}
 
@@ -359,6 +365,21 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 			}
 
 			/**
+			 * Builds the countdown-wrapper attributes array.
+			 *
+			 * @access public
+			 * @since 1.0
+			 * @return array
+			 */
+			public function countdown_wrapper_attr() {
+				$attr = [
+					'class' => 'fusion-countdown-wrapper',
+				];
+
+				return $attr;
+			}
+
+			/**
 			 * Builds the counter-wrapper attributes array.
 			 *
 			 * @access public
@@ -371,6 +392,10 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 					'class' => 'fusion-countdown-counter-wrapper',
 					'id'    => 'fusion-countdown-' . $this->countdown_counter,
 				];
+
+				if ( ! $this->args['subheading_text'] && ! $this->args['heading_text'] && ! $this->args['link_url'] ) {
+					$attr['style'] = 'flex-grow: 1;';
+				}
 
 				if ( 'site_time' === $this->args['timezone'] ) {
 					$attr['data-gmt-offset'] = get_option( 'gmt_offset' );
@@ -400,12 +425,13 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 					return true;
 				}
 
-				if ( ! isset( $this->args['countdown_end']['date'] ) || empty( $this->args['countdown_end']['date'] ) ) {
+				if ( is_array( $this->args['countdown_end'] ) && ( ! isset( $this->args['countdown_end']['date'] ) || empty( $this->args['countdown_end']['date'] ) ) ) {
 					return true;
 				}
 
-				$end_date = strtotime( $this->args['countdown_end']['date'] );
+				$end_date = is_array( $this->args['countdown_end'] ) ? strtotime( $this->args['countdown_end']['date'] ) : strtotime( $this->args['countdown_end'] );
 				$now      = time();
+
 				if ( isset( $this->args['countdown_end']['args']['start_date'] ) && ! empty( $this->args['countdown_end']['args']['start_date'] ) ) {
 					if ( ! is_numeric( $this->args['countdown_end']['args']['start_date'] ) ) {
 						$this->args['countdown_end']['args']['start_date'] = strtotime( $this->args['countdown_end']['args']['start_date'] );
@@ -451,6 +477,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 			 */
 			public function get_styles() {
 				$this->base_selector = '.fusion-countdown-' . $this->countdown_counter . ' ';
+				$this->dynamic_css   = [];
 
 				if ( $this->args['background_image'] && ! $this->is_default( 'background_image' ) ) {
 					$this->add_css_property( $this->base_selector, 'background', 'url(' . $this->args['background_image'] . ') ' . $this->args['background_position'] . ' ' . $this->args['background_repeat'] . ' ' . $this->args['background_color'] );
@@ -472,6 +499,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 					$spacing_value = fusion_library()->sanitize->number( $this->args['counter_box_spacing'] ) / 2;
 					$spacing_unit  = fusion_library()->sanitize->get_unit( $this->args['counter_box_spacing'] );
 					$this->add_css_property( $this->base_selector . '.fusion-dash-wrapper', 'padding', $spacing_value . $spacing_unit );
+					$this->add_css_property( $this->base_selector . '.fusion-countdown-counter-wrapper', 'margin', '0 calc(7.5px - ' . $spacing_value . $spacing_unit . ')' );
 				}
 
 				$selector = $this->base_selector . '.fusion-dash';
@@ -531,19 +559,19 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 					$this->add_css_property( $this->base_selector . ' .fusion-countdown-link', 'color', $this->args['link_text_color'] );
 				}
 
-				if ( ! $this->is_default( 'element_margin_top' ) ) {
+				if ( ! $this->is_default( 'element_margin_top' ) && '' !== $this->args['element_margin_top'] ) {
 					$this->add_css_property( $this->base_selector, 'margin-top', $this->args['element_margin_top'] );
 				}
 
-				if ( ! $this->is_default( 'element_margin_bottom' ) ) {
+				if ( ! $this->is_default( 'element_margin_bottom' ) && '' !== $this->args['element_margin_bottom'] ) {
 					$this->add_css_property( $this->base_selector, 'margin-bottom', $this->args['element_margin_bottom'] );
 				}
 
-				if ( ! $this->is_default( 'element_margin_left' ) ) {
+				if ( ! $this->is_default( 'element_margin_left' ) && '' !== $this->args['element_margin_left'] ) {
 					$this->add_css_property( $this->base_selector, 'margin-left', $this->args['element_margin_left'] );
 				}
 
-				if ( ! $this->is_default( 'element_margin_right' ) ) {
+				if ( ! $this->is_default( 'element_margin_right' ) && '' !== $this->args['element_margin_right'] ) {
 					$this->add_css_property( $this->base_selector, 'margin-right', $this->args['element_margin_right'] );
 				}
 
@@ -564,7 +592,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 				$main_elements = apply_filters( 'fusion_builder_element_classes', [ '.fusion-countdown' ], '.fusion-countdown.fusion-countdown-floated' );
 
 				$elements = array_merge(
-					[ '.fusion-countdown' ],
+					[ '.fusion-countdown .fusion-countdown-wrapper' ],
 					$dynamic_css_helpers->map_selector( $main_elements, ' .fusion-countdown-heading-wrapper' ),
 					$dynamic_css_helpers->map_selector( $main_elements, ' .fusion-countdown-link-wrapper' )
 				);
@@ -653,7 +681,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'       => esc_html__( 'Countdown Background Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the background color for the countdown box.', 'fusion-builder' ),
 								'id'          => 'countdown_background_color',
-								'default'     => '#65bc7b',
+								'default'     => 'var(--awb-color5)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 								'css_vars'    => [
@@ -717,7 +745,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'       => esc_html__( 'Countdown Counter Box Background Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the background color for the counter boxes.', 'fusion-builder' ),
 								'id'          => 'countdown_counter_box_color',
-								'default'     => '#212934',
+								'default'     => 'var(--awb-color7)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 								'css_vars'    => [
@@ -762,7 +790,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'           => esc_html__( 'Countdown Counter Border Color', 'fusion-builder' ),
 								'description'     => esc_html__( 'Controls the border color of the counter boxes.', 'fusion-builder' ),
 								'id'              => 'countdown_counter_border_color',
-								'default'         => '#1d242d',
+								'default'         => 'var(--awb-color7)',
 								'type'            => 'color-alpha',
 								'transport'       => 'postMessage',
 								'soft_dependency' => true,
@@ -788,7 +816,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'       => esc_html__( 'Countdown Counter Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color for the countdown timer text.', 'fusion-builder' ),
 								'id'          => 'countdown_counter_text_color',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 								'css_vars'    => [
@@ -810,7 +838,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'       => esc_html__( 'Countdown Counter Label Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color for the countdown timer labels.', 'fusion-builder' ),
 								'id'          => 'countdown_label_color',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 								'css_vars'    => [
@@ -832,7 +860,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'       => esc_html__( 'Countdown Heading Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color for the countdown headings.', 'fusion-builder' ),
 								'id'          => 'countdown_heading_text_color',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 								'css_vars'    => [
@@ -854,7 +882,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'       => esc_html__( 'Countdown Subheading Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color for the countdown subheadings.', 'fusion-builder' ),
 								'id'          => 'countdown_subheading_text_color',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -862,7 +890,7 @@ if ( fusion_is_element_enabled( 'fusion_countdown' ) ) {
 								'label'       => esc_html__( 'Countdown Link Text Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color for the countdown link text.', 'fusion-builder' ),
 								'id'          => 'countdown_link_text_color',
-								'default'     => '#ffffff',
+								'default'     => 'var(--awb-color1)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -936,7 +964,7 @@ function fusion_element_countdown() {
 				'icon'          => 'fusiona-calendar-check-o',
 				'preview'       => FUSION_BUILDER_PLUGIN_DIR . 'inc/templates/previews/fusion-countdown-preview.php',
 				'preview_id'    => 'fusion-builder-block-module-countdown-preview-template',
-				'help_url'      => 'https://theme-fusion.com/documentation/fusion-builder/elements/countdown-element/',
+				'help_url'      => 'https://theme-fusion.com/documentation/avada/elements/countdown-element/',
 				'inline_editor' => true,
 				'params'        => [
 					[

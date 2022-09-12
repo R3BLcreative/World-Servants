@@ -216,7 +216,9 @@ if ( fusion_is_element_enabled( 'fusion_search' ) ) {
 
 				ob_start();
 				Fusion_Searchform::get_form( $args );
-				return ob_get_clean();
+				$form = ob_get_clean();
+
+				return apply_filters( 'get_search_form', $form, $args );
 			}
 
 			/**

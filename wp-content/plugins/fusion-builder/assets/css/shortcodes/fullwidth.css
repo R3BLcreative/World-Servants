@@ -29,8 +29,7 @@
   min-width: 100%;
   height: auto;
   width: auto;
-  -o-object-fit: cover;
-     object-fit: cover;
+  object-fit: cover;
   transform: translate(-50%, -50%);
 }
 .fullwidth-box.video-background .fusion-row {
@@ -194,4 +193,14 @@
   width: 9px;
   border-radius: 50%;
   background-color: var(--container_scroll_nav_bullet_color);
+}
+#boxed-wrapper.safari-overflow {
+  overflow-x: visible;
+}
+.safari-overflow .fusion-fullwidth {
+  overflow-x: hidden;
+}
+.safari-overflow .fusion-fullwidth.has-sticky,
+.safari-overflow .fusion-fullwidth .fusion-fullwidth {
+  overflow-x: visible;
 }

@@ -25,20 +25,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 		$completed_reg = Avada()->registration->appear_registered() ? ' avada-db-completed avada-db-onload-completed' : '';
 
-		$completed_import = '';
-		$imported_data    = get_option( 'fusion_import_data', [] );
-		foreach ( $imported_data as $part ) {
-			if ( ! empty( $part ) ) {
-				$completed_import = ' avada-db-completed';
-				break;
-			}
+		// Should Skip wizard permanntly?
+		if ( isset( $_GET['skip-wizard'] ) && 'true' === $_GET['skip-wizard'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			update_option( 'awb_skip_wizard', 'yes' );
 		}
 
-		$frontend_builder_loaded = get_option( 'avada_builder_frontend_loaded' );
-		$completed_customization = $frontend_builder_loaded ? ' avada-db-completed' : '';
-
 		$setup_completed = '';
-		if ( $completed_reg && $imported_data && $completed_customization ) {
+		$the_user        = wp_get_current_user();
+		$fresh_install   = get_transient( 'awb_fresh_install' );
+		$should_skip     = get_option( 'awb_skip_wizard' );
+		if ( 'yes' === $should_skip || ( $completed_reg && ( ! $fresh_install || 'fresh' !== $fresh_install ) ) ) {
 			$setup_completed = ' avada-db-welcome-setup-completed';
 		}
 		?>
@@ -46,60 +42,44 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<?php echo $reg_form; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</section>
 
-		<section class="avada-db-card avada-db-welcome-setup<?php echo esc_attr( $setup_completed ); ?>">
-			<button class="avada-db-more-info avada-db-tooltip">
-				<span class="avada-db-tooltip-text"><?php esc_html_e( 'Show Setup Steps', 'Avada' ); ?></span>
-			</button>
-			<button class="notice-dismiss"></button>
-
+		<section class="avada-db-card avada-db-main-setup avada-db-welcome-setup<?php echo esc_attr( $setup_completed ); ?>">
 			<div class="avada-db-welcome-container">
 				<div class="avada-db-welcome-intro">
-					<h1 class="avada-db-welcome-heading"><?php echo esc_html( apply_filters( 'avada_admin_welcome_title', __( 'Welcome To Avada!', 'Avada' ) ) ); ?></h1>
-					<p class="avada-db-welcome-text"><?php echo esc_html( apply_filters( 'avada_admin_welcome_text', __( 'Avada is now installed and ready to use! Get ready to build something beautiful. We hope you enjoy it!', 'Avada' ) ) ); ?></p>
+					<div class="avada-db-card-caption">
+						<?php if ( '' === $setup_completed ) : ?>
+							<?php /* translators: %s: The username. */ ?>
+							<h1 class="avada-db-welcome-heading"><?php echo esc_html( sprintf( apply_filters( 'avada_admin_welcome_title', __( 'Welcome To Avada, %s!', 'Avada' ) ), ucfirst( $the_user->display_name ) ) ); ?></h1>
+							<p class="avada-db-welcome-text"><?php echo esc_html( apply_filters( 'avada_admin_setup_welcome_text', __( 'Launch the Avada setup wizard, the easiest way to get your website started.', 'Avada' ) ) ); ?></p>
+						<?php else : ?>
+							<?php /* translators: %s: The username. */ ?>
+							<h1 class="avada-db-welcome-heading"><?php echo esc_html( sprintf( apply_filters( 'avada_admin_welcome_title_completed', __( 'Hello %s!', 'Avada' ) ), ucfirst( $the_user->display_name ) ) ); ?></h1>
+							<p class="avada-db-welcome-text"><?php echo esc_html( apply_filters( 'avada_admin_setup_welcome_text_completed', __( 'Welcome back to the Avada dashboard. Take a look at our latest update.', 'Avada' ) ) ); ?></p>
+						<?php endif; ?>
+					</div>
 
 			<?php // Filter for the dashboard welcome content. ?>
 			<?php ob_start(); ?>
+			<?php if ( '' !== $setup_completed ) : ?>
 					<a class="avada-db-welcome-video" href="#">
 						<span class="avada-db-welcome-video-icon">
 							<span class="avada-db-triangle"></span>
 						</span>
-						<span class="avada-db-welcome-video-text"><?php esc_html_e( 'Watch Avada Website Builder In Action.', 'Avada' ); ?></span>
+						<?php /* translators: %s: version number. */ ?>
+						<span class="avada-db-welcome-video-text"><?php echo esc_html( sprintf( __( 'What’s New In Avada %s', 'Avada' ), AVADA_VERSION ) ); ?></span>
 					</a>
+				<?php else : ?>
+					<a class="avada-db-get-started-button" href="<?php echo esc_url( admin_url( 'admin.php?page=avada-setup' ) ); ?>"><?php esc_html_e( 'Get Started', 'Avada' ); ?></a>
+				<?php endif; ?>
 				</div>
-				<?php $welcome_video = self::get_dashboard_screen_video_url(); ?>
-				<div class="avada-db-welcome-video-container">
-					<img class="avada-db-welcome-image" src="<?php echo esc_url( get_template_directory_uri() . '/assets/admin/images/dashboard-welcome.jpg' ); ?>" alt="<?php esc_html_e( 'WPEngine Logo', 'Avada' ); ?>" width="1200" height="712" />
-					<iframe class="avada-db-welcome-video-iframe" src="<?php echo esc_url( $welcome_video ); ?>" width="100%" height="100%" frameborder="0"></iframe>
+				<div class="avada-db-welcome-media-container">
+					<?php if ( '' !== $setup_completed ) : ?>
+						<?php $welcome_video = self::get_dashboard_screen_video_url(); ?>
+						<img class="avada-db-welcome-image" src="<?php echo esc_url( get_template_directory_uri() . '/assets/admin/images/welcome-completed.png' ); ?>" alt="<?php esc_html_e( 'Avada Welcome Image', 'Avada' ); ?>" width="646" height="400">
+						<iframe class="avada-db-welcome-video-iframe" data-src="<?php echo esc_url( $welcome_video ); ?>" width="100%" height="100%" frameborder="0"></iframe>
+					<?php else : ?>
+						<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/admin/images/welcome.png' ); ?>" alt="<?php esc_html_e( 'Avada Welcome Image', 'Avada' ); ?>" width="646" height="400">
+					<?php endif; ?>
 				</div>
-			</div>
-
-			<div class="avada-db-setup">
-				<h2 class="avada-db-setup-heading"><?php esc_html_e( 'Set Up Your Website', 'Avada' ); ?></h2>
-				<p class="avada-db-setup-text"><?php esc_html_e( 'Set up your website with 3 easy steps.' ); ?></p>
-
-				<a class="avada-db-setup-step avada-db-step-one<?php echo esc_attr( $completed_reg ); ?>" href="#avada-db-registration" aria-label="<?php esc_attr_e( 'Link to product registration', 'Avada' ); ?>">
-					<div class="avada-db-setup-step-info">
-						<h3 class="avada-db-setup-step-heading"><?php esc_html_e( 'Register Your Website', 'Avada' ); ?></h3>
-						<p class="avada-db-setup-step-text avada-db-card-text-small"><?php esc_html_e( 'Enter your purchase code in the form below to register this copy of Avada.' ); ?></p>
-					</div>
-					<i class="avada-db-setup-step-icon fusiona-unlock"></i>
-				</a>
-
-				<a class="avada-db-setup-step avada-db-step-two<?php echo esc_attr( $completed_import ); ?>" href="<?php echo esc_url( admin_url( 'admin.php?page=avada-prebuilt-websites' ) ); ?>" aria-label="<?php esc_attr_e( 'Link to prebuilt websites', 'Avada' ); ?>">
-					<div class="avada-db-setup-step-info">
-						<h3 class="avada-db-setup-step-heading"><?php esc_html_e( 'Select A Prebuilt Website', 'Avada' ); ?></h3>
-						<p class="avada-db-setup-step-text avada-db-card-text-small"><?php esc_html_e( 'One-click import one of our professionally designed, prebuilt websites.' ); ?></p>
-					</div>
-					<i class="avada-db-setup-step-icon fusiona-demos"></i>
-				</a>
-
-				<a class="avada-db-setup-step avada-db-step-three<?php echo esc_attr( $completed_customization ); ?>" href="<?php echo esc_url( add_query_arg( 'fb-edit', '1', get_site_url() ) ); ?>" aria-label="<?php esc_attr_e( 'Live edit website', 'Avada' ); ?>">
-					<div class="avada-db-setup-step-info">
-						<h3 class="avada-db-setup-step-heading"><?php esc_html_e( 'Customize Your Website', 'Avada' ); ?></h3>
-						<p class="avada-db-setup-step-text avada-db-card-text-small"><?php esc_html_e( 'Edit your website live, directly on the front-end, with Avada\'s amazing design tools.' ); ?></p>
-					</div>
-					<i class="fusiona-arrow-forward"></i>
-				</a>
 			</div>
 			<?php $welcome_html = ob_get_clean(); ?>
 			<?php echo apply_filters( 'avada_admin_welcome_screen_content', $welcome_html ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
@@ -134,6 +114,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 				} else {
 					$buy_button_text = esc_html__( 'Buy Another License', 'Avada' );
 				}
+
+				$resource_order = [ 2, 3, 4 ];
+				shuffle( $resource_order );
 				?>
 				<div class="avada-db-card-notice avada-db-welcome-resources-license<?php echo esc_attr( $notice_sale_class ); ?>" data-sale="<?php esc_attr_e( 'Sale', 'Avada' ); ?>">
 					<p class="avada-db-card-notice-heading-image">
@@ -152,7 +135,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</p>
 				</div>
 
-				<div class="avada-db-card-notice avada-db-welcome-resources-hosting avada-db-sale" data-sale="<?php esc_attr_e( 'Discount', 'Avada' ); ?>">
+				<div class="avada-db-card-notice avada-db-welcome-resources-hosting avada-db-sale" style="order:<?php echo esc_attr( $resource_order[0] ); ?>;<?php echo 4 === $resource_order[0] ? 'display:none;' : ''; ?>" data-sale="<?php esc_attr_e( 'Discount', 'Avada' ); ?>">
 					<p class="avada-db-card-notice-heading-image">
 						<a href="<?php echo esc_url( 'https://shareasale.com/r.cfm?b=1632110&u=873588&m=41388' ); ?>" class="avada-db-imgae-link" target="_blank" rel="noopener noreferrer">
 							<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/admin/images/avada-wpe-large.png' ); ?>" alt="<?php esc_html_e( 'WPEngine Logo', 'Avada' ); ?>" width="800" height="315" />
@@ -170,7 +153,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</p>
 				</div>
 
-				<div class="avada-db-card-notice avada-db-welcome-resources-customization">
+				<div class="avada-db-card-notice avada-db-welcome-resources-hosting avada-db-sale" style="order:<?php echo esc_attr( $resource_order[1] ); ?>;<?php echo 4 === $resource_order[1] ? 'display:none;' : ''; ?>" data-sale="<?php esc_attr_e( 'Discount', 'Avada' ); ?>">
+					<p class="avada-db-card-notice-heading-image">
+						<a href="<?php echo esc_url( 'https://www.siteground.com/avada?afcode=452502cf59bfef470b2806e5ba67670a' ); ?>" class="avada-db-imgae-link" target="_blank" rel="noopener noreferrer">
+							<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/admin/images/avada-siteground-large.png' ); ?>" alt="<?php esc_html_e( 'WPEngine Logo', 'Avada' ); ?>" width="800" height="315" />
+						</a>
+					</p>
+					<div class="avada-db-card-notice-heading">
+						<h3><?php esc_html_e( 'Avada Special Hosting', 'Avada' ); ?></h3>
+					</div>
+					<p class="avada-db-card-notice-content">
+						<?php esc_html_e( 'We have partnered with SiteGround to bring you full-service WordPress hosting. Sign up and have Avada installed and activated for you with one click.', 'Avada' ); ?><br />
+					</p>
+					<p class="avada-db-card-notice-content">
+						<a href="<?php echo esc_url( 'https://www.siteground.com/avada?afcode=452502cf59bfef470b2806e5ba67670a' ); ?>" class="button button-primary" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Get Special Offer', 'Avada' ); ?></a>
+					</p>
+				</div>
+
+				<div class="avada-db-card-notice avada-db-welcome-resources-customization" style="order:<?php echo esc_attr( $resource_order[2] ); ?>;<?php echo 4 === $resource_order[2] ? 'display:none;' : ''; ?>">
 					<p class="avada-db-card-notice-heading-image">
 						<a href="<?php echo esc_url( 'https://codeable.io/?ref=jMHpp' ); ?>" class="avada-db-imgae-link" target="_blank" rel="noopener noreferrer">
 							<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/admin/images/avada-codeable.png' ); ?>" alt="<?php esc_html_e( 'Codeable Logo', 'Avada' ); ?>" width="800" height="315" />

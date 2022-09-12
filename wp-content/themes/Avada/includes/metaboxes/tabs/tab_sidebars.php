@@ -30,7 +30,7 @@ function avada_page_options_tab_sidebars( $sections ) {
 	$skip_fields = false;
 	if ( $override ) {
 		$is_template = 'fusion_tb_section' === $post_type;
-		$layout_cats = get_the_terms( $post->ID, 'fusion_tb_category' );
+		$layout_cats = is_object( $post ) ? get_the_terms( $post->ID, 'fusion_tb_category' ) : false;
 
 		if ( ! $is_template ) {
 			$skip_fields = true;

@@ -724,7 +724,17 @@ class Fusion_Product_Registration {
 					?>
 				</p>
 			<?php else : ?>
-				<p class="avada-db-reg-text"><?php esc_html_e( 'Please enter your Avada purchase code and get access to our prebuilt websites, auto-updates, and premium plugins. The purchase code and site URL will be sent to a ThemeFusion server located in the U.S. to verify the purchase.', 'fusion-builder' ); ?></p>
+				<p class="avada-db-reg-text">
+					<?php 
+					esc_html_e( 'Please enter your Avada purchase code and get access to our prebuilt websites, auto-updates, and premium plugins. The purchase code and site URL will be sent to a ThemeFusion server located in the U.S. to verify the purchase.', 'fusion-builder' );
+
+					// Add note about installing plugins on Setup page.
+					if ( isset( $_GET['page'] ) && 'avada-setup' === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						echo '&nbsp;';
+						esc_html_e( 'After registration is completed required Avada plugins will be installed and activated if needed.', 'fusion-builder' );
+					}
+					?>
+				</p>
 			<?php endif; ?>
 
 			<form class="avada-db-reg-form" method="post">

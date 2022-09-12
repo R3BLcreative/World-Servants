@@ -70,6 +70,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				values.height = _.fusionValidateAttrValue( values.height, '' );
 				values.width  = _.fusionValidateAttrValue( values.width, '' );
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -95,11 +98,19 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( '' !== values.alignment ) {
 					attrVimeo[ 'class' ] += ' fusion-align' + values.alignment;
-					attrVimeo.style += ' width:100%';
+					attrVimeo.style += ' width:100%;';
 				}
 
 				if ( 'true' == values.autoplay || 'yes' === values.autoplay ) {
 					attrVimeo[ 'data-autoplay' ] = '1';
+				}
+
+				if ( '' !== values.margin_top ) {
+					attrVimeo.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					attrVimeo.style += 'margin-bottom:' + values.margin_bottom + ';';
 				}
 
 				if ( '' !== values[ 'class' ] ) {

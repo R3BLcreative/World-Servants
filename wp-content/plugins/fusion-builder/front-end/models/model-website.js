@@ -166,7 +166,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			var self = this;
 
 			// Demo on Click.
-			$container.find( '.studio-imports > li' ).on( 'click', function( event ) {
+			$container.find( '.studio-imports > li.awb-demo-pages-layout' ).on( 'click', function( event ) {
 				event.preventDefault();
 				self.state.current = jQuery( this ).data( 'website_id' );
 				self.state.title = jQuery( this ).data( 'website_title' );

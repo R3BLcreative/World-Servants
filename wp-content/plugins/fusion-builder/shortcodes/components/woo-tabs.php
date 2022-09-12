@@ -110,12 +110,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_tabs' ) ) {
 					'fusion_font_family_text_font'   => '',
 					'fusion_font_variant_text_font'  => '',
 					'text_font_size'                 => '',
+					'text_text_transform'            => '',
+					'text_line_height'               => '',
+					'text_letter_spacing'            => '',
 
 					// Title styling.
 					'title_color'                    => '',
 					'fusion_font_family_title_font'  => '',
 					'fusion_font_variant_title_font' => '',
 					'title_font_size'                => '',
+					'title_text_transform'           => '',
+					'title_line_height'              => '',
+					'title_letter_spacing'           => '',
 
 					'stars_color'                    => '',
 					'backgroundcolor'                => '',
@@ -379,6 +385,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_tabs' ) ) {
 					$this->add_css_property( $this->base_selector . ' .woocommerce-tabs .panel', 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['text_font_size'] ) );
 				}
 
+				if ( ! $this->is_default( 'text_line_height' ) ) {
+					$this->add_css_property( $this->base_selector . ' .woocommerce-tabs .panel', 'line-height', $this->args['text_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'text_letter_spacing' ) ) {
+					$this->add_css_property( $this->base_selector . ' .woocommerce-tabs .panel', 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['text_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'text_text_transform' ) ) {
+					$this->add_css_property( $this->base_selector . ' .woocommerce-tabs .panel', 'text-transform', $this->args['text_text_transform'] );
+				}
+
 				// Text typography styles.
 				$text_styles = Fusion_Builder_Element_Helper::get_font_styling( $this->args, 'text_font', 'array' );
 				foreach ( $text_styles as $rule => $value ) {
@@ -396,6 +414,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_tabs' ) ) {
 
 				if ( ! $this->is_default( 'title_font_size' ) ) {
 					$this->add_css_property( $title_selectors, 'font-size', fusion_library()->sanitize->get_value_with_unit( $this->args['title_font_size'] ) );
+				}
+
+				if ( ! $this->is_default( 'title_line_height' ) ) {
+					$this->add_css_property( $title_selectors, 'line-height', $this->args['title_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'title_letter_spacing' ) ) {
+					$this->add_css_property( $title_selectors, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['title_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'title_text_transform' ) ) {
+					$this->add_css_property( $title_selectors, 'text-transform', $this->args['title_text_transform'] );
 				}
 
 				// Heading typography styles.
@@ -522,6 +552,22 @@ function fusion_component_woo_tabs() {
 				'component'               => true,
 				'templates'               => [ 'content' ],
 				'components_per_template' => 1,
+				'subparam_map'            => [
+					'fusion_font_family_title_font'  => 'title_fonts',
+					'fusion_font_variant_title_font' => 'title_fonts',
+					'title_font_size'                => 'title_fonts',
+					'title_text_transform'           => 'title_fonts',
+					'title_line_height'              => 'title_fonts',
+					'title_letter_spacing'           => 'title_fonts',
+					'title_color'                    => 'title_fonts',
+					'fusion_font_family_text_font'   => 'text_fonts',
+					'fusion_font_variant_text_font'  => 'text_fonts',
+					'text_font_size'                 => 'text_fonts',
+					'text_text_transform'            => 'text_fonts',
+					'text_line_height'               => 'text_fonts',
+					'text_letter_spacing'            => 'text_fonts',
+					'text_color'                     => 'text_fonts',
+				],
 				'params'                  => [
 					[
 						'type'        => 'checkbox_button_set',
@@ -710,33 +756,29 @@ function fusion_component_woo_tabs() {
 						],
 					],
 					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_html__( 'Content Heading Color', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the color of the content heading, ex: #000.' ),
-						'param_name'  => 'title_color',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_tab_titles',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Content Heading Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the content heading. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'title_fonts',
+						'choices'          => [
+							'font-family'    => 'title_font',
+							'font-size'      => 'title_font_size',
+							'text-transform' => 'title_text_transform',
+							'line-height'    => 'title_line_height',
+							'letter-spacing' => 'title_letter_spacing',
+							'color'          => 'title_color',
 						],
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_html__( 'Content Heading Font Family', 'fusion-builder' ),
-						'description'      => esc_html__( 'Controls the font family of the content heading.', 'fusion-builder' ),
-						'param_name'       => 'title_font',
 						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '',
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => '',
 						],
+						'remove_from_atts' => true,
+						'global'           => true,
 						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'dependency'       => [
 							[
@@ -750,57 +792,31 @@ function fusion_component_woo_tabs() {
 						],
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_html__( 'Content Heading Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the content heading. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'title_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_tab_titles',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Content Text Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the content text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'text_fonts',
+						'choices'          => [
+							'font-family'    => 'text_font',
+							'font-size'      => 'text_font_size',
+							'text-transform' => 'text_text_transform',
+							'line-height'    => 'text_line_height',
+							'letter-spacing' => 'text_letter_spacing',
+							'color'          => 'text_color',
 						],
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_html__( 'Content Text Color', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the color of the content text, ex: #000.' ),
-						'param_name'  => 'text_color',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_html__( 'Content Text Font Family', 'fusion-builder' ),
-						'description'      => esc_html__( 'Controls the font family of the content text.', 'fusion-builder' ),
-						'param_name'       => 'text_font',
 						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '',
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => '',
 						],
+						'remove_from_atts' => true,
+						'global'           => true,
 						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'callback'         => [
-							'function' => 'fusion_style_block',
-						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_html__( 'Content Text Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the content text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'text_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'callback'    => [
 							'function' => 'fusion_style_block',
 						],
 					],

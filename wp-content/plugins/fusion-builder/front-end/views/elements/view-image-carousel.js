@@ -91,6 +91,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			validateValues: function( values ) {
 				values.column_spacing = _.fusionValidateAttrValue( values.column_spacing, 'px' );
+				values.margin_bottom  = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left    = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right   = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top     = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -110,6 +114,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( true === this.model.attributes.showPlaceholder ) {
 					attr[ 'class' ] += ' fusion-show-placeholder';
+				}
+
+				if ( '' !== values.margin_top ) {
+					attr.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					attr.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					attr.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					attr.style += 'margin-left:' + values.margin_left + ';';
 				}
 
 				if ( 'yes' === values.lightbox ) {
@@ -272,7 +292,7 @@ responsive = '';
 				selectors = [ this.baseSelector + ' .awb-imageframe-caption-container .awb-imageframe-caption-title' ];
 				// title color.
 				if ( ! this.isDefault( 'caption_title_color' ) ) {
-					this.addCssProperty( selectors, 'color', atts.values.caption_title_color );
+					this.addCssProperty( selectors, 'color', atts.values.caption_title_color, true );
 				}
 				// title size.
 				if ( ! this.isDefault( 'caption_title_size' ) ) {
@@ -287,7 +307,15 @@ responsive = '';
 				}
 				// title transform.
 				if ( ! this.isDefault( 'caption_title_transform' ) ) {
-					this.addCssProperty( selectors, 'text-transform', atts.values.caption_title_transform );
+					this.addCssProperty( selectors, 'text-transform', atts.values.caption_title_transform, true );
+				}
+				// Line height.
+				if ( ! this.isDefault( 'caption_title_line_height' ) ) {
+					this.addCssProperty( selectors, 'line-height', atts.values.caption_title_line_height, true );
+				}
+				// Letter spacing.
+				if ( ! this.isDefault( 'caption_title_letter_spacing' ) ) {
+					this.addCssProperty( selectors, 'letter-spacing', _.fusionGetValueWithUnit( atts.values.caption_title_letter_spacing ), true );
 				}
 
 				selectors = [ this.baseSelector + ' .awb-imageframe-caption-container .awb-imageframe-caption-text' ];
@@ -309,6 +337,14 @@ responsive = '';
 				// text transform.
 				if ( ! this.isDefault( 'caption_text_transform' ) ) {
 					this.addCssProperty( selectors, 'text-transform', atts.values.caption_text_transform );
+				}
+				// Line height.
+				if ( ! this.isDefault( 'caption_text_line_height' ) ) {
+					this.addCssProperty( selectors, 'line-height', atts.values.caption_text_line_height );
+				}
+				// Letter spacing.
+				if ( ! this.isDefault( 'caption_text_letter_spacing' ) ) {
+					this.addCssProperty( selectors, 'letter-spacing', _.fusionGetValueWithUnit( atts.values.caption_text_letter_spacing ) );
 				}
 
 				// Border color.

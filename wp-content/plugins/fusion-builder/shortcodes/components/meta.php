@@ -100,6 +100,8 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 					'border_size'              => null,
 					'border_color'             => $fusion_settings->get( 'sep_color' ),
 					'alignment'                => 'flex-start',
+					'alignment_medium'         => '',
+					'alignment_small'          => '',
 					'stacked_vertical_align'   => 'flex-start',
 					'stacked_horizontal_align' => 'flex-start',
 					'height'                   => '33',
@@ -123,6 +125,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 					'border_right'             => '0px',
 					'border_top'               => '1px',
 					'read_time'                => 200,
+					'reading_time_decimal'     => 'yes',
 					'background_color'         => '',
 					'item_background_color'    => '',
 					'item_border_color'        => $fusion_settings->get( 'sep_color' ),
@@ -226,6 +229,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 			protected function get_styles() {
 				$this->base_selector = '.fusion-meta-tb.fusion-meta-tb-' . $this->counter;
 				$this->dynamic_css   = [];
+				$fusion_settings     = awb_get_fusion_settings();
 
 				$selectors = [
 					$this->base_selector,
@@ -238,6 +242,11 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 
 				if ( ! $this->is_default( 'link_color' ) ) {
 					$this->add_css_property( $this->base_selector . ' span a', 'color', $this->args['link_color'] );
+				}
+
+				// Alignment.
+				if ( '' !== $this->args['alignment'] && 'stacked' !== $this->args['layout'] ) {
+					$this->add_css_property( $this->base_selector, 'justify-content', $this->args['alignment'] );
 				}
 
 				$selectors = [
@@ -330,6 +339,22 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 				}
 
 				$css = $this->parse_css();
+
+				// Responsive Alignment.
+				if ( 'stacked' !== $this->args['layout'] ) {
+					foreach ( [ 'medium', 'small' ] as $size ) {
+						$key   = 'alignment_' . $size;
+						$media = sprintf( '@media only screen and (max-width:%spx)', $fusion_settings->get( 'visibility_' . $size ) );
+
+						if ( '' === $this->args[ $key ] ) {
+							continue;
+						}
+
+						$this->dynamic_css = [];
+						$this->add_css_property( $this->base_selector, 'justify-content', $this->args[ $key ] );
+						$css .= sprintf( '%s { %s }', $media, $this->parse_css() );
+					}
+				}
 				return $css ? '<style type="text/css">' . $css . '</style>' : '';
 			}
 
@@ -358,10 +383,6 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 
 				if ( $this->args['height'] ) {
 					$attr['style'] .= 'min-height:' . $this->args['height'] . ';';
-				}
-
-				if ( '' !== $this->args['alignment'] && 'stacked' !== $this->args['layout'] ) {
-					$attr['style'] .= 'justify-content:' . $this->args['alignment'] . ';';
 				}
 
 				if ( '' !== $this->args['stacked_vertical_align'] && 'floated' !== $this->args['layout'] ) {
@@ -410,6 +431,22 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 					'link_color'     => 'text_color',
 					'primary_color'  => 'text_hover_color',
 					'meta_font_size' => 'font_size',
+				];
+			}
+
+			/**
+			 * Used to set any other variables for use on front-end editor template.
+			 *
+			 * @static
+			 * @access public
+			 * @since 3.6
+			 * @return array
+			 */
+			public static function get_element_extras() {
+				$fusion_settings = awb_get_fusion_settings();
+				return [
+					'visibility_medium' => $fusion_settings->get( 'visibility_medium' ),
+					'visibility_small'  => $fusion_settings->get( 'visibility_small' ),
 				];
 			}
 
@@ -537,9 +574,11 @@ if ( fusion_is_element_enabled( 'fusion_tb_meta' ) ) {
 							break;
 						case 'read_time':
 							$reading_time_args = [
-								'reading_speed' => $this->args['read_time'],
+								'reading_speed'         => $this->args['read_time'],
+								'use_decimal_precision' => $this->args['reading_time_decimal'],
 							];
-							$reading_time      = awb_get_reading_time( $this->get_post_id(), $reading_time_args );
+
+							$reading_time = awb_get_reading_time_for_display( $this->get_post_id(), $reading_time_args );
 							/* Translators: %s: minutes of read. */
 							$content .= '<span class="fusion-tb-published-read-time">' . sprintf( esc_html__( '%s min read', 'fusion-builder' ), $reading_time ) . '</span>' . $separator;
 							break;
@@ -779,7 +818,7 @@ function fusion_component_meta() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Reading Time', 'fusion-builder' ),
-						'description' => esc_attr__( 'Average Words Read / Min', 'fusion-builder' ),
+						'description' => esc_attr__( 'Average words read per minute. The default value is 200.', 'fusion-builder' ),
 						'param_name'  => 'read_time',
 						'value'       => '200',
 						'default'     => '200',
@@ -787,6 +826,36 @@ function fusion_component_meta() {
 							'function' => 'fusion_ajax',
 							'action'   => 'get_fusion_tb_meta',
 							'ajax'     => true,
+						],
+						'dependency'  => [
+							[
+								'element'  => 'meta',
+								'value'    => 'read_time',
+								'operator' => 'contains',
+							],
+						],
+					],
+					[
+						'type'        => 'radio_button_set',
+						'heading'     => esc_attr__( 'Reading Time Decimal Precision', 'fusion-builder' ),
+						'description' => esc_attr__( 'Whether to use(Ex: 2.3 min) or not(Ex: 2 min) decimal precision in reading time.', 'fusion-builder' ),
+						'param_name'  => 'reading_time_decimal',
+						'value'       => [
+							'yes' => esc_html__( 'Yes', 'fusion-builder' ),
+							'no'  => esc_html__( 'No', 'fusion-builder' ),
+						],
+						'default'     => 'yes',
+						'callback'    => [
+							'function' => 'fusion_ajax',
+							'action'   => 'get_fusion_tb_meta',
+							'ajax'     => true,
+						],
+						'dependency'  => [
+							[
+								'element'  => 'meta',
+								'value'    => 'read_time',
+								'operator' => 'contains',
+							],
 						],
 					],
 					[
@@ -820,6 +889,9 @@ function fusion_component_meta() {
 								'value'    => 'stacked',
 								'operator' => '!=',
 							],
+						],
+						'responsive'  => [
+							'state' => 'large',
 						],
 					],
 					[

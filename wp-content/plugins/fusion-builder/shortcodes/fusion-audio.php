@@ -63,6 +63,10 @@ if ( fusion_is_element_enabled( 'fusion_audio' ) && ! class_exists( 'FusionSC_Au
 				'animation_direction'        => 'down',
 				'animation_speed'            => '',
 				'animation_offset'           => $fusion_settings->get( 'animation_offset' ),
+				'margin_bottom'              => '',
+				'margin_left'                => '',
+				'margin_right'               => '',
+				'margin_top'                 => '',
 				'hide_on_mobile'             => fusion_builder_default_visibility( 'string' ),
 				'class'                      => '',
 				'id'                         => '',
@@ -128,6 +132,11 @@ if ( fusion_is_element_enabled( 'fusion_audio' ) && ! class_exists( 'FusionSC_Au
 			$border_radius               = $this->args['border_radius_top_left'] . ' ' . $this->args['border_radius_top_right'] . ' ' . $this->args['border_radius_bottom_right'] . ' ' . $this->args['border_radius_bottom_left'];
 			$this->args['border_radius'] = ( '0px 0px 0px 0px' === $border_radius ) ? '' : $border_radius;
 
+			$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+			$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+			$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+			$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
+
 			$html = '<div ' . FusionBuilder::attributes( 'audio-shortcode' ) . '>';
 
 			$sc_params = '';
@@ -190,6 +199,8 @@ if ( fusion_is_element_enabled( 'fusion_audio' ) && ! class_exists( 'FusionSC_Au
 			if ( 'yes' === $this->args['box_shadow'] ) {
 				$style .= '--fusion-audio-box-shadow:' . Fusion_Builder_Box_Shadow_Helper::get_box_shadow_styles( $this->args );
 			}
+
+			$style .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 			$attr['style'] = $style;
 
@@ -274,7 +285,7 @@ if ( fusion_is_element_enabled( 'fusion_audio' ) && ! class_exists( 'FusionSC_Au
 							'label'       => esc_attr__( 'Background Color', 'fusion-builder' ),
 							'description' => esc_attr__( 'Controls the background color for the audio player.', 'fusion-builder' ),
 							'id'          => 'audio_background_color',
-							'default'     => '#1d242d',
+							'default'     => 'var(--awb-color8)',
 							'type'        => 'color-alpha',
 							'css_vars'    => [
 								[
@@ -288,7 +299,7 @@ if ( fusion_is_element_enabled( 'fusion_audio' ) && ! class_exists( 'FusionSC_Au
 							'label'       => esc_attr__( 'Audio Progress Color', 'fusion-builder' ),
 							'description' => esc_attr__( 'Select a color for the audio progress-bar.', 'fusion-builder' ),
 							'id'          => 'audio_progressbar_color',
-							'default'     => '#ffffff',
+							'default'     => 'var(--awb-color1)',
 							'type'        => 'color-alpha',
 							'css_vars'    => [
 								[
@@ -332,9 +343,8 @@ if ( fusion_is_element_enabled( 'fusion_audio' ) && ! class_exists( 'FusionSC_Au
 							'label'       => esc_attr__( 'Border Color', 'fusion-builder' ),
 							'description' => esc_attr__( 'Controls the border color for the audio player.', 'fusion-builder' ),
 							'id'          => 'audio_border_color',
-							'value'       => '',
 							'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-							'default'     => '',
+							'default'     => 'var(--awb-color1)',
 							'css_vars'    => [
 								[
 									'name'     => '--fusion-audio-border-color-default',
@@ -415,7 +425,7 @@ function fusion_element_audio() {
 				'allow_generator'          => false,
 				'inline_editor'            => false,
 				'inline_editor_shortcodes' => false,
-				'help_url'                 => 'https://theme-fusion.com/documentation/fusion-builder/elements/audio-element/',
+				'help_url'                 => 'https://theme-fusion.com/documentation/avada/elements/audio-element/',
 				'params'                   => [
 					[
 						'type'        => 'uploadfile',
@@ -529,6 +539,16 @@ function fusion_element_audio() {
 					'fusion_box_shadow_no_inner_placeholder' => [],
 					'fusion_animation_placeholder'     => [
 						'preview_selector' => '.fusion-audio',
+					],
+					'fusion_margin_placeholder'        => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
 					],
 					[
 						'type'        => 'checkbox_button_set',

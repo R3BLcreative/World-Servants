@@ -1,4 +1,4 @@
-/* global builderConfig, FusionPageBuilder, builderId, fusionSettings, FusionPageBuilderApp, fusionAllElements, fusionAppConfig, FusionApp, fusionOptionName, fusionBuilderText, fusionIconSearch */
+/* global builderConfig, awbTypoData, FusionPageBuilder, builderId, fusionSettings, FusionPageBuilderApp, fusionAllElements, fusionAppConfig, FusionApp, fusionOptionName, fusionBuilderText, fusionIconSearch */
 /* jshint -W020 */
 var FusionEvents = _.extend( {}, Backbone.Events );
 
@@ -18,7 +18,6 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 
 				this.callback           = new FusionPageBuilder.Callback();
 				this.dialog             = new FusionPageBuilder.Dialog();
-				this.assets             = new FusionPageBuilder.Assets();
 				this.inlineEditor       = new FusionPageBuilder.inlineEditor();
 				this.validate           = new FusionPageBuilder.Validate();
 				this.hotkeys            = new FusionPageBuilder.Hotkeys();
@@ -65,6 +64,9 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 				// Font Awesome stuff.
 				this.listenTo( FusionEvents, 'fusion-preview-update', this.toggleFontAwesomePro );
 				this.listenTo( FusionEvents, 'fusion-to-status_fontawesome-changed', this.FontAwesomeSubSets );
+
+				// Preview updates.
+				this.listenTo( FusionEvents, 'awb-update-studio-item-preview', this.previewColors  );
 
 				this.setHeartbeatListeners();
 				this.correctLayoutTooltipPosition();
@@ -192,23 +194,40 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 			initStudioPreview: function() {
 
 				// Studio preview.
-				jQuery( 'body' ).on( 'click', '.fusion-studio-preview', function( event ) {
-					var url    = jQuery( event.currentTarget ).data( 'url' ),
-						$wrapper = jQuery( event.currentTarget ).closest( '.studio-wrapper' );
+				jQuery( 'body' ).on( 'click', '.studio-wrapper .fusion-page-layout:not(.awb-demo-pages-layout) img', function( event ) {
+					var $item    = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
+						url      = $item.data( 'url' ),
+						$wrapper = $item.closest( '.studio-wrapper' ),
+						layoutID = $item.data( 'layout-id' );
 
 					$wrapper.addClass( 'loading fusion-studio-preview-active' );
 					$wrapper.find( '.fusion-loader' ).show();
-					$wrapper.prepend( '<button class="fusion-studio-preview-back fusiona-close-fb"></button>' );
-					$wrapper.append( '<iframe class="fusion-studio-preview-frame" src="' + url + '" frameBorder="0" scrolling="auto" onload="FusionApp.studioPreviewLoaded();" allowfullscreen=""></iframe>' );
+					$wrapper.append( '<iframe class="awb-studio-preview-frame" src="' + url + '" frameBorder="0" scrolling="auto" onload="FusionApp.studioPreviewLoaded();" allowfullscreen=""></iframe>' );
+					$wrapper.find( '.awb-import-options' ).addClass( 'open' );
+					$wrapper.data( 'layout-id', layoutID );
 				} );
 
 				// Remove studio preview.
 				jQuery( 'body' ).on( 'click', '.fusion-studio-preview-back', function( event ) {
 					var $wrapper = jQuery( event.currentTarget ).closest( '.studio-wrapper' );
 
+					event.preventDefault();
+
 					$wrapper.removeClass( 'fusion-studio-preview-active' );
-					$wrapper.find( '.fusion-studio-preview-back' ).remove();
-					$wrapper.find( '.fusion-studio-preview-frame' ).remove();
+					$wrapper.find( '.awb-studio-preview-frame' ).remove();
+					$wrapper.find( '.awb-import-options' ).removeClass( 'open' );
+					$wrapper.removeData( 'layout-id' );
+				} );
+
+				// Import in preview.
+				jQuery( 'body' ).on( 'click', '.fusion-studio-preview-active .awb-import-studio-item-in-preview', function( event ) {
+					var $wrapper = jQuery( event.currentTarget ).closest( '.studio-wrapper ' ),
+						dataID = $wrapper.data( 'layout-id' );
+
+					event.preventDefault();
+
+					jQuery( '.fusion-studio-preview-active .fusion-studio-preview-back' ).trigger( 'click' );
+					jQuery( '.fusion-page-layout[data-layout-id="' + dataID + '"]' ).find( '.awb-import-studio-item' ).trigger( 'click' );
 				} );
 			},
 
@@ -219,8 +238,126 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 			 * @return {void}
 			 */
 			studioPreviewLoaded: function() {
-				jQuery( '.studio-wrapper' ).removeClass( 'loading' );
-				jQuery( '.studio-wrapper' ).find( '.fusion-loader' ).hide();
+				if ( 'object' === typeof FusionApp ) {
+					this.previewColors();
+				} else {
+					jQuery( '.studio-wrapper' ).removeClass( 'loading' ).find( '.fusion-loader' ).hide();
+				}
+			},
+
+			/**
+			 * Trigger preview colors to update on preview.
+			 *
+			 * @since 3.7
+			 * @return {void}
+			 */
+			previewColors: function() {
+				var styleObject = getComputedStyle( document.getElementById( 'fb-preview' ).contentWindow.document.documentElement ),
+					overWriteType    = jQuery( '.awb-import-options input[name="overwrite-type"]:checked' ).val(),
+					shouldInvert     = jQuery( '.awb-import-options input[name="invert"]:checked' ).val(),
+					varData          = {
+						color_palette: {},
+						typo_sets: {},
+						shouldInvert: shouldInvert
+					};
+
+				varData = this.getOverWritePalette( varData, styleObject, overWriteType, shouldInvert );
+				varData = this.getOverWriteTypography( varData, styleObject, overWriteType );
+
+				jQuery( '.awb-studio-preview-frame' )[ 0 ].contentWindow.postMessage( varData, '*' );
+
+				// Remove loading from preview.
+				jQuery( '.studio-wrapper' ).removeClass( 'loading' ).find( '.fusion-loader' ).hide();
+			},
+
+			/**
+			 * Gets overwrite palette.
+			 *
+			 * @since 3.7
+			 * @param {Object} varData       The var data.
+			 * @param {Object} styleObject   The style object.
+			 * @param {String} overWriteType The overwrite type.
+			 * @param {String} shouldInvert  If should invert or not.
+			 * @return {object}
+			 */
+			getOverWritePalette: function( varData, styleObject, overWriteType, shouldInvert ) {
+				if ( 'inherit' === overWriteType ) {
+					switch ( shouldInvert ) {
+					case 'dont-invert':
+						for ( let step = 1; 9 > step; step++ ) {
+							varData.color_palette[ '--awb-color' + step ]        = styleObject.getPropertyValue( '--awb-color' + step );
+							varData.color_palette[ '--awb-color' + step + '-h' ] = styleObject.getPropertyValue( '--awb-color' + step + '-h' );
+							varData.color_palette[ '--awb-color' + step + '-s' ] = styleObject.getPropertyValue( '--awb-color' + step + '-s' );
+							varData.color_palette[ '--awb-color' + step + '-l' ] = styleObject.getPropertyValue( '--awb-color' + step + '-l' );
+							varData.color_palette[ '--awb-color' + step + '-a' ] = styleObject.getPropertyValue( '--awb-color' + step + '-a' );
+						}
+						break;
+					case 'do-invert':
+						for ( let i = 1, revI = 8; 8 >= i; i++, revI-- ) {
+							varData.color_palette[ '--awb-color' + i ]        = styleObject.getPropertyValue( '--awb-color' + revI );
+							varData.color_palette[ '--awb-color' + i + '-h' ] = styleObject.getPropertyValue( '--awb-color' + revI + '-h' );
+							varData.color_palette[ '--awb-color' + i + '-s' ] = styleObject.getPropertyValue( '--awb-color' + revI + '-s' );
+							varData.color_palette[ '--awb-color' + i + '-l' ] = styleObject.getPropertyValue( '--awb-color' + revI + '-l' );
+							varData.color_palette[ '--awb-color' + i + '-a' ] = styleObject.getPropertyValue( '--awb-color' + revI + '-a' );
+						}
+						break;
+					}
+
+					return varData;
+				}
+
+
+				return varData;
+			},
+
+			/**
+			 * Gets typography overwrite.
+			 *
+			 * @since 3.7
+			 * @param {Object} varData       The var data.
+			 * @param {Object} styleObject   The style object.
+			 * @param {String} overWriteType The overwrite type.
+			 * @return {object}
+			 */
+			getOverWriteTypography: function( varData, styleObject, overWriteType ) {
+				const subsets = [
+					'font-family',
+					'font-size',
+					'font-weight',
+					'font-style',
+					'font-variant',
+					'line-height',
+					'letter-spacing',
+					'text-transform'
+				];
+
+				if ( 'inherit' !== overWriteType ) {
+					return varData;
+				}
+
+				// Global typography sets.
+				for ( let step = 1; 6 > step; step++ ) {
+					subsets.forEach( function( subset ) {
+						subset = '--awb-typography' + step + '-' + subset;
+						const value = styleObject.getPropertyValue( subset );
+						if ( '' !== value ) {
+							varData.typo_sets[ subset ] = value;
+						}
+					} );
+				}
+
+				// Headings typography.
+				for ( let step = 1; 7 > step; step++ ) {
+					subsets.forEach( function( subset ) {
+						subset = '--h' + step + '_typography-' + subset;
+						const value = styleObject.getPropertyValue( subset );
+						if ( '' !== value ) {
+							varData.typo_sets[ subset ] = value;
+						}
+					} );
+				}
+
+				return varData;
 			},
 
 			/**
@@ -758,7 +895,7 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 					}
 					return this.data.examplePostDetails.post_meta;
 				}
-				if ( ( 'fusion_tb_section' === FusionApp.data.postDetails.post_type || 'post_cards' === FusionApp.data.fusion_element_type ) && 'undefined' !== typeof FusionApp.data.postMeta._fusion && 'undefined' !== typeof FusionApp.data.postMeta._fusion.dynamic_content_preview_type && 'undefined' !== typeof FusionApp.initialData.dynamicPostID ) {
+				if ( ( 'fusion_tb_section' === FusionApp.data.postDetails.post_type || 'post_cards' === FusionApp.data.fusion_element_type || 'awb_off_canvas' === FusionApp.data.postDetails.post_type ) && 'undefined' !== typeof FusionApp.data.postMeta._fusion && 'undefined' !== typeof FusionApp.data.postMeta._fusion.dynamic_content_preview_type && 'undefined' !== typeof FusionApp.initialData.dynamicPostID ) {
 					return FusionApp.initialData.dynamicPostID;
 				}
 				if ( 'object' !== typeof this.data.examplePostDetails ) {
@@ -1495,9 +1632,11 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 			setGoogleFonts: function() {
 				var self        = this,
 					googleFonts = {},
+					fontFamily,
 					$fontNodes  = jQuery( '#fb-preview' ).contents().find( '[data-fusion-google-font]' );
 
 				googleFonts = this.setElementFonts( googleFonts );
+
 				if ( $fontNodes.length ) {
 					$fontNodes.each( function() {
 						if ( 'undefined' === typeof googleFonts[ jQuery( this ).attr( 'data-fusion-google-font' ) ] ) {
@@ -1513,6 +1652,17 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 					} );
 				}
 
+				// Delete global typographies. If is studio, then parse overwrite typography to add to meta.
+				for ( fontFamily in googleFonts ) {
+					if ( fontFamily.includes( 'var(' ) ) {
+
+						// awbOriginalPalette is a variable present only on studio plugin.
+						if ( window.awbOriginalPalette ) {
+							addOverwriteTypographyToMeta( fontFamily );
+						}
+					}
+				}
+
 				// Check each has a variant selected
 				_.each( googleFonts, function( font, family ) {
 					if ( 'object' !== typeof font.variants || ! font.variants.length ) {
@@ -1521,9 +1671,9 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 				} );
 
 				if ( 'object' === typeof this.data.postMeta._fusion_google_fonts ) {
-					_.each( this.data.postMeta._fusion_google_fonts, function( fontData, fontFamily ) {
+					_.each( this.data.postMeta._fusion_google_fonts, function( fontData, currentFontFamily ) {
 						_.each( fontData, function( values, key ) {
-							self.data.postMeta._fusion_google_fonts[ fontFamily ][ key ] = _.values( values );
+							self.data.postMeta._fusion_google_fonts[ currentFontFamily ][ key ] = _.values( values );
 						} );
 					} );
 
@@ -1541,6 +1691,68 @@ var FusionEvents = _.extend( {}, Backbone.Events );
 					// We do not have existing values and we do have fonts now.
 					this.data.postMeta._fusion_google_fonts = googleFonts; // eslint-disable-line camelcase
 					this.contentChange( 'page', 'page-option' );
+				}
+
+				function addOverwriteTypographyToMeta( globalVar ) {
+					var typoMatch = globalVar.match( /--awb-typography(\d)/ ),
+						fontName,
+						fontVariant,
+						uniqueFontVariant,
+						variantMatch,
+						i,
+						typoId;
+
+					if ( ! typoMatch[ 1 ] || ! Array.isArray( googleFonts[ globalVar ].variants ) ) {
+						delete googleFonts[ globalVar ];
+						return;
+					}
+
+					// Get the font family.
+					typoId = typoMatch[ 1 ];
+					fontName = awbTypoData.data[ 'typography' + typoId ][ 'font-family' ];
+					fontVariant = [];
+
+					// Get the global font variants and merge with non-global ones.
+					for ( i = 0; i < googleFonts[ globalVar ].variants.length; i++ ) {
+						if ( googleFonts[ globalVar ].variants[ i ].includes( 'var(' ) ) {
+							variantMatch = googleFonts[ globalVar ].variants[ i ].match( /--awb-typography(\d)/ );
+
+							if ( variantMatch[ 1 ] ) {
+								if ( awbTypoData.data[ 'typography' + variantMatch[ 1 ] ].variant ) {
+									fontVariant.push( awbTypoData.data[ 'typography' + variantMatch[ 1 ] ].variant );
+								} else {
+									fontVariant.push( '400' );
+								}
+							}
+
+						} else {
+							fontVariant.push( googleFonts[ globalVar ].variants[ i ] );
+						}
+					}
+
+					// Update the font variant. If exist then concat them.
+					if ( googleFonts[ fontName ] ) {
+						if ( googleFonts[ fontName ].variants ) {
+							googleFonts[ fontName ].variants = googleFonts[ fontName ].variants.concat( fontVariant );
+						} else {
+							googleFonts[ fontName ].variants = fontVariant;
+						}
+					} else {
+						googleFonts[ fontName ] = {};
+						googleFonts[ fontName ].variants = fontVariant;
+					}
+
+					// Remove duplicate variants.
+					uniqueFontVariant = [];
+					googleFonts[ fontName ].variants.forEach( function( el ) {
+						if ( ! uniqueFontVariant.includes( el ) ) {
+							uniqueFontVariant.push( el );
+						}
+					} );
+					googleFonts[ fontName ].variants = uniqueFontVariant;
+
+					// Finally, delete global variant.
+					delete googleFonts[ globalVar ];
 				}
 			},
 

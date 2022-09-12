@@ -48,6 +48,8 @@ class Avada_Template {
 		$this->body_classes = $this->body_classes( [] );
 
 		add_filter( 'body_class', [ $this, 'body_class_filter' ] );
+
+		add_filter( 'fusion_element_attributes_args', [ $this, 'body_attributes_filter' ], 10, 2 );
 	}
 
 	/**
@@ -184,7 +186,10 @@ class Avada_Template {
 		// If we have an override, ignore global.
 		if ( 'template_sidebar' === $sidebars_option_names[0] ) {
 			$sidebar_1 = fusion_get_option( $sidebars_option_names[0] );
+			$sidebar_1 = ! empty( $sidebar_1 ) ? (array) $sidebar_1 : '';
+
 			$sidebar_2 = fusion_get_option( $sidebars_option_names[1] );
+			$sidebar_2 = ! empty( $sidebar_2 ) ? (array) $sidebar_2 : '';
 		}
 
 		$override = function_exists( 'Fusion_Template_Builder' ) ? Fusion_Template_Builder()->get_override( 'content' ) : false;
@@ -220,6 +225,23 @@ class Avada_Template {
 		return apply_filters( 'avada_sidebar_context', $sidebar_1, $c_page_id, $sidebar, false );
 	}
 
+	/**
+	 * Filters body element's attributes.
+	 *
+	 * @since 7.8
+	 *
+	 * @param  array $args Element attributes.
+	 * @param  array $el   Element tag.
+	 * @return array The merged and extended body classes.
+	 */
+	public function body_attributes_filter( $args, $el ) {
+
+		if ( 'body' === $el && ! isset( $args['data-awb-post-id'] ) ) {
+			$args['data-awb-post-id'] = get_the_ID();
+		}
+
+		return $args;
+	}
 
 	/**
 	 * Adds extra classes for the <body> element, using the 'body_class' filter.
@@ -329,7 +351,7 @@ class Avada_Template {
 			}
 		}
 
-		if ( is_archive() && ( ! ( class_exists( 'BuddyPress' ) && Fusion_Helper::is_buddypress() ) && ! ( class_exists( 'bbPress' ) && Fusion_Helper::is_bbpress() ) && ! ( class_exists( 'Tribe__Events__Main' ) && Fusion_Helper::is_events_archive( $c_page_id ) ) && ( class_exists( 'WooCommerce' ) && ! is_shop() ) || ! class_exists( 'WooCommerce' ) ) && ! is_tax( 'portfolio_category' ) && ! is_tax( 'portfolio_skills' ) && ! is_tax( 'portfolio_tags' ) && ! is_tax( 'product_cat' ) && ! is_tax( 'product_tag' ) ) {
+		if ( is_archive() && ( ! ( class_exists( 'BuddyPress' ) && Fusion_Helper::is_buddypress() ) && ! ( class_exists( 'bbPress' ) && Fusion_Helper::is_bbpress() ) && ! ( class_exists( 'Tribe__Events__Main' ) && Fusion_Helper::is_events_archive( $c_page_id ) ) && ( class_exists( 'WooCommerce' ) && ! is_shop() ) || ! class_exists( 'WooCommerce' ) ) && ! is_tax( 'portfolio_category' ) && ! is_tax( 'portfolio_skills' ) && ! is_tax( 'portfolio_tags' ) && ! ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() ) ) {
 			if ( 'None' !== $sidebar_1 ) {
 				$classes[] = 'has-sidebar';
 			}
@@ -347,7 +369,7 @@ class Avada_Template {
 			}
 		}
 
-		if ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() ) {
+		if ( function_exists( 'is_product_taxonomy' ) && is_product_taxonomy() && ! is_search() ) {
 			if ( 'None' !== $sidebar_1 ) {
 				$classes[] = 'has-sidebar';
 			}
@@ -356,7 +378,7 @@ class Avada_Template {
 			}
 		}
 
-		if ( is_search() ) {
+		if ( is_search() && ! is_tax() ) {
 			if ( 'None' !== $sidebar_1 ) {
 				$classes[] = 'has-sidebar';
 			}
@@ -462,7 +484,7 @@ class Avada_Template {
 				$classes[] = 'fusion-woocommerce-equal-heights';
 			}
 
-			if ( Avada()->settings->get( 'woocommerce_one_page_checkout' ) && is_checkout() && ! fusion_library()->woocommerce->is_new_checkout() ) {
+			if ( Avada()->settings->get( 'woocommerce_one_page_checkout' ) && is_checkout() && ! fusion_library()->woocommerce->is_checkout_layout() ) {
 				$classes[] = 'avada-woo-one-page-checkout';
 			}
 
@@ -470,7 +492,7 @@ class Avada_Template {
 				$classes[] = 'avada-has-woo-gallery-disabled';
 			}
 
-			$using_woo_horizontal_tabs = apply_filters( 'fusion_add_woo_horizontal_tabs_body_class', 'horizontal' === Avada()->settings->get( 'woocommerce_product_tab_design' ) && ( is_singular( 'product' ) || ( is_account_page() || is_checkout() && ! fusion_library()->woocommerce->is_new_checkout() ) ) );
+			$using_woo_horizontal_tabs = apply_filters( 'fusion_add_woo_horizontal_tabs_body_class', 'horizontal' === Avada()->settings->get( 'woocommerce_product_tab_design' ) && ( is_singular( 'product' ) || ( is_account_page() || is_checkout() && ! fusion_library()->woocommerce->is_checkout_layout() ) ) );
 			if ( $using_woo_horizontal_tabs ) {
 				$classes[] = 'woo-tabs-horizontal';
 			}
@@ -486,7 +508,7 @@ class Avada_Template {
 				$classes[] = 'woo-outofstock-badge-' . $outofstock_badge;
 			}
 
-			if ( ! is_null( fusion_library()->woocommerce ) && fusion_library()->woocommerce->is_new_checkout() ) {
+			if ( ! is_null( fusion_library()->woocommerce ) && fusion_library()->woocommerce->is_checkout_layout() ) {
 				$classes[] = 'woocommerce';
 			}
 		}

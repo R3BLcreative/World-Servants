@@ -61,4 +61,4 @@ function fusion_element_column_inner() {
 		)
 	);
 }
-add_action( 'fusion_builder_before_init', 'fusion_element_column_inner' );
+add_action( 'wp_loaded', 'fusion_element_column_inner' );

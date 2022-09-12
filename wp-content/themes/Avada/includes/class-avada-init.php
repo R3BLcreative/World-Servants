@@ -121,7 +121,7 @@ class Avada_Init {
 	 * @access  public
 	 */
 	public function set_builder_status() {
-		$builder_settings = get_option( 'fusion_builder_settings' );
+		$builder_settings = get_option( 'fusion_builder_settings', [] );
 
 		if ( isset( $builder_settings['enable_builder_ui'] ) && $builder_settings['enable_builder_ui'] ) {
 			add_theme_support( 'fusion_builder' );
@@ -479,12 +479,23 @@ class Avada_Init {
 	 * @return void.
 	 */
 	public function live_search_retrieve_posts() {
+
+		if ( isset( $_POST['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			if ( 1 === count( $_POST['post_type'] ) && isset( $_POST['post_type'][0] ) && 'any' === $_POST['post_type'][0] ) { // phpcs:ignore WordPress.Security.NonceVerification
+				$post_types = 'any';
+			} else {
+				$post_types = $_POST['post_type']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
+			}
+		} else {
+			$post_types = $this->get_search_results_post_types();
+		}
+
 		$args = [
-			's'                       => trim( strip_tags( $_POST['search'] ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification, WordPress.WP.AlternativeFunctions
-				'post_type'           => isset( $_POST['post_type'] ) ? $_POST['post_type'] : $this->get_search_results_post_types(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification
-				'posts_per_page'      => isset( $_POST['per_page'] ) ? (int) wp_unslash( $_POST['per_page'] ) : 10, // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput, WPThemeReview.CoreFunctionality.PostsPerPage.posts_per_page_posts_per_page, WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
-				'post_status'         => 'publish',
-				'ignore_sticky_posts' => 1,
+			's'                   => trim( strip_tags( $_POST['search'] ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification, WordPress.WP.AlternativeFunctions
+			'post_type'           => $post_types,
+			'posts_per_page'      => isset( $_POST['per_page'] ) ? (int) wp_unslash( $_POST['per_page'] ) : 10, // phpcs:ignore WordPress.Security.NonceVerification, WordPress.Security.ValidatedSanitizedInput, WPThemeReview.CoreFunctionality.PostsPerPage.posts_per_page_posts_per_page, WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
+			'post_status'         => 'publish',
+			'ignore_sticky_posts' => 1,
 		];
 
 		if ( function_exists( 'wc_get_product_visibility_term_ids' ) && ( 'any' === $args['post_type'] || ( is_array( $args['post_type'] ) && in_array( 'product', $args['post_type'] ) ) ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict

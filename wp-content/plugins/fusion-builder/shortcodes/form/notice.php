@@ -88,8 +88,8 @@ if ( fusion_is_element_enabled( 'fusion_form_notice' ) ) {
 
 				$this->params = $this->get_form_data();
 
-				// If default, notices are up to user when processing data.
-				if ( 'default' === $this->params['form_meta']['form_type'] ) {
+				// If post, notices are up to user when processing data.
+				if ( 'post' === $this->params['form_meta']['form_type'] ) {
 					$html .= '<input type="hidden" value="fusion-notices-' . $this->counter . '" name="form_notices" />';
 					ob_start();
 					do_action( 'fusion_form_post_notice', $this->args );

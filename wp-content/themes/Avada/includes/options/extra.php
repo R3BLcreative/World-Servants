@@ -75,6 +75,30 @@ function avada_options_section_extra( $sections ) {
 							],
 						],
 					],
+					'post_views'                 => [
+						'label'       => esc_html__( 'Post Views Counter', 'Avada' ),
+						'description' => esc_html__( 'Set the method to update the post views, or disable them entirely. "Page Load" option will update using PHP when a page is retrieved. "Ajax" will send an additional request after the page loads.', 'Avada' ),
+						'id'          => 'post_views',
+						'default'     => 'page_load',
+						'type'        => 'radio-buttonset',
+						'choices'     => [
+							'page_load' => esc_html__( 'Page Load', 'Avada' ),
+							'ajax'      => esc_html__( 'Ajax', 'Avada' ),
+							'disabled'  => esc_html__( 'Disabled', 'Avada' ),
+						],
+					],
+					'post_views_counting'        => [
+						'label'       => esc_html__( 'Post Views User Type Counting', 'Avada' ),
+						'description' => esc_html__( 'Select which types of users will increase post views on visit.', 'Avada' ),
+						'id'          => 'post_views_counting',
+						'default'     => 'all',
+						'type'        => 'select',
+						'choices'     => [
+							'all'        => esc_html__( 'All', 'Avada' ),
+							'logged_out' => esc_html__( 'Logged Out', 'Avada' ),
+							'non_admins' => esc_html__( 'Non-Admins', 'Avada' ),
+						],
+					],
 					'featured_image_placeholder' => [
 						'label'           => esc_html__( 'Image Placeholders', 'Avada' ),
 						'description'     => esc_html__( 'Turn on to display a placeholder image for posts that do not have a featured image. This allows the post to display on portfolio archives and related posts/projects carousels.', 'Avada' ),
@@ -299,7 +323,7 @@ function avada_options_section_extra( $sections ) {
 						'label'       => esc_html__( 'Scrollbar Background', 'Avada' ),
 						'description' => esc_html__( 'Controls the background color for the scrollbar.', 'Avada' ),
 						'id'          => 'scrollbar_background',
-						'default'     => '#f2f3f5',
+						'default'     => 'var(--awb-color2)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -319,7 +343,7 @@ function avada_options_section_extra( $sections ) {
 						'label'       => esc_html__( 'Scrollbar Handle Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color for the scrollbar handle.', 'Avada' ),
 						'id'          => 'scrollbar_handle',
-						'default'     => '#65bc7b',
+						'default'     => 'var(--awb-color4)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -714,7 +738,7 @@ function avada_options_section_extra( $sections ) {
 						'description'     => esc_html__( 'Controls the top color of the image rollover background.', 'Avada' ),
 						'id'              => 'image_gradient_top_color',
 						'type'            => 'color-alpha',
-						'default'         => 'rgba(101,188,123,0.8)',
+						'default'         => 'hsla(var(--awb-color4-h),var(--awb-color4-s),var(--awb-color4-l),calc(var(--awb-color4-a) - 20%))',
 						'soft_dependency' => true,
 						'css_vars'        => [
 							[
@@ -728,7 +752,7 @@ function avada_options_section_extra( $sections ) {
 						'label'           => esc_html__( 'Image Rollover Gradient Bottom Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the bottom color of the image rollover background.', 'Avada' ),
 						'id'              => 'image_gradient_bottom_color',
-						'default'         => '#65bc7b',
+						'default'         => 'var(--awb-color4)',
 						'type'            => 'color-alpha',
 						'soft_dependency' => true,
 						'css_vars'        => [
@@ -743,7 +767,7 @@ function avada_options_section_extra( $sections ) {
 						'label'           => esc_html__( 'Image Rollover Element Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the color of image rollover text and icon circular backgrounds.', 'Avada' ),
 						'id'              => 'image_rollover_text_color',
-						'default'         => '#212934',
+						'default'         => 'var(--awb-color8)',
 						'type'            => 'color-alpha',
 						'soft_dependency' => true,
 						'css_vars'        => [
@@ -757,7 +781,7 @@ function avada_options_section_extra( $sections ) {
 						'label'           => esc_html__( 'Image Rollover Icon Color', 'Avada' ),
 						'description'     => esc_html__( 'Controls the color of the icons in the image rollover.', 'Avada' ),
 						'id'              => 'image_rollover_icon_color',
-						'default'         => '#ffffff',
+						'default'         => 'var(--awb-color1)',
 						'type'            => 'color-alpha',
 						'soft_dependency' => true,
 						'css_vars'        => [
@@ -1007,7 +1031,7 @@ function avada_options_section_extra( $sections ) {
 						'label'       => esc_html__( 'Grid Element Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the color of borders/date box/timeline dots and arrows for the grid boxes.', 'Avada' ),
 						'id'          => 'timeline_color',
-						'default'     => '#f2f3f5',
+						'default'     => 'var(--awb-color2)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[
@@ -1033,7 +1057,7 @@ function avada_options_section_extra( $sections ) {
 					],
 					'grid_separator_style_type'           => [
 						'label'       => esc_html__( 'Grid Separator Style', 'Avada' ),
-						'description' => __( 'Controls the line style of grid separators. <strong>Note:</strong> For blog and portfolio grids at least one meta data field must be enabled and excerpt or full content must be shown in order that the separator will be displayed.', 'Avada' ),
+						'description' => __( 'Controls the line style of grid separators. <strong>NOTE:</strong> For blog and portfolio grids at least one meta data field must be enabled and excerpt or full content must be shown in order that the separator will be displayed.', 'Avada' ),
 						'id'          => 'grid_separator_style_type',
 						'default'     => 'double|solid',
 						'type'        => 'select',
@@ -1062,7 +1086,7 @@ function avada_options_section_extra( $sections ) {
 						'label'       => esc_html__( 'Grid Separator Color', 'Avada' ),
 						'description' => esc_html__( 'Controls the line style color of grid separators.', 'Avada' ),
 						'id'          => 'grid_separator_color',
-						'default'     => '#e2e2e2',
+						'default'     => 'var(--awb-color3)',
 						'type'        => 'color-alpha',
 						'css_vars'    => [
 							[

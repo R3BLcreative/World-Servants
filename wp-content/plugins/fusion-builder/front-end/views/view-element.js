@@ -83,8 +83,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				this._triggerColumn = _.debounce( _.bind( this.triggerColumn, this ), 300 );
 
-				this.listenTo( FusionEvents, 'fusion-wireframe-toggle', this.wireFrameToggled );
-
 				// Check if query_data is not set and element has callback.
 				this.needsQuery();
 
@@ -329,9 +327,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					self            = this,
 					markup;
 
-				// Render wireframe template
-				self.renderWireframePreview();
-
 				// If needs query add loader and either trigger or check where triggered.
 				if ( 'undefined' !== typeof element.callback && 'undefined' === typeof this.model.get( 'query_data' ) && true === element.callback.ajax ) {
 
@@ -356,9 +351,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 *
 			 * @since 2.0.0
 			 * @param {Object} event The event triggering the element removal.
+			 * @param {bool} forceManually - Force manually, even if it's not an event, to update history and trigger content changes.
 			 * @return {void}
 			 */
-			removeElement: function( event, isAutomated ) {
+			removeElement: function( event, isAutomated, forceManually ) {
 				var parentCid   = this.model.get( 'parent' ),
 					parentModel = FusionPageBuilderElements.find( function( model ) {
 						return model.get( 'cid' ) == parentCid; // jshint ignore: line
@@ -368,7 +364,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( event ) {
 					event.preventDefault();
+				}
 
+				// If the column is deleted manually.
+				if ( event || forceManually ) {
 					colView = FusionPageBuilderViewManager.getView( parentCid );
 					colView.$el.find( '.fusion-builder-module-controls-container a' ).trigger( 'mouseleave' );
 
@@ -408,7 +407,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					};
 					fusionGlobalManager.handleMultiGlobal( MultiGlobalArgs );
 				}
-
 			},
 
 			/**
@@ -430,10 +428,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 *
 			 * @since 2.0.0
 			 * @param {Object} event - The event triggering the element removal.
+			 * @param {bool} forceManually - Force manually, even if it's not an event, to update history and trigger content changes.
 			 * @return {void}
 			 *
 			 */
-			cloneElement: function( event ) {
+			cloneElement: function( event, forceManually ) {
 				var elementAttributes,
 					currentModel,
 					MultiGlobalArgs;
@@ -470,7 +469,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				};
 				fusionGlobalManager.handleMultiGlobal( MultiGlobalArgs );
 
-				if ( event ) {
+				if ( event || forceManually ) {
 					FusionEvents.trigger( 'fusion-content-changed' );
 
 					FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.cloned + ' ' + fusionAllElements[ this.model.get( 'element_type' ) ].name + ' ' + fusionBuilderText.element );

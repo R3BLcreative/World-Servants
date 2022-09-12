@@ -16,10 +16,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			initialize: function() {
-
 				this.$el.attr( 'data-cid', this.model.get( 'cid' ) );
-
-				this.listenTo( FusionEvents, 'fusion-wireframe-toggle', this.wireFrameToggled );
 			},
 
 			render: function() {
@@ -98,67 +95,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 						FusionPageBuilderApp.scrollingContainers();
 
-						FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.checkout_form + ' Element order changed' );
+						FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.checkout_form + ' Element Order Changed' );
 					}
 				} );
-
-				// If we are in wireframe mode, then disable.
-				if ( FusionPageBuilderApp.wireframeActive ) {
-					this.disableDroppableContainer();
-				}
-			},
-
-			/**
-			 * Enable the droppable and draggable.
-			 *
-			 * @since 3.3
-			 * @return {void}
-			 */
-			enableDroppableContainer: function() {
-				var $el = this.$el;
-
-				if ( 'undefined' !== typeof $el.draggable( 'instance' ) && 'undefined' !== typeof $el.find( '.fusion-container-target' ).droppable( 'instance' ) ) {
-					$el.draggable( 'enable' );
-					$el.find( '.fusion-container-target' ).droppable( 'enable' );
-				} else {
-
-					// No sign of init, then need to call it.
-					this.droppableContainer();
-				}
-			},
-
-			/**
-			 * Destroy or disable the droppable and draggable.
-			 *
-			 * @since 3.3
-			 * @return {void}
-			 */
-			disableDroppableContainer: function() {
-				var $el = this.$el;
-
-				// If its been init, just disable.
-				if ( 'undefined' !== typeof $el.draggable( 'instance' ) ) {
-					$el.draggable( 'disable' );
-				}
-
-				// If its been init, just disable.
-				if ( 'undefined' !== typeof $el.find( '.fusion-container-target' ).droppable( 'instance' ) ) {
-					$el.find( '.fusion-container-target' ).droppable( 'disable' );
-				}
-			},
-
-			/**
-			 * Fired when wireframe mode is toggled.
-			 *
-			 * @since 3.3
-			 * @return {void}
-			 */
-			wireFrameToggled: function() {
-				if ( FusionPageBuilderApp.wireframeActive ) {
-					this.disableDroppableContainer();
-				} else {
-					this.enableDroppableContainer();
-				}
 			},
 
 			/**

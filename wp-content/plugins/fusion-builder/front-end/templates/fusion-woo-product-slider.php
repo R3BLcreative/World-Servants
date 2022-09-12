@@ -16,7 +16,7 @@
 				{{{ productList }}}
 			</ul>
 			<# if ( 'yes' == showNav ) { #>
-				<div class="fusion-carousel-nav"><span class="fusion-nav-prev"></span><span class="fusion-nav-next"></span></div>
+				<div class="fusion-carousel-nav"><span class="fusion-nav-prev" aria-label="Previous"></span><span class="fusion-nav-next" aria-label="Next"></span></div>
 			<# } #>
 			</div>
 		</div>

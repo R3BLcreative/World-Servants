@@ -89,18 +89,30 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_price' ) ) {
 					'badge_position'                       => 'right',
 					'alignment'                            => 'flex-start',
 					'price_font_size'                      => '',
+					'price_text_transform'                 => '',
+					'price_line_height'                    => '',
+					'price_letter_spacing'                 => '',
 					'price_color'                          => $fusion_settings->get( 'primary_color' ),
 					'fusion_font_family_price_typography'  => 'inherit',
 					'fusion_font_variant_price_typography' => '400',
 					'sale_font_size'                       => '',
+					'sale_text_transform'                  => '',
+					'sale_line_height'                     => '',
+					'sale_letter_spacing'                  => '',
 					'sale_color'                           => $fusion_settings->get( 'body_typography', 'color' ),
 					'fusion_font_family_sale_typography'   => 'inherit',
 					'fusion_font_variant_sale_typography'  => '400',
 					'stock_font_size'                      => '',
+					'stock_text_transform'                 => '',
+					'stock_line_height'                    => '',
+					'stock_letter_spacing'                 => '',
 					'stock_color'                          => $fusion_settings->get( 'body_typography', 'color' ),
 					'fusion_font_family_stock_typography'  => 'inherit',
 					'fusion_font_variant_stock_typography' => '400',
 					'badge_font_size'                      => '',
+					'badge_text_transform'                 => '',
+					'badge_line_height'                    => '',
+					'badge_letter_spacing'                 => '',
 					'badge_text_color'                     => $fusion_settings->get( 'primary_color' ),
 					'fusion_font_family_badge_typography'  => 'inherit',
 					'fusion_font_variant_badge_typography' => '400',
@@ -172,6 +184,8 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_price' ) ) {
 			 * @return string          HTML output.
 			 */
 			public function render( $args, $content = '' ) {
+				global $product;
+
 				$this->defaults = self::get_element_defaults();
 				$this->args     = FusionBuilder::set_shortcode_defaults( $this->defaults, $args, 'fusion_tb_woo_price' );
 
@@ -185,7 +199,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_price' ) ) {
 
 				$this->emulate_product();
 
-				if ( ! $this->is_product() ) {
+				if ( ! $this->is_product() || ! is_object( $product ) ) {
 					return;
 				}
 
@@ -267,6 +281,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_price' ) ) {
 					$this->add_css_property( $selectors, 'font-size', $this->args['price_font_size'] );
 				}
 
+				if ( ! $this->is_default( 'price_line_height' ) ) {
+					$this->add_css_property( $selectors, 'line-height', $this->args['price_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'price_letter_spacing' ) ) {
+					$this->add_css_property( $selectors, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['price_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'price_text_transform' ) ) {
+					$this->add_css_property( $selectors, 'text-transform', $this->args['price_text_transform'] );
+				}
+
 				if ( ! $this->is_default( 'price_color' ) ) {
 					$this->add_css_property( $selectors, 'color', $this->args['price_color'] );
 				}
@@ -283,6 +309,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_price' ) ) {
 
 				if ( ! $this->is_default( 'sale_font_size' ) ) {
 					$this->add_css_property( $selectors, 'font-size', $this->args['sale_font_size'] );
+				}
+
+				if ( ! $this->is_default( 'sale_line_height' ) ) {
+					$this->add_css_property( $selectors, 'line-height', $this->args['sale_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'sale_letter_spacing' ) ) {
+					$this->add_css_property( $selectors, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['sale_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'sale_text_transform' ) ) {
+					$this->add_css_property( $selectors, 'text-transform', $this->args['sale_text_transform'] );
 				}
 
 				if ( ! $this->is_default( 'sale_color' ) ) {
@@ -303,6 +341,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_price' ) ) {
 					$this->add_css_property( $selectors, 'font-size', $this->args['stock_font_size'] );
 				}
 
+				if ( ! $this->is_default( 'stock_line_height' ) ) {
+					$this->add_css_property( $selectors, 'line-height', $this->args['stock_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'stock_letter_spacing' ) ) {
+					$this->add_css_property( $selectors, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['stock_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'stock_text_transform' ) ) {
+					$this->add_css_property( $selectors, 'text-transform', $this->args['stock_text_transform'] );
+				}
+
 				if ( ! $this->is_default( 'stock_color' ) ) {
 					$this->add_css_property( $selectors, 'color', $this->args['stock_color'] );
 				}
@@ -321,6 +371,18 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_price' ) ) {
 
 				if ( ! $this->is_default( 'badge_font_size' ) ) {
 					$this->add_css_property( $selectors, 'font-size', $this->args['badge_font_size'] );
+				}
+
+				if ( ! $this->is_default( 'badge_line_height' ) ) {
+					$this->add_css_property( $selectors, 'line-height', $this->args['badge_line_height'] );
+				}
+
+				if ( ! $this->is_default( 'badge_letter_spacing' ) ) {
+					$this->add_css_property( $selectors, 'letter-spacing', fusion_library()->sanitize->get_value_with_unit( $this->args['badge_letter_spacing'] ) );
+				}
+
+				if ( ! $this->is_default( 'badge_text_transform' ) ) {
+					$this->add_css_property( $selectors, 'text-transform', $this->args['badge_text_transform'] );
 				}
 
 				if ( ! $this->is_default( 'badge_text_color' ) ) {
@@ -479,6 +541,36 @@ function fusion_component_woo_price() {
 				'name'                    => esc_attr__( 'Woo Price', 'fusion-builder' ),
 				'shortcode'               => 'fusion_tb_woo_price',
 				'icon'                    => 'fusiona-woo-price',
+				'subparam_map'            => [
+					'price_font_size'                      => 'price_fonts',
+					'price_text_transform'                 => 'price_fonts',
+					'price_line_height'                    => 'price_fonts',
+					'price_letter_spacing'                 => 'price_fonts',
+					'price_color'                          => 'price_fonts',
+					'fusion_font_family_price_typography'  => 'price_fonts',
+					'fusion_font_variant_price_typography' => 'price_fonts',
+					'sale_font_size'                       => 'sale_fonts',
+					'sale_text_transform'                  => 'sale_fonts',
+					'sale_line_height'                     => 'sale_fonts',
+					'sale_letter_spacing'                  => 'sale_fonts',
+					'sale_color'                           => 'sale_fonts',
+					'fusion_font_family_sale_typography'   => 'sale_fonts',
+					'fusion_font_variant_sale_typography'  => 'sale_fonts',
+					'stock_font_size'                      => 'stock_fonts',
+					'stock_text_transform'                 => 'stock_fonts',
+					'stock_line_height'                    => 'stock_fonts',
+					'stock_letter_spacing'                 => 'stock_fonts',
+					'stock_color'                          => 'stock_fonts',
+					'fusion_font_family_stock_typography'  => 'stock_fonts',
+					'fusion_font_variant_stock_typography' => 'stock_fonts',
+					'badge_font_size'                      => 'badge_fonts',
+					'badge_text_transform'                 => 'badge_fonts',
+					'badge_line_height'                    => 'badge_fonts',
+					'badge_letter_spacing'                 => 'badge_fonts',
+					'badge_text_color'                     => 'badge_fonts',
+					'fusion_font_family_badge_typography'  => 'badge_fonts',
+					'fusion_font_variant_badge_typography' => 'badge_fonts',
+				],
 				'component'               => true,
 				'templates'               => [ 'content', 'post_cards', 'page_title_bar' ],
 				'components_per_template' => 1,
@@ -630,77 +722,61 @@ function fusion_component_woo_price() {
 						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Price Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the price text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'price_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Price Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select a color for the price text.', 'fusion-builder' ),
-						'param_name'  => 'price_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'primary_color' ),
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-					],
-					[
-						'type'             => 'font_family',
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Price Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the price text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'price_fonts',
+						'choices'          => [
+							'font-family'    => 'price_typography',
+							'font-size'      => 'price_font_size',
+							'text-transform' => 'price_text_transform',
+							'line-height'    => 'price_line_height',
+							'letter-spacing' => 'price_letter_spacing',
+							'color'          => 'price_color',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'primary_color' ),
+						],
 						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Price Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the price text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'price_typography',
+						'global'           => true,
 						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
 						],
+					],
+					[
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Sale Old Price Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the sale old price text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'sale_fonts',
+						'choices'          => [
+							'font-family'    => 'sale_typography',
+							'font-size'      => 'sale_font_size',
+							'text-transform' => 'sale_text_transform',
+							'line-height'    => 'sale_line_height',
+							'letter-spacing' => 'sale_letter_spacing',
+							'color'          => 'sale_color',
+						],
 						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
+							'font-family'    => '',
+							'variant'        => '400',
+							'font-size'      => '',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'body_typography', 'color' ),
 						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Sale Old Price Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the sale old price text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'sale_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_sale',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Sale Old Price Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select a color for the sale old price text.', 'fusion-builder' ),
-						'param_name'  => 'sale_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'body_typography', 'color' ),
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_sale',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'             => 'font_family',
 						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Sale Old Price Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the sale old price text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'sale_typography',
-						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
+						'global'           => true,
+						'callback'         => [
+							'function' => 'fusion_style_block',
+						],
 						'dependency'       => [
 							[
 								'element'  => 'show_sale',
@@ -708,53 +784,35 @@ function fusion_component_woo_price() {
 								'operator' => '!=',
 							],
 						],
+						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
+					],
+					[
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Stock Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the stock text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'stock_fonts',
+						'choices'          => [
+							'font-family'    => 'stock_typography',
+							'font-size'      => 'stock_font_size',
+							'text-transform' => 'stock_text_transform',
+							'line-height'    => 'stock_line_height',
+							'letter-spacing' => 'stock_letter_spacing',
+							'color'          => 'stock_color',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'body_typography', 'color' ),
+						],
+						'remove_from_atts' => true,
+						'global'           => true,
+						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
 						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
-						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Stock Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the stock text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'stock_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_stock',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Stock Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select a color for the stock text.', 'fusion-builder' ),
-						'param_name'  => 'stock_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'body_typography', 'color' ),
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_stock',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Stock Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the stock text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'stock_typography',
-						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'dependency'       => [
 							[
 								'element'  => 'show_stock',
@@ -762,66 +820,40 @@ function fusion_component_woo_price() {
 								'operator' => '!=',
 							],
 						],
+					],
+					[
+						'type'             => 'typography',
+						'heading'          => esc_attr__( 'Discount Badge Typography', 'fusion-builder' ),
+						'description'      => esc_html__( 'Controls the typography of the discount badge text. Leave empty for the global font family.', 'fusion-builder' ),
+						'param_name'       => 'badge_fonts',
+						'choices'          => [
+							'font-family'    => 'badge_typography',
+							'font-size'      => 'badge_font_size',
+							'text-transform' => 'badge_text_transform',
+							'line-height'    => 'badge_line_height',
+							'letter-spacing' => 'badge_letter_spacing',
+							'color'          => 'badge_text_color',
+						],
+						'default'          => [
+							'font-family'    => '',
+							'variant'        => '400',
+							'text-transform' => '',
+							'line-height'    => '',
+							'letter-spacing' => '',
+							'color'          => $fusion_settings->get( 'primary_color' ),
+						],
+						'remove_from_atts' => true,
+						'global'           => true,
+						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'callback'         => [
 							'function' => 'fusion_style_block',
 						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
-						],
-					],
-					[
-						'type'        => 'textfield',
-						'heading'     => esc_attr__( 'Discount Badge Font Size', 'fusion-builder' ),
-						'description' => esc_html__( 'Controls the font size of the discount badge text. Enter value including any valid CSS unit, ex: 20px.', 'fusion-builder' ),
-						'param_name'  => 'badge_font_size',
-						'value'       => '',
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_badge',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'        => 'colorpickeralpha',
-						'heading'     => esc_attr__( 'Discount Badge Text Color', 'fusion-builder' ),
-						'description' => esc_attr__( 'Select a color for the discount badge text.', 'fusion-builder' ),
-						'param_name'  => 'badge_text_color',
-						'value'       => '',
-						'default'     => $fusion_settings->get( 'primary_color' ),
-						'group'       => esc_attr__( 'Design', 'fusion-builder' ),
-						'dependency'  => [
-							[
-								'element'  => 'show_badge',
-								'value'    => 'no',
-								'operator' => '!=',
-							],
-						],
-					],
-					[
-						'type'             => 'font_family',
-						'remove_from_atts' => true,
-						'heading'          => esc_attr__( 'Discount Badge Font Family', 'fusion-builder' ),
-						/* translators: URL for the link. */
-						'description'      => esc_html__( 'Controls the font family of the discount badge text.  Leave empty for the global font family.', 'fusion-builder' ),
-						'param_name'       => 'badge_typography',
-						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 						'dependency'       => [
 							[
 								'element'  => 'show_badge',
 								'value'    => 'no',
 								'operator' => '!=',
 							],
-						],
-						'callback'         => [
-							'function' => 'fusion_style_block',
-						],
-						'default'          => [
-							'font-family'  => '',
-							'font-variant' => '400',
 						],
 					],
 					[

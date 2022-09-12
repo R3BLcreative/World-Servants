@@ -280,16 +280,16 @@ function avada_page_options_tab_pagetitlebar( $sections ) {
 		$sections['pagetitlebar']['fields']['page_title_height']              = [
 			'id'          => 'page_title_height',
 			'label'       => esc_attr__( 'Page Title Bar Height', 'Avada' ),
-			/* translators: Additional description (defaults). */
-			'description' => sprintf( esc_attr__( 'Controls the height of the page title bar on desktop. Enter value including any valid CSS unit besides %% which does not work for page title bar, ex: 87px. %s', 'Avada' ), Avada()->settings->get_default_description( 'page_title_height' ) ),
+			/* translators: percetange sign and additional description (defaults). */
+			'description' => sprintf( esc_attr__( 'Controls the height of the page title bar on desktop. Enter value including any valid CSS unit besides %1$s which does not work for page title bar, ex: 87px. %2$s', 'Avada' ), '%', Avada()->settings->get_default_description( 'page_title_height' ) ),
 			'dependency'  => $page_title_dependency,
 			'type'        => 'text',
 		];
 		$sections['pagetitlebar']['fields']['page_title_mobile_height']       = [
 			'id'          => 'page_title_mobile_height',
 			'label'       => esc_attr__( 'Page Title Bar Mobile Height', 'Avada' ),
-			/* translators: Additional description (defaults). */
-			'description' => sprintf( esc_attr__( 'Controls the height of the page title bar on mobile. Enter value including any valid CSS unit besides %% which does not work for page title bar, ex: 70px. %s', 'Avada' ), Avada()->settings->get_default_description( 'page_title_mobile_height' ) ),
+			/* translators: percetange sign and additional description (defaults). */
+			'description' => sprintf( esc_attr__( 'Controls the height of the page title bar on mobile. Enter value including any valid CSS unit besides %1$s which does not work for page title bar, ex: 70px. %2$s', 'Avada' ), '%', Avada()->settings->get_default_description( 'page_title_mobile_height' ) ),
 			'dependency'  => $page_title_dependency,
 			'type'        => 'text',
 		];

@@ -152,7 +152,6 @@ class Fusion_App {
 			$this->set_builder_status();
 			$this->set_preview_status();
 
-
 			$this->init();
 		}
 
@@ -223,11 +222,15 @@ class Fusion_App {
 		// Action to add new term from live editor.
 		add_action( 'wp_ajax_fusion_multiselect_addnew', [ $this, 'fusion_multiselect_addnew' ] );
 
+		// Load empty checkout page in live editor.
+		add_action( 'init', [ $this, 'load_empty_checkout_page' ] );
+
 		// Front end page edit trigger. Work around for theme check.
 		$add_to_admin_bar_hook = 'admin_bar_menu';
 		add_action( $add_to_admin_bar_hook, [ $this, 'builder_trigger' ], 999 );
 
 		add_action( 'wp_footer', [ $this, 'remove_unused_form_links' ], 997 );
+		add_action( 'wp_footer', [ $this, 'remove_unused_off_canvas_links' ], 997 );
 	}
 
 	/**
@@ -239,14 +242,15 @@ class Fusion_App {
 	 */
 	public function remove_unused_form_links() {
 		$maybe_has_forms = class_exists( 'Fusion_Template_Builder' ) && function_exists( 'get_post_type' ) && 'fusion_tb_section' !== get_post_type();
-		if ( ! current_user_can( 'edit_others_posts' ) || ! is_admin_bar_showing() || ! $maybe_has_forms ) {
+		$forms_enabled   = class_exists( 'Fusion_Form_Builder' ) && false !== Fusion_Form_Builder::is_enabled();
+		if ( ! $forms_enabled || ! current_user_can( 'edit_others_posts' ) || ! is_admin_bar_showing() || ! $maybe_has_forms ) {
 			return;
 		}
 		?>
 			<script>
 				jQuery( document ).ready( function() {
-					var $formEditLinks = jQuery( 'li[id^="wp-admin-bar-fb-edit-form-"]' ),
-						$ul            = jQuery( '#wp-admin-bar-fb-edit-default' );
+					var $ul            = jQuery( '#wp-admin-bar-awb-form-group' ),
+						$formEditLinks = $ul.children( 'li' );
 
 					if ( 0 < $formEditLinks.length ) {
 						$formEditLinks.each( function() {
@@ -260,6 +264,45 @@ class Fusion_App {
 						if ( $ul.length && ! $ul.children().length ) {
 							$ul.remove();
 						}
+					}
+				} )
+			</script>
+		<?php
+	}
+
+	/**
+	 * Remove unused off canvas links.
+	 *
+	 * @access public
+	 * @since 3.6
+	 * @return void
+	 */
+	public function remove_unused_off_canvas_links() {
+		$maybe_has_off_canvas = class_exists( 'Fusion_Template_Builder' ) && function_exists( 'get_post_type' ) && 'fusion_tb_section' !== get_post_type();
+		$off_canvas_enabled   = class_exists( 'AWB_Off_Canvas_Front_End' ) && false !== AWB_Off_Canvas_Front_End::is_enabled();
+		if ( ! $off_canvas_enabled || ! current_user_can( 'edit_others_posts' ) || ! is_admin_bar_showing() || ! $maybe_has_off_canvas ) {
+			return;
+		}
+		?>
+			<script>
+				jQuery( document ).ready( function() {
+					var $ul                = jQuery( '#wp-admin-bar-awb-off-canvas-group' ),
+						$offCanvasEditLink = $ul.children( 'li' );
+
+					if ( 0 < $offCanvasEditLink.length ) {
+						$offCanvasEditLink.each( function() {
+							var offCanvasId = this.id.replace( 'wp-admin-bar-fb-edit-off-canvas', 'awb-oc' );
+							if ( ! jQuery( '#' + offCanvasId ).length ) {
+								this.remove();
+							}
+						} );
+
+						// Remove empty Ul.
+						if ( $ul.length && ! $ul.children().length ) {
+							$ul.remove();
+						}
+					} else {
+
 					}
 				} )
 			</script>
@@ -315,7 +358,7 @@ class Fusion_App {
 			}
 
 			if ( isset( $_POST['meta_values'] ) ) {
-				$this->data['meta_values'] = fusion_string_to_array( wp_unslash( $_POST['meta_values'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+				$this->data['meta_values'] = fusion_string_to_array( $_POST['meta_values'], false );  // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			}
 		}
 	}
@@ -421,7 +464,6 @@ class Fusion_App {
 			}
 		}
 
-
 		if ( ( is_category() || is_tax() ) && ( ! function_exists( 'FusionBuilder' ) || ! FusionBuilder()->editing_post_card ) ) {
 			$category     = get_queried_object();
 			$backend_link = get_edit_term_link( $category->term_id, $category->taxonomy );
@@ -516,6 +558,7 @@ class Fusion_App {
 				'post_status'    => get_post_status( $page_id ),
 				'post_password'  => is_object( $_post ) ? $_post->post_password : '',
 				'post_date'      => is_object( $_post ) ? $_post->post_date : '',
+				'post_parent'    => is_object( $_post ) ? $_post->post_parent : '',
 				'menu_order'     => ( isset( $_post->menu_order ) ) ? $_post->menu_order : '0',
 			];
 
@@ -668,12 +711,23 @@ class Fusion_App {
 		$customize_url      = fusion_app_get_permalink( $admin_bar );
 		$forms_enabled      = class_exists( 'Fusion_Form_Builder' ) && false !== Fusion_Form_Builder::is_enabled();
 		$post_cards_enabled = function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled( 'fusion_post_cards' );
+		$off_canvas_enabled = class_exists( 'AWB_Off_Canvas_Front_End' ) && false !== AWB_Off_Canvas_Front_End::is_enabled();
+		$post_type          = get_post_type();
+		$post_type_names    = [
+			'avada_portfolio' => 'Portfolio Post',
+			'avada_faq'       => 'FAQ Post',
+			'tribe_events'    => 'Event',
+		];
+
+		if ( is_search() || is_404() ) {
+			$customize_url = '#';
+		}
 
 		if ( ! $customize_url || '' === $customize_url ) {
 			return;
 		}
 
-		$customize_url = add_query_arg( 'fb-edit', true, $customize_url );
+		$customize_url = '#' !== $customize_url ? add_query_arg( 'fb-edit', true, $customize_url ) : $customize_url;
 		$live_editor   = apply_filters( 'fusion_load_live_editor', true );
 
 		if ( $live_editor ) {
@@ -686,19 +740,25 @@ class Fusion_App {
 			);
 		}
 
-		if ( class_exists( 'Fusion_Template_Builder' ) && function_exists( 'get_post_type' ) && 'fusion_tb_section' !== get_post_type() ) {
-			$templates     = Fusion_Template_Builder()->get_template_terms();
-			$submenu_items = [];
-			$forms         = [];
-			$post_cards    = [];
+		if ( class_exists( 'Fusion_Template_Builder' ) && function_exists( 'get_post_type' ) && 'fusion_tb_section' !== $post_type ) {
+			$layouts          = Fusion_Template_Builder()->get_registered_layouts();
+			$templates        = Fusion_Template_Builder()->get_template_terms();
+			$submenu_items    = [];
+			$forms            = [];
+			$post_cards       = [];
+			$group_class_name = '';
+			$layout_link      = '';
 
 			foreach ( $templates as $key => $template_arr ) {
 				$template = Fusion_Template_Builder::get_instance()->get_override( $key );
+
 				if ( $template ) {
 					$submenu_items[] = [
 						'key'         => $key,
 						'label'       => $template_arr['label'],
+						'name'        => $template->post_title,
 						'template_id' => $template->ID,
+						'layout_id'   => isset( $template->layout_id ) ? $template->layout_id : '',
 					];
 
 					if ( $forms_enabled ) {
@@ -723,34 +783,93 @@ class Fusion_App {
 				$post_cards = array_merge( $post_cards, $matches[1] );
 			}
 
-			if ( $submenu_items ) {
+			if ( isset( $post_type_names[ $post_type ] ) ) {
+				$post_type_name = $post_type_names[ $post_type ];
+			} else {
+				$post_type_name = ucwords( $post_type );
+			}
 
+			if ( '#' !== $customize_url ) {
 				$admin_bar->add_node(
 					[
 						'parent' => 'fb-edit',
 						'id'     => 'fb-edit-page',
-						'title'  => esc_html__( 'Edit Page', 'fusion-builder' ),
+						/* translators: Name of post type. */
+						'title'  => sprintf( __( 'Edit %s', 'fusion-builder' ), esc_html( $post_type_name ) ),
 						'href'   => $customize_url,
 					]
 				);
 
-				foreach ( $submenu_items as $item ) {
+				$group_class_name = 'fb-edit-group';
+			}
 
+			if ( ! empty( $submenu_items ) ) {
+
+				// Add a layout group.
+				$args = [
+					'id'     => 'awb-layout-group',
+					'parent' => 'fb-edit',
+					'meta'   => [ 'class' => 'awb-layout-group ' . $group_class_name ],
+				];
+				$admin_bar->add_group( $args );
+
+				foreach ( $submenu_items as $item ) {
 					$admin_bar->add_node(
 						[
-							'parent' => 'fb-edit',
+							'parent' => 'awb-layout-group',
 							'id'     => 'fb-edit-' . $item['key'],
-							/* translators: Template name, for example Content */
-							'title'  => sprintf( __( 'Edit %s', 'fusion-builder' ), $item['label'] ),
+							'title'  => '<span class="awb-edit-item"><span class="awb-edit-name">' . esc_html( $item['name'] ) . '</span><span class="awb-edit-type">' . $item['label'] . '</span></span>',
 							'href'   => add_query_arg( 'fb-edit', true, get_permalink( $item['template_id'] ) ),
 						]
 					);
 
+					if ( ! empty( $item['layout_id'] ) ) {
+						$layout_id   = 'global' === $item['layout_id'] ? 0 : $item['layout_id'];
+						$layout_name = $layouts[ $layout_id ]['title'];
+						$layout_id   = $item['layout_id'];
+						$layout_link = '<a class="awb-edit-layout" href="' . esc_url( admin_url( 'admin.php?page=avada-layouts&layout=' . $layout_id ) ) . '" target="_blank">' . esc_html( $layout_name ) . '</a>';
+
+						$admin_bar->add_node(
+							[
+								'parent' => 'fb-edit-' . $item['key'],
+								'id'     => 'fb-edit-layout-' . $item['key'],
+								/* translators: Number of layout. */
+								'title'  => sprintf( __( 'Edit Layout: %s', 'fusion-builder' ), esc_html( $layout_name ) ),
+								'href'   => esc_url( admin_url( 'admin.php?page=avada-layouts&layout=' . $layout_id ) ),
+								'meta'   => [
+									'target' => '_blank',
+								],
+							]
+						);
+					}
 				}
+			} else {
+
+				// Add a layout group.
+				$args = [
+					'id'     => 'awb-layout-group',
+					'parent' => 'fb-edit',
+					'meta'   => [ 'class' => $group_class_name ],
+				];
+				$admin_bar->add_group( $args );
+
+				$admin_bar->add_node(
+					[
+						'parent' => 'awb-layout-group',
+						'id'     => 'fb-edit-layout',
+						'title'  => '<span class="awb-edit-item"><span class="awb-edit-name">' . __( 'Use Layouts', 'fusion-builder' ) . '</span><span class="awb-edit-type">' . __( 'Manage', 'fusion-builder' ) . '</span></span>',
+						'href'   => esc_url( admin_url( 'admin.php?page=avada-layouts' ) ),
+						'meta'   => [
+							'target' => '_blank',
+						],
+					]
+				);
 			}
 
+			$group_class_name = 'fb-edit-group';
+
 			// Add all forms.
-			if ( current_user_can( 'edit_others_posts' ) && ! empty( $forms ) && $forms_enabled && function_exists( 'get_post_type' ) && 'fusion_form' !== get_post_type() ) {
+			if ( current_user_can( 'edit_others_posts' ) && ! empty( $forms ) && $forms_enabled && function_exists( 'get_post_type' ) && 'fusion_form' !== $post_type ) {
 				$args         = [
 					'post_type'      => 'fusion_form',
 					'post__in'       => $forms,
@@ -759,24 +878,34 @@ class Fusion_App {
 				];
 				$fusion_forms = get_posts( $args );
 
-				foreach ( $fusion_forms as $form ) {
-					$element_post_id    = $form->ID;
-					$element_post_title = $form->post_title;
+				if ( ! empty( $fusion_forms ) ) {
 
-					$admin_bar->add_node(
-						[
-							'parent' => 'fb-edit',
-							'id'     => 'fb-edit-form-' . $element_post_id,
-							/* translators: Template name, for example Content */
-							'title'  => sprintf( __( 'Edit Form - %s', 'fusion-builder' ), $element_post_title ),
-							'href'   => add_query_arg( 'fb-edit', true, get_permalink( $element_post_id ) ),
-						]
-					);
+					// Add a form group.
+					$args = [
+						'id'     => 'awb-form-group',
+						'parent' => 'fb-edit',
+						'meta'   => [ 'class' => $group_class_name ],
+					];
+					$admin_bar->add_group( $args );
+
+					foreach ( $fusion_forms as $index => $form ) {
+						$element_post_id    = $form->ID;
+						$element_post_title = $form->post_title;
+
+						$admin_bar->add_node(
+							[
+								'parent' => 'awb-form-group',
+								'id'     => 'fb-edit-form-' . $element_post_id,
+								'title'  => '<span class="awb-edit-item"><span class="awb-edit-name">' . esc_html( $element_post_title ) . '</span><span class="awb-edit-type">' . esc_html__( 'Form', 'fusion-builder' ) . '</span></span>',
+								'href'   => add_query_arg( 'fb-edit', true, get_permalink( $element_post_id ) ),
+							]
+						);
+					}
 				}
 			}
 
 			// Add all post cards.
-			if ( current_user_can( 'edit_others_posts' ) && ! empty( $post_cards ) && $post_cards_enabled && ( function_exists( 'get_post_type' ) && 'fusion_element' !== get_post_type() || function_exists( 'is_object_in_term' ) && is_object_in_term( get_the_ID(), 'element_category', 'post_cards' ) ) ) {
+			if ( current_user_can( 'edit_others_posts' ) && ! empty( $post_cards ) && $post_cards_enabled && ( function_exists( 'get_post_type' ) && 'fusion_element' !== $post_type || function_exists( 'is_object_in_term' ) && is_object_in_term( get_the_ID(), 'element_category', 'post_cards' ) ) ) {
 				$fusion_post_cards = get_posts(
 					[
 						'post_type'      => 'fusion_element',
@@ -792,19 +921,64 @@ class Fusion_App {
 					]
 				);
 
-				foreach ( $fusion_post_cards as $card ) {
-					$element_post_id    = $card->ID;
-					$element_post_title = $card->post_title;
+				if ( ! empty( $fusion_post_cards ) ) {
 
-					$admin_bar->add_node(
-						[
-							'parent' => 'fb-edit',
-							'id'     => 'fb-edit-post-card-' . $element_post_id,
-							/* translators: Template name, for example Content */
-							'title'  => sprintf( __( 'Edit Post Card - %s', 'fusion-builder' ), $element_post_title ),
-							'href'   => add_query_arg( 'fb-edit', true, get_permalink( $element_post_id ) ),
-						]
-					);
+					// Add a post card group.
+					$args = [
+						'id'     => 'awb-post-card-group',
+						'parent' => 'fb-edit',
+						'meta'   => [ 'class' => $group_class_name ],
+					];
+					$admin_bar->add_group( $args );
+
+					foreach ( $fusion_post_cards as $card ) {
+						$element_post_id    = $card->ID;
+						$element_post_title = $card->post_title;
+
+						$admin_bar->add_node(
+							[
+								'parent' => 'awb-post-card-group',
+								'id'     => 'fb-edit-post-card-' . $element_post_id,
+								'title'  => '<span class="awb-edit-item"><span class="awb-edit-name">' . esc_html( $element_post_title ) . '</span><span class="awb-edit-type">' . esc_html__( 'Post Card', 'fusion-builder' ) . '</span></span>',
+								'href'   => add_query_arg( 'fb-edit', true, get_permalink( $element_post_id ) ),
+							]
+						);
+					}
+				}
+			}
+
+			// Add all off canvas.
+			if ( $off_canvas_enabled && current_user_can( 'edit_others_posts' ) && ! is_admin() && function_exists( 'get_post_type' ) && 'awb_off_canvas' !== $post_type ) {
+				$args         = [
+					'post_type'      => 'awb_off_canvas',
+					'posts_per_page' => -1, // phpcs:ignore WPThemeReview.CoreFunctionality.PostsPerPage.posts_per_page_posts_per_page
+					'post_status'    => 'publish',
+				];
+				$off_canvases = get_posts( $args );
+
+				if ( ! empty( $off_canvases ) ) {
+
+					// Add a off-canvas group.
+					$args = [
+						'id'     => 'awb-off-canvas-group',
+						'parent' => 'fb-edit',
+						'meta'   => [ 'class' => $group_class_name ],
+					];
+					$admin_bar->add_group( $args );
+
+					foreach ( $off_canvases as $off_canvas ) {
+						$element_post_id    = $off_canvas->ID;
+						$element_post_title = $off_canvas->post_title;
+
+						$admin_bar->add_node(
+							[
+								'parent' => 'awb-off-canvas-group',
+								'id'     => 'fb-edit-off-canvas-' . $element_post_id,
+								'title'  => '<span class="awb-edit-item"><span class="awb-edit-name">' . esc_html( $element_post_title ) . '</span><span class="awb-edit-type">' . esc_html__( 'Off Canvas', 'fusion-builder' ) . '</span></span>',
+								'href'   => add_query_arg( 'fb-edit', true, get_permalink( $element_post_id ) ),
+							]
+						);
+					}
 				}
 			}
 		}
@@ -833,7 +1007,7 @@ class Fusion_App {
 			$classes[] = 'fusion-hide-droppables';
 		}
 
-		if ( isset( $preferences::$preferences['tooltips'] ) && 'off' === $preferences::$preferences['tooltips'] ) {
+		if ( ( isset( $preferences::$preferences['tooltips'] ) && 'off' === $preferences::$preferences['tooltips'] ) || 'awb_off_canvas' === get_post_type() ) {
 			$classes[] = 'fusion-hide-all-tooltips';
 		}
 
@@ -847,6 +1021,14 @@ class Fusion_App {
 
 		if ( isset( $preferences::$preferences['transparent_header'] ) && 'off' === $preferences::$preferences['transparent_header'] ) {
 			$classes[] = 'fusion-no-absolute-containers';
+		}
+
+		if ( isset( $preferences::$preferences['element_transform'] ) && 'never' === $preferences::$preferences['element_transform'] ) {
+			$classes[] = 'fusion-disable-element-transform';
+		}
+
+		if ( isset( $preferences::$preferences['element_transform'] ) && 'editing' === $preferences::$preferences['element_transform'] ) {
+			$classes[] = 'fusion-element-transform-on-edit';
 		}
 
 		return $classes;
@@ -899,8 +1081,18 @@ class Fusion_App {
 			$classes[] = 'fusion-disable-element-filters';
 		}
 
+		if ( isset( $preferences::$preferences['element_transform'] ) && 'off' === $preferences::$preferences['element_transform'] ) {
+			$classes[] = 'fusion-disable-element-transform';
+		}
+
+		if ( isset( $preferences::$preferences['options_subtabs'] ) && 'collapsed' === $preferences::$preferences['options_subtabs'] ) {
+			$classes[] = 'fusion-options-subtabs-collapsed';
+		}
+
 		if ( is_rtl() ) {
 			$classes[] = 'rtl';
+		} else {
+			$classes[] = 'ltr';
 		}
 
 		$classes[] = 'locale-' . sanitize_html_class( strtolower( str_replace( '_', '-', get_user_locale() ) ) );
@@ -1159,6 +1351,7 @@ class Fusion_App {
 	public function load_templates() {
 		include FUSION_LIBRARY_PATH . '/inc/fusion-app/templates/front-end-toolbar.php';
 		include FUSION_LIBRARY_PATH . '/inc/fusion-app/templates/repeater-fields.php';
+		include FUSION_LIBRARY_PATH . '/inc/fusion-app/templates/typography-set.php';
 		include FUSION_LIBRARY_PATH . '/inc/fusion-app/templates/modal-dialog-more.php';
 		include FUSION_LIBRARY_PATH . '/inc/fusion-app/templates/bulk-add.php';
 	}
@@ -1182,24 +1375,9 @@ class Fusion_App {
 		}
 		wp_enqueue_style( 'fusion-font-icomoon', FUSION_LIBRARY_URL . '/inc/fusion-app/assets/fonts/icomoon' . $min . '.css', false, $fusion_library_latest_version, 'all' );
 
-		// For inline editor.
-		wp_enqueue_script( 'jquery-touch-punch' );
-		wp_enqueue_script( 'jquery-color' );
-		wp_enqueue_style( 'wp-color-picker' );
-		wp_enqueue_script( 'iris', admin_url( 'js/iris.min.js' ), [], $fusion_library_latest_version, true );
-		wp_enqueue_script( 'wp-color-picker', admin_url( 'js/color-picker.min.js' ), [ 'wp-i18n' ], $fusion_library_latest_version, true );
-
-		$colorpicker_l10n = [
-			'clear'         => __( 'Clear', 'Avada' ),
-			'defaultString' => __( 'Default', 'Avada' ),
-			'pick'          => __( 'Select Color', 'Avada' ),
-			'current'       => __( 'Current Color', 'Avada' ),
-		];
-
-		wp_localize_script( 'wp-color-picker', 'wpColorPickerL10n', $colorpicker_l10n );
-
-		// ColorPicker Alpha Channel.
-		wp_enqueue_script( 'wp-color-picker-alpha', FUSION_LIBRARY_URL . '/inc/redux/custom-fields/color_alpha/wp-color-picker-alpha.js', [ 'wp-i18n' ], $fusion_library_latest_version, true );
+		if ( function_exists( 'AWB_Global_Colors' ) ) {
+			AWB_Global_Colors()->enqueue();
+		}
 
 		// Media.
 		wp_enqueue_media();
@@ -1216,6 +1394,8 @@ class Fusion_App {
 	 */
 	public function live_scripts( $hook ) {
 		global $fusion_library_latest_version, $fusion_settings;
+
+		$builder_options = get_option( 'fusion_builder_settings', [] );
 
 		// Compatibility with WP 5.2: These don't get loaded by default so if missing we need to include the post.php file.
 		if ( ! function_exists( 'get_available_post_mime_types' ) || ! function_exists( 'get_available_post_mime_types' ) ) {
@@ -1239,7 +1419,7 @@ class Fusion_App {
 		wp_enqueue_style( 'editor-buttons' );
 
 		// Main styling.
-		wp_enqueue_style( 'fusion-app-builder-frame-css', FUSION_LIBRARY_URL . '/inc/fusion-app/css/fusion-builder-frame.min.css', [], $fusion_library_latest_version );
+		wp_enqueue_style( 'fusion-app-builder-frame-css', FUSION_LIBRARY_URL . '/inc/fusion-app/css/fusion-builder-frame' . $min . '.css', [], $fusion_library_latest_version );
 
 		// Underscore util.
 		wp_enqueue_script( 'wp-util' );
@@ -1276,23 +1456,21 @@ class Fusion_App {
 		wp_enqueue_style( 'thickbox' );
 		wp_enqueue_style( 'forms' );
 
-		wp_enqueue_script( 'jquery-touch-punch' );
-		wp_enqueue_script( 'jquery-color' );
-		wp_enqueue_style( 'wp-color-picker' );
-		wp_enqueue_script( 'iris', admin_url( 'js/iris.min.js' ), [], $fusion_library_latest_version, true );
-		wp_enqueue_script( 'wp-color-picker', admin_url( 'js/color-picker.min.js' ), [], $fusion_library_latest_version, true );
+		if ( function_exists( 'AWB_Global_Colors' ) ) {
+			AWB_Global_Colors()->enqueue();
+		}
 
-		$colorpicker_l10n = [
-			'clear'         => __( 'Clear', 'Avada' ),
-			'defaultString' => __( 'Default', 'Avada' ),
-			'pick'          => __( 'Select Color', 'Avada' ),
-			'current'       => __( 'Current Color', 'Avada' ),
-		];
+		if ( function_exists( 'Avada_Studio_Colors' ) ) {
+			Avada_Studio_Colors()->enqueue();
+		}
 
-		wp_localize_script( 'wp-color-picker', 'wpColorPickerL10n', $colorpicker_l10n );
+		if ( function_exists( 'Avada_Studio_Typography' ) ) {
+			Avada_Studio_Typography()->enqueue();
+		}
 
-		// ColorPicker Alpha Channel.
-		wp_enqueue_script( 'wp-color-picker-alpha', FUSION_LIBRARY_URL . '/inc/redux/custom-fields/color_alpha/wp-color-picker-alpha.js', [], $fusion_library_latest_version, true );
+		if ( function_exists( 'AWB_Global_Typography' ) ) {
+			AWB_Global_Typography()->enqueue();
+		}
 
 		// Code Mirror.
 		if ( function_exists( 'wp_enqueue_code_editor' ) ) {
@@ -1343,7 +1521,6 @@ class Fusion_App {
 			wp_enqueue_script( 'fusion_app_validation', FUSION_LIBRARY_URL . '/inc/fusion-app/model-validation.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_callback_functions', FUSION_LIBRARY_URL . '/inc/fusion-app/model-callback-functions.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_dependencies', FUSION_LIBRARY_URL . '/inc/fusion-app/model-dependencies.js', [], $fusion_library_latest_version, true );
-			wp_enqueue_script( 'fusion_app_assets', FUSION_LIBRARY_URL . '/inc/fusion-app/model-assets.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_model_view_manager', FUSION_LIBRARY_URL . '/inc/fusion-app/model-view-manager.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_active_states', FUSION_LIBRARY_URL . '/inc/fusion-app/model-active-states.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_hotkeys', FUSION_LIBRARY_URL . '/inc/fusion-app/model-hotkeys.js', [], $fusion_library_latest_version, true );
@@ -1373,18 +1550,21 @@ class Fusion_App {
 			wp_enqueue_script( 'fusion_app_option_repeater', FUSION_LIBRARY_URL . '/inc/fusion-app/options/repeater.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_switch', FUSION_LIBRARY_URL . '/inc/fusion-app/options/switch.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_typography', FUSION_LIBRARY_URL . '/inc/fusion-app/options/typography.js', [], $fusion_library_latest_version, true );
-			wp_enqueue_script( 'fusion_app_option_font_family', FUSION_LIBRARY_URL . '/inc/fusion-app/options/font-family.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_import', FUSION_LIBRARY_URL . '/inc/fusion-app/options/import.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_export', FUSION_LIBRARY_URL . '/inc/fusion-app/options/export.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_sortable', FUSION_LIBRARY_URL . '/inc/fusion-app/options/sortable.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_sortable_text', FUSION_LIBRARY_URL . '/inc/fusion-app/options/sortable-text.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_connected_sortable', FUSION_LIBRARY_URL . '/inc/fusion-app/options/connected-sortable.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_color_palette', FUSION_LIBRARY_URL . '/inc/fusion-app/options/color-palette.js', [], $fusion_library_latest_version, true );
+			wp_enqueue_script( 'fusion_app_option_typography_sets', FUSION_LIBRARY_URL . '/inc/fusion-app/options/typography-sets.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_column_width', FUSION_LIBRARY_URL . '/inc/fusion-app/options/column-width.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_form_options', FUSION_LIBRARY_URL . '/inc/fusion-app/options/form-options.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_fusion_logics', FUSION_LIBRARY_URL . '/inc/fusion-app/options/fusion-logics.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_hubspot_map', FUSION_LIBRARY_URL . '/inc/fusion-app/options/hubspot-map.js', [], $fusion_library_latest_version, true );
 			wp_enqueue_script( 'fusion_app_option_mailchimp_map', FUSION_LIBRARY_URL . '/inc/fusion-app/options/mailchimp-map.js', [], $fusion_library_latest_version, true );
+			wp_enqueue_script( 'fusion_app_option_image_focus_point', FUSION_LIBRARY_URL . '/inc/fusion-app/options/image-focus-point.js', [], $fusion_library_latest_version, true );
+			wp_enqueue_script( 'fusion_app_option_toggle', FUSION_LIBRARY_URL . '/inc/fusion-app/options/toggle.js', [], $fusion_library_latest_version, true );
+			wp_enqueue_script( 'fusion_app_option_layout_conditions', FUSION_LIBRARY_URL . '/inc/fusion-app/options/layout-conditions.js', [], $fusion_library_latest_version, true );
 
 			wp_enqueue_script( 'fusion-extra-panel-functions', FUSION_LIBRARY_URL . '/inc/fusion-app/callbacks.js', [], $fusion_library_latest_version, true );
 
@@ -1415,6 +1595,9 @@ class Fusion_App {
 				'fusion_web_fonts'       => apply_filters( 'fusion_live_initial_google_fonts', true ) ? $this->get_googlefonts_ajax() : false,
 				'widget_element_enabled' => function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled( 'fusion_widget' ),
 				'predefined_choices'     => apply_filters( 'fusion_predefined_choices', [] ),
+				'builder_type'           => isset( $builder_options['enable_builder_ui_by_default'] ) ? $builder_options['enable_builder_ui_by_default'] : 'backend',
+				'posts_per_page'         => get_option( 'posts_per_page' ), // phpcs:ignore WPThemeReview, WordPress -- Normal number.
+				'removeEmptyAttributes'  => isset( $builder_options['remove_empty_attributes'] ) ? $builder_options['remove_empty_attributes'] : 'off',
 			]
 		);
 
@@ -1688,31 +1871,7 @@ class Fusion_App {
 		$google_fonts = self::$google_fonts;
 
 		// An array of all available variants.
-		$all_variants = [
-			'100'       => esc_html__( 'Ultra-Light 100', 'Avada' ),
-			'100light'  => esc_html__( 'Ultra-Light 100', 'Avada' ),
-			'100italic' => esc_html__( 'Ultra-Light 100 Italic', 'Avada' ),
-			'200'       => esc_html__( 'Light 200', 'Avada' ),
-			'200italic' => esc_html__( 'Light 200 Italic', 'Avada' ),
-			'300'       => esc_html__( 'Book 300', 'Avada' ),
-			'300italic' => esc_html__( 'Book 300 Italic', 'Avada' ),
-			'400'       => esc_html__( 'Normal 400', 'Avada' ),
-			'regular'   => esc_html__( 'Normal 400', 'Avada' ),
-			'italic'    => esc_html__( 'Normal 400 Italic', 'Avada' ),
-			'500'       => esc_html__( 'Medium 500', 'Avada' ),
-			'500italic' => esc_html__( 'Medium 500 Italic', 'Avada' ),
-			'600'       => esc_html__( 'Semi-Bold 600', 'Avada' ),
-			'600bold'   => esc_html__( 'Semi-Bold 600', 'Avada' ),
-			'600italic' => esc_html__( 'Semi-Bold 600 Italic', 'Avada' ),
-			'700'       => esc_html__( 'Bold 700', 'Avada' ),
-			'700italic' => esc_html__( 'Bold 700 Italic', 'Avada' ),
-			'800'       => esc_html__( 'Extra-Bold 800', 'Avada' ),
-			'800bold'   => esc_html__( 'Extra-Bold 800', 'Avada' ),
-			'800italic' => esc_html__( 'Extra-Bold 800 Italic', 'Avada' ),
-			'900'       => esc_html__( 'Ultra-Bold 900', 'Avada' ),
-			'900bold'   => esc_html__( 'Ultra-Bold 900', 'Avada' ),
-			'900italic' => esc_html__( 'Ultra-Bold 900 Italic', 'Avada' ),
-		];
+		$all_variants = $this->get_variants_translations();
 
 		// Format the array for use by the typography controls.
 		$google_fonts_final = [];
@@ -1740,6 +1899,9 @@ class Fusion_App {
 
 		// Build the standard fonts.
 		$standard_fonts       = [
+			"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue' ,sans-serif",
+			"'Iowan Old Style', 'Apple Garamond', Baskerville, 'Times New Roman', 'Droid Serif', Times, 'Source Serif Pro', serif",
+			"Menlo, Consolas, Monaco, 'Liberation Mono', 'Lucida Console', monospace",
 			'Arial, Helvetica, sans-serif',
 			"'Arial Black', Gadget, sans-serif",
 			"'Bookman Old Style', serif",
@@ -1803,9 +1965,22 @@ class Fusion_App {
 			}
 		}
 
+		// Adobe Fonts.
+		$adobe_fonts_data  = get_option( 'avada_adobe_fonts', [] );
+		$adobe_fonts_final = [];
+		foreach ( $adobe_fonts_data as $adobe_font_data ) {
+			$adobe_font_item = [
+				'family'   => $adobe_font_data['font_slug'],
+				'label'    => $adobe_font_data['label'],
+				'variants' => $adobe_font_data['variants'],
+			];
+			array_push( $adobe_fonts_final, $adobe_font_item );
+		}
+
 		$fonts_array = [
 			'standard' => $standard_fonts_final,
 			'google'   => $google_fonts_final,
+			'adobe'    => $adobe_fonts_final,
 			'custom'   => $custom_fonts,
 		];
 
@@ -1815,6 +1990,55 @@ class Fusion_App {
 		}
 
 		return $fonts_array;
+	}
+
+	/**
+	 * Get the translations of the variants id.
+	 *
+	 * @return array
+	 */
+	public function get_variants_translations() {
+		$all_variants = [
+			'100'       => esc_html__( 'Ultra-Light 100', 'Avada' ),
+			'100light'  => esc_html__( 'Ultra-Light 100', 'Avada' ),
+			'100italic' => esc_html__( 'Ultra-Light 100 Italic', 'Avada' ),
+			'200'       => esc_html__( 'Light 200', 'Avada' ),
+			'200italic' => esc_html__( 'Light 200 Italic', 'Avada' ),
+			'300'       => esc_html__( 'Book 300', 'Avada' ),
+			'300italic' => esc_html__( 'Book 300 Italic', 'Avada' ),
+			'400'       => esc_html__( 'Normal 400', 'Avada' ),
+			'regular'   => esc_html__( 'Normal 400', 'Avada' ),
+			'italic'    => esc_html__( 'Normal 400 Italic', 'Avada' ),
+			'500'       => esc_html__( 'Medium 500', 'Avada' ),
+			'500italic' => esc_html__( 'Medium 500 Italic', 'Avada' ),
+			'600'       => esc_html__( 'Semi-Bold 600', 'Avada' ),
+			'600bold'   => esc_html__( 'Semi-Bold 600', 'Avada' ),
+			'600italic' => esc_html__( 'Semi-Bold 600 Italic', 'Avada' ),
+			'700'       => esc_html__( 'Bold 700', 'Avada' ),
+			'700italic' => esc_html__( 'Bold 700 Italic', 'Avada' ),
+			'800'       => esc_html__( 'Extra-Bold 800', 'Avada' ),
+			'800bold'   => esc_html__( 'Extra-Bold 800', 'Avada' ),
+			'800italic' => esc_html__( 'Extra-Bold 800 Italic', 'Avada' ),
+			'900'       => esc_html__( 'Ultra-Bold 900', 'Avada' ),
+			'900bold'   => esc_html__( 'Ultra-Bold 900', 'Avada' ),
+			'900italic' => esc_html__( 'Ultra-Bold 900 Italic', 'Avada' ),
+		];
+
+		return $all_variants;
+	}
+
+	/**
+	 * Gets all typography fonts.
+	 *
+	 * @since 3.7
+	 * @return array
+	 */
+	public function get_typography_fonts() {
+		$this->is_ajax = false;
+		$fonts         = $this->get_googlefonts_ajax();
+		$this->set_ajax_status();
+
+		return $fonts;
 	}
 
 	/**
@@ -1986,6 +2210,21 @@ class Fusion_App {
 		echo ':root{--medium_screen_width:' . absint( $fusion_settings->get( 'visibility_medium' ) ) . 'px;}';
 		echo '</style>';
 	}
+
+	/**
+	 * Adds necessary filters to load empty checkout page in live editor.
+	 *
+	 * @access public
+	 * @since 7.8.1
+	 */
+	public function load_empty_checkout_page() {
+
+		if ( $this->is_preview || $this->is_builder || ( defined( 'WC_DOING_AJAX' ) && WC_DOING_AJAX && isset( $_GET['wc-ajax'] ) && 'update_order_review' === $_GET['wc-ajax'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			add_filter( 'woocommerce_checkout_redirect_empty_cart', '__return_false' );
+			add_filter( 'woocommerce_checkout_update_order_review_expired', '__return_false' );
+		}
+
+	}
 }
 
 /**
@@ -1994,8 +2233,8 @@ class Fusion_App {
  * The Fusion_App class is a singleton
  * so we can directly access the one true FusionBuilder object using this function.
  *
- * @since object 2.0
- * @return object Fusion_App
+ * @since 2.0
+ * @return Fusion_App
  */
 function Fusion_App() { // phpcs:ignore WordPress.NamingConventions
 	return Fusion_App::get_instance();

@@ -78,7 +78,7 @@ if ( ! class_exists( 'FusionSC_Global' ) ) {
 				// Get post contents.
 				$post = get_post( $this->args['id'] );
 				// Check if post exists.
-				if ( ! is_null( $post ) ) {
+				if ( ! is_null( $post ) && false === strpos( $post->post_content, 'fusion_global id="' . $this->args['id'] ) ) {
 					// Return contents.
 					return apply_filters( 'fusion_element_global_content', do_shortcode( fusion_builder_fix_shortcodes( shortcode_unautop( wpautop( wptexturize( $post->post_content ) ) ) ) ), $args );
 				}
@@ -279,7 +279,7 @@ if ( ! class_exists( 'FusionSC_Global' ) ) {
 			// get all registered short-code matches.
 			$matches = $this->get_shortcode_matches( $content );
 			if ( ! empty( $matches ) ) {
-				list( $shortcodes, $d, $parents, $atts, $d, $contents ) = $matches;
+				list( $shortcodes, $d, $parents, $atts, $d, $contents ) = $matches; // phpcs:ignore PHPCompatibility.Lists.AssignmentOrder.Affected
 				$child_arr_shortcodes                                   = [];
 
 				foreach ( $parents as $k => $parent ) {

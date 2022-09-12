@@ -53,6 +53,10 @@ if ( fusion_is_element_enabled( 'fusion_products_slider' ) && class_exists( 'Woo
 			 */
 			public static function get_element_defaults() {
 				return [
+					'margin_top'      => '',
+					'margin_right'    => '',
+					'margin_bottom'   => '',
+					'margin_left'     => '',
 					'hide_on_mobile'  => fusion_builder_default_visibility( 'string' ),
 					'class'           => '',
 					'id'              => '',
@@ -283,6 +287,11 @@ if ( fusion_is_element_enabled( 'fusion_products_slider' ) && class_exists( 'Woo
 
 					$this->args = $defaults;
 
+					$this->args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_bottom'], 'px' );
+					$this->args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_left'], 'px' );
+					$this->args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_right'], 'px' );
+					$this->args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['margin_top'], 'px' );
+
 					$featured_image_size = 'full';
 					if ( 'fixed' === $picture_size ) {
 						$featured_image_size = 'portfolio-five';
@@ -318,6 +327,7 @@ if ( fusion_is_element_enabled( 'fusion_products_slider' ) && class_exists( 'Woo
 								'post_featured_image_size' => $featured_image_size,
 								'post_permalink'           => get_permalink( get_the_ID() ),
 								'display_placeholder_image' => true,
+								'display_woo_outofstock'   => 'include' === $out_of_stock ? true : false,
 								'display_woo_sale'         => $show_sale,
 							];
 
@@ -392,12 +402,7 @@ if ( fusion_is_element_enabled( 'fusion_products_slider' ) && class_exists( 'Woo
 					$html .= '</ul>';
 					// Check if navigation should be shown.
 					if ( 'yes' === $show_nav ) {
-						$html .= sprintf(
-							'<div %s><span %s></span><span %s></span></div>',
-							FusionBuilder::attributes( 'fusion-carousel-nav' ),
-							FusionBuilder::attributes( 'fusion-nav-prev' ),
-							FusionBuilder::attributes( 'fusion-nav-next' )
-						);
+						$html .= awb_get_carousel_nav();
 					}
 					$html .= '</div>';
 					$html .= '</div>';
@@ -423,8 +428,11 @@ if ( fusion_is_element_enabled( 'fusion_products_slider' ) && class_exists( 'Woo
 					$this->args['hide_on_mobile'],
 					[
 						'class' => 'fusion-woo-product-slider fusion-woo-slider',
+						'style' => '',
 					]
 				);
+
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( $this->args );
 
 				if ( $this->args['class'] ) {
 					$attr['class'] .= ' ' . $this->args['class'];
@@ -511,7 +519,7 @@ function fusion_element_products_slider() {
 					'name'      => esc_attr__( 'Woo Product Carousel', 'fusion-builder' ),
 					'shortcode' => 'fusion_products_slider',
 					'icon'      => 'fusiona-tag',
-					'help_url'  => 'https://theme-fusion.com/documentation/fusion-builder/elements/woocommerce-product-carousel-element/',
+					'help_url'  => 'https://theme-fusion.com/documentation/avada/elements/woocommerce-product-carousel-element/',
 					'params'    => [
 						[
 							'type'        => 'radio_button_set',
@@ -743,6 +751,16 @@ function fusion_element_products_slider() {
 								'no'  => esc_attr__( 'No', 'fusion-builder' ),
 							],
 							'default'     => 'yes',
+						],
+						'fusion_margin_placeholder' => [
+							'param_name' => 'margin',
+							'group'      => esc_attr__( 'General', 'fusion-builder' ),
+							'value'      => [
+								'margin_top'    => '',
+								'margin_right'  => '',
+								'margin_bottom' => '',
+								'margin_left'   => '',
+							],
 						],
 						[
 							'type'        => 'checkbox_button_set',

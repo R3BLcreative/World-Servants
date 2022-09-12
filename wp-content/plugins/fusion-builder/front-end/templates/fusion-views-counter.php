@@ -8,8 +8,13 @@
 
 ?>
 <script type="text/html" id="tmpl-fusion_views_counter-shortcode">
-	<div {{{ _.fusionGetAttributes( wrapperAttributes ) }}}>
+	<# if ( ! isDisabled ) { #>
+		<div {{{ _.fusionGetAttributes( wrapperAttributes ) }}}>
 		{{{ styleTag }}}
 		<div {{{ _.fusionGetAttributes( contentAttributes ) }}}>{{{ FusionPageBuilderApp.renderContent( mainContent, cid, false ) }}}</div>
-	</div>
+	<# } else { #>
+		<div class="fusion-builder-placeholder-preview">
+			<i class="fusiona-exclamation" aria-hidden="true"></i> {{ isDisabledText }}
+		</div>
+	<# } #>
 </script>

@@ -86,9 +86,14 @@
 	</div>
 
 	<div class="fusion-layouts avada-db-card avada-db-card-transparent">
+		<?php
+		$options      = get_option( 'fusion_builder_settings', [] );
+		$builder_type = isset( $options['enable_builder_ui_by_default'] ) ? $options['enable_builder_ui_by_default'] : 'backend';
+		?>
 		<script>
-			fusionLayouts = <?php echo wp_json_encode( Fusion_Template_Builder()->get_registered_layouts(), JSON_FORCE_OBJECT ); ?>;
+			fusionLayouts   = <?php echo wp_json_encode( Fusion_Template_Builder()->get_registered_layouts(), JSON_FORCE_OBJECT ); ?>;
 			fusionTemplates = <?php echo wp_json_encode( Fusion_Template_Builder()->get_templates_by_term(), JSON_FORCE_OBJECT ); ?>;
+			builderType     = '<?php echo esc_attr( $builder_type ); ?>';
 		</script>
 	</div>
 <?php Fusion_Builder_Admin::footer(); ?>

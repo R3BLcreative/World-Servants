@@ -41,7 +41,7 @@
 	</div>
 
 	<div id="video-dialog" title="{{{ fusionBuilderText.getting_started_video }}}">
-		<p><iframe width="560" height="315" src="https://www.youtube.com/embed/569TlvRLn90?rel=0&enablejsapi=1" frameborder="0" allowfullscreen></iframe></p>
+		<p><iframe width="560" height="315" src="https://www.youtube.com/embed/CbOQqvQDrVQ?rel=0&enablejsapi=1" frameborder="0" allowfullscreen></iframe></p>
 	</div>
 </div>
 

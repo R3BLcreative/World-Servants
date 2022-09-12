@@ -248,7 +248,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_shipping' ) ) {
 						$this->add_css_property( $this->base_selector . ' .avada-select-parent .select-arrow', 'color', $this->args['field_text_color'] );
 					}
 
-					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$placeholder_inputs = [
 						$this->base_selector . ' input::placeholder',
 						$this->base_selector . ' textarea::placeholder',
@@ -274,7 +274,7 @@ if ( fusion_is_element_enabled( 'fusion_tb_woo_checkout_shipping' ) ) {
 				}
 
 				if ( ! $this->is_default( 'field_border_focus_color' ) ) {
-					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$hover_inputs = [
 						$this->base_selector . ' input:hover',
 						$this->base_selector . ' select:hover',

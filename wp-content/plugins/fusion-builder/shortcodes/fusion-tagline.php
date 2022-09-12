@@ -81,6 +81,10 @@ if ( fusion_is_element_enabled( 'fusion_tagline_box' ) ) {
 					'highlightposition'                 => 'left',
 					'link'                              => '',
 					'linktarget'                        => '_self',
+					'padding_top'                       => '',
+					'padding_right'                     => '',
+					'padding_bottom'                    => '',
+					'padding_left'                      => '',
 					'margin_bottom'                     => ( '' !== $fusion_settings->get( 'tagline_margin', 'bottom' ) ) ? fusion_library()->sanitize->size( $fusion_settings->get( 'tagline_margin', 'bottom' ) ) : '0px',
 					'margin_top'                        => ( '' !== $fusion_settings->get( 'tagline_margin', 'top' ) ) ? fusion_library()->sanitize->size( $fusion_settings->get( 'tagline_margin', 'top' ) ) : '0px',
 					'modal'                             => '',
@@ -181,7 +185,7 @@ if ( fusion_is_element_enabled( 'fusion_tagline_box' ) ) {
 						$args['button_shape'] = 'round3d';
 					}
 
-					$defaults['button_border_radius_top_left']     = isset( $button_radius[ $args['shape'] ] ) ? $button_radius[ $args['shape'] ] : '0px';
+					$defaults['button_border_radius_top_left']     = isset( $button_radius[ $args['button_shape'] ] ) ? $button_radius[ $args['button_shape'] ] : '0px';
 					$defaults['button_border_radius_top_right']    = $defaults['button_border_radius_top_left'];
 					$defaults['button_border_radius_bottom_right'] = $defaults['button_border_radius_top_left'];
 					$defaults['button_border_radius_bottom_left']  = $defaults['button_border_radius_top_left'];
@@ -204,6 +208,11 @@ if ( fusion_is_element_enabled( 'fusion_tagline_box' ) ) {
 
 				$this->args     = $defaults;
 				$desktop_button = $title_tag = $additional_content = '';
+
+				$this->args['padding_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_bottom'], 'px' );
+				$this->args['padding_left']   = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_left'], 'px' );
+				$this->args['padding_right']  = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_right'], 'px' );
+				$this->args['padding_top']    = FusionBuilder::validate_shortcode_attr_value( $this->args['padding_top'], 'px' );
 
 				$fusion_settings = awb_get_fusion_settings();
 				if ( ! apply_filters( 'awb_load_button_presets', ( '1' === $fusion_settings->get( 'button_presets' ) ) ) ) {
@@ -359,6 +368,8 @@ if ( fusion_is_element_enabled( 'fusion_tagline_box' ) ) {
 				}
 				$attr['style'] .= 'border-style:solid;';
 
+				$attr['style'] .= Fusion_Builder_Padding_Helper::get_paddings_style( $this->args );
+
 				return $attr;
 			}
 
@@ -483,7 +494,7 @@ if ( fusion_is_element_enabled( 'fusion_tagline_box' ) ) {
 								'label'       => esc_html__( 'Tagline Box Background Color', 'fusion-builder' ),
 								'description' => esc_html__( 'Controls the color of the tagline box background.', 'fusion-builder' ),
 								'id'          => 'tagline_bg',
-								'default'     => '#f9f9fb',
+								'default'     => 'var(--awb-color2)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -563,7 +574,7 @@ function fusion_element_tagline_box() {
 				'preview_id'      => 'fusion-builder-block-module-tagline-preview-template',
 				'allow_generator' => true,
 				'inline_editor'   => true,
-				'help_url'        => 'https://theme-fusion.com/documentation/fusion-builder/elements/tagline-box-element/',
+				'help_url'        => 'https://theme-fusion.com/documentation/avada/elements/tagline-box-element/',
 				'params'          => [
 					[
 						'type'        => 'colorpickeralpha',
@@ -823,6 +834,20 @@ function fusion_element_tagline_box() {
 						'value'        => esc_attr__( 'Your Content Goes Here', 'fusion-builder' ),
 						'placeholder'  => true,
 						'dynamic_data' => true,
+					],
+					[
+						'type'             => 'dimension',
+						'remove_from_atts' => true,
+						'heading'          => esc_attr__( 'Tagline Box Padding', 'fusion-builder' ),
+						'description'      => esc_attr__( 'In pixels or percentage, ex: 10px or 10%.', 'fusion-builder' ),
+						'param_name'       => 'padding',
+						'value'            => [
+							'padding_top'    => '',
+							'padding_right'  => '',
+							'padding_bottom' => '',
+							'padding_left'   => '',
+						],
+						'group'            => esc_attr__( 'Design', 'fusion-builder' ),
 					],
 					'fusion_margin_placeholder'    => [
 						'param_name'  => 'dimensions',

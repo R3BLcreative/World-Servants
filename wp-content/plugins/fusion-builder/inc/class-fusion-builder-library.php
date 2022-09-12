@@ -570,7 +570,7 @@ class Fusion_Builder_Library {
 		$post_content = '';
 		switch ( $category ) {
 			case 'sections':
-				$post_content = '[fusion_builder_container][fusion_builder_row][/fusion_builder_row][/fusion_builder_container]';
+				$post_content = '[fusion_builder_container type="flex"][fusion_builder_row][/fusion_builder_row][/fusion_builder_container]';
 				break;
 			case 'columns':
 				$post_content = '[fusion_builder_column type="1_1"][/fusion_builder_column]';
@@ -610,7 +610,7 @@ class Fusion_Builder_Library {
 		}
 
 		// Just redirect to back-end editor.  In future tie it to default editor option.
-		wp_safe_redirect( get_edit_post_link( $library_id, false ) );
+		wp_safe_redirect( awb_get_new_post_edit_link( $library_id ) );
 		die();
 	}
 
@@ -687,6 +687,10 @@ class Fusion_Builder_Library {
 
 		// If this is a studio layout, use different logic.
 		if ( isset( $_POST['fusion_studio'] ) && $_POST['fusion_studio'] ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+
+			// Set import options from $_REQUEST global array.
+			AWB_Studio_Import()->set_import_options_from_request();
+
 			echo wp_json_encode( AWB_Studio_Import()->get_studio_content() );
 			wp_die();
 		}
@@ -795,7 +799,7 @@ class Fusion_Builder_Library {
 
 			$layout_id  = wp_unslash( $_POST['fusion_layout_id'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$content    = isset( $_POST['fusion_layout_content'] ) ? wp_unslash( $_POST['fusion_layout_content'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-			$to_replace = addslashes( ' fusion_global="' . $layout_id . '"' );
+			$to_replace = [ addslashes( ' fusion_global="' . $layout_id . '"' ), ' fusion_global="' . $layout_id . '"' ];
 			$content    = str_replace( $to_replace, '', $content );
 
 			// Filter nested globals.
@@ -1044,6 +1048,7 @@ class Fusion_Builder_Library {
 								<div class="fusion-builder-element-content fusion-loader"><span class="fusion-builder-loader"></span><span class="awb-studio-import-status"></span></div>
 								<ul class="studio-imports"></ul>
 							</section>
+							<?php AWB_Studio::studio_import_options_template(); ?>
 						</div>
 					<?php else : ?>
 						<div class="fusion-builder-layouts-header">
@@ -1073,7 +1078,7 @@ class Fusion_Builder_Library {
 								printf(
 									/* translators: The "Fusion Documentation" link. */
 									__( 'Manage your saved containers. Containers cannot be inserted from the library window. The globe icon indicates the element is a <a href="%s" target="_blank">global element</a>.', 'fusion-builder' ), // phpcs:ignore WordPress.Security.EscapeOutput
-									'https://theme-fusion.com/documentation/fusion-builder/fusion-builder-library/fusion-builder-global-elements/'
+									'https://theme-fusion.com/documentation/avada/library/avada-builder-library-global-elements/'
 								);
 								?>
 							</span>
@@ -1108,7 +1113,7 @@ class Fusion_Builder_Library {
 							?>
 
 							<li class="<?php echo esc_attr( $is_global ); ?> fusion-page-layout" data-layout_id="<?php echo get_the_ID(); ?>">
-								<h4 class="fusion-page-layout-title" title="<?php the_title(); ?>">
+								<h4 class="fusion-page-layout-title" title="<?php the_title_attribute(); ?>">
 									<?php the_title(); ?>
 									<?php if ( '' !== $is_global && 'front' !== $this->location ) : ?>
 										<div class="fusion-global-tooltip-wrapper"><span class="fusion-global-tooltip"><?php esc_html_e( 'This is a global container.', 'fusion-builder' ); ?></span></div>
@@ -1170,7 +1175,7 @@ class Fusion_Builder_Library {
 								printf(
 									/* translators: The "Fusion Documentation" link. */
 									__( 'Manage your saved columns. Columns cannot be inserted from the library window and they must always go inside a container. The globe icon indicates the element is a <a href="%s" target="_blank">global element</a>.', 'fusion-builder' ), // phpcs:ignore WordPress.Security.EscapeOutput
-									'https://theme-fusion.com/documentation/fusion-builder/fusion-builder-library/fusion-builder-global-elements/'
+									'https://theme-fusion.com/documentation/avada/library/avada-builder-library-global-elements/'
 								);
 								?>
 							</span>
@@ -1205,7 +1210,7 @@ class Fusion_Builder_Library {
 							?>
 
 							<li class="<?php echo esc_attr( $is_global ); ?> fusion-page-layout" data-layout_id="<?php echo get_the_ID(); ?>">
-								<h4 class="fusion-page-layout-title" title="<?php the_title(); ?>">
+								<h4 class="fusion-page-layout-title" title="<?php the_title_attribute(); ?>">
 									<?php the_title(); ?>
 									<?php if ( '' !== $is_global && 'front' !== $this->location ) : ?>
 										<div class="fusion-global-tooltip-wrapper"><span class="fusion-global-tooltip"><?php esc_html_e( 'This is a global column.', 'fusion-builder' ); ?></span></div>
@@ -1270,7 +1275,7 @@ class Fusion_Builder_Library {
 								printf(
 									/* translators: The "Fusion Documentation" link. */
 									__( 'Manage your saved elements. Elements cannot be inserted from the library window and they must always go inside a column. The globe icon indicates the element is a <a href="%s" target="_blank">global element</a>.', 'fusion-builder' ), // phpcs:ignore WordPress.Security.EscapeOutput
-									'https://theme-fusion.com/documentation/fusion-builder/fusion-builder-library/fusion-builder-global-elements/'
+									'https://theme-fusion.com/documentation/avada/library/avada-builder-library-global-elements/'
 								);
 								?>
 							</span>
@@ -1306,7 +1311,7 @@ class Fusion_Builder_Library {
 							?>
 
 							<li class="<?php echo esc_attr( $is_global ); ?> fusion-page-layout" data-layout_type="<?php echo esc_attr( $element_type ); ?>" data-layout_id="<?php echo esc_attr( get_the_ID() ); ?>">
-								<h4 class="fusion-page-layout-title" title="<?php the_title(); ?>">
+								<h4 class="fusion-page-layout-title" title="<?php the_title_attribute(); ?>">
 									<?php the_title(); ?>
 									<?php if ( '' !== $is_global && 'front' !== $this->location ) : ?>
 										<div class="fusion-global-tooltip-wrapper">

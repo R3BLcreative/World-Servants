@@ -17,7 +17,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				'click .fusion-builder-all-modules .fusion-builder-element:not(.fusion-builder-element-generator,.fusion-builder-disabled-element)': 'addModule',
 				'click .fusion_builder_custom_elements_load': 'addCustomModule',
 				'click .fusion-builder-column-layouts li': 'addNestedColumns',
-				'click .fusion-studio-load': 'loadStudioElement'
+				'click .awb-import-options-toggle': 'toggleImportOptions',
+				'click .awb-import-studio-item': 'loadStudioElement'
 			},
 
 			render: function() {
@@ -101,6 +102,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				var layoutID,
 					self           = this,
 					$layout        = jQuery( event.currentTarget ).closest( '.fusion-page-layout' ),
+					importOptions  = FusionPageBuilderApp.studio.getImportOptions( event ),
 					targetElement;
 
 				if ( event ) {
@@ -112,7 +114,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 				FusionPageBuilderApp.layoutIsLoading = true;
 
-				layoutID  = $layout.data( 'layout_id' );
+				layoutID  = $layout.data( 'layout-id' );
 
 				if ( 'undefined' !== typeof this.options.targetElement ) {
 					targetElement = this.options.targetElement;
@@ -127,6 +129,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						fusion_load_nonce: FusionPageBuilderApp.fusion_load_nonce,
 						fusion_is_global: false,
 						fusion_layout_id: layoutID,
+						overWriteType: importOptions.overWriteType,
+						shouldInvert: importOptions.shouldInvert,
+						imagesImport: importOptions.imagesImport,
 						fusion_studio: true,
 						category: 'elements',
 						post_id: fusionBuilderConfig.post_id
@@ -173,7 +178,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								( function( k ) { // eslint-disable-line no-loop-func
 
 									dfdNext = dfdNext.then( function() {
-										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ] );
+										return self.importStudioMedia( FusionPageBuilderApp.studio.getImportData(), self.mediaImportKeys[ k ], importOptions );
 									} );
 
 									promises.push( dfdNext );

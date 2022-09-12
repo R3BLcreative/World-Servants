@@ -111,7 +111,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => '',
 					'description' => class_exists( 'Fusion_Template_Builder' ) ? sprintf(
 						/* translators: %1$s: Content|Footer|Page Title Bar. %2$s: Layout selection URL. */
-						'<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> For more flexibility and a more modern, performant setup, we recommend using the %1$s builder. To create a custom %1$s layout, <a href="%2$s" target="_blank">visit this page</a>.', 'Avada' ) . '</div>',
+						'<div class="fusion-redux-important-notice">' . __( '<strong>IMPORTANT NOTE:</strong> For more flexibility and a more modern, performant setup, we recommend using the %1$s Builder. To create a custom %1$s Layout, <a href="%2$s" target="_blank">visit this page</a>.', 'Avada' ) . '</div>',
 						Fusion_Template_Builder::get_instance()->get_template_terms()['header']['label'],
 						admin_url( 'admin.php?page=avada-layouts' )
 					) : '',
@@ -252,7 +252,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Highlight Background Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background color of main menu highlight.', 'Avada' ),
 					'id'          => 'menu_highlight_background',
-					'default'     => '#65bc7b',
+					'default'     => 'var(--awb-color4)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-or-and',
 					'required'    => [
@@ -895,7 +895,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Dropdown Background Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background color of the main menu dropdown.', 'Avada' ),
 					'id'          => 'menu_sub_bg_color',
-					'default'     => '#ffffff',
+					'default'     => 'var(--awb-color1)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -921,7 +921,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Dropdown Background Hover Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background hover color of the main menu dropdown.', 'Avada' ),
 					'id'          => 'menu_bg_hover_color',
-					'default'     => '#f9f9fb',
+					'default'     => 'var(--awb-color3)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -947,7 +947,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Dropdown Separator Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color of the separators in the main menu dropdown.', 'Avada' ),
 					'id'          => 'menu_sub_sep_color',
-					'default'     => '#e2e2e2',
+					'default'     => 'var(--awb-color3)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -987,7 +987,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Background Color For Header 4 & 5', 'Avada' ),
 					'description' => esc_html__( 'Controls the background color of the main menu when using header 4 or 5.', 'Avada' ),
 					'id'          => 'menu_h45_bg_color',
-					'default'     => '#ffffff',
+					'default'     => 'var(--awb-color1)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1016,26 +1016,30 @@ function avada_options_section_menu( $sections ) {
 					'type'        => 'info',
 				],
 				'nav_typography'                     => [
-					'id'          => 'nav_typography',
-					'label'       => esc_html__( 'Menus Typography', 'Avada' ),
-					'description' => esc_html__( 'These settings control the typography for all main menu top-level items.', 'Avada' ),
-					'type'        => 'typography',
-					'class'       => 'avada-no-fontsize',
-					'choices'     => [
+					'id'                        => 'nav_typography',
+					'label'                     => esc_html__( 'Menus Typography', 'Avada' ),
+					'description'               => esc_html__( 'These settings control the typography for all main menu top-level items.', 'Avada' ),
+					'type'                      => 'typography',
+					'global'                    => true,
+					'text_transform_no_inherit' => true,
+					'class'                     => 'avada-no-fontsize',
+					'choices'                   => [
 						'font-family'    => true,
 						'font-weight'    => true,
 						'font-size'      => true,
 						'letter-spacing' => true,
 						'color'          => true,
+						'text-transform' => true,
 					],
-					'default'     => [
-						'font-family'    => 'Open Sans',
+					'default'                   => [
+						'font-family'    => 'var(--awb-typography3-font-family)',
 						'font-weight'    => '400',
-						'font-size'      => '14px',
-						'letter-spacing' => '0',
-						'color'          => '#212934',
+						'font-size'      => 'var(--awb-typography3-font-size)',
+						'letter-spacing' => 'var(--awb-typography3-letter-spacing)',
+						'color'          => 'var(--awb-color8)',
+						'text-transform' => 'none',
 					],
-					'css_vars'    => [
+					'css_vars'                  => [
 						[
 							'name'     => '--nav_typography-font-family',
 							'choice'   => 'font-family',
@@ -1072,6 +1076,10 @@ function avada_options_section_menu( $sections ) {
 							'name'     => '--nav_typography-color-35a',
 							'choice'   => 'color',
 							'callback' => [ 'color_alpha_set', .35 ],
+						],
+						[
+							'name'   => '--nav_typography-text-transform',
+							'choice' => 'text-transform',
 						],
 					],
 				],
@@ -1155,7 +1163,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Font Hover/Active Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color for main menu text hover and active states, highlight bar and dropdown border.', 'Avada' ),
 					'id'          => 'menu_hover_first_color',
-					'default'     => '#65bc7b',
+					'default'     => 'var(--awb-color4)',
 					'type'        => 'color-alpha',
 					'css_vars'    => [
 						[
@@ -1172,7 +1180,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Dropdown Font Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color for main menu dropdown text.', 'Avada' ),
 					'id'          => 'menu_sub_color',
-					'default'     => '#212934',
+					'default'     => 'var(--awb-color8)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1353,7 +1361,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Flyout Menu Icon Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color of the flyout menu icons.', 'Avada' ),
 					'id'          => 'flyout_menu_icon_color',
-					'default'     => '#212934',
+					'default'     => 'var(--awb-color8)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-or',
 					'required'    => [
@@ -1385,7 +1393,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Flyout Menu Icon Hover Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the hover color of the flyout menu icons.', 'Avada' ),
 					'id'          => 'flyout_menu_icon_hover_color',
-					'default'     => '#65bc7b',
+					'default'     => 'var(--awb-color4)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-or',
 					'required'    => [
@@ -1417,7 +1425,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Flyout Menu Background Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background color of the flyout menu', 'Avada' ),
 					'id'          => 'flyout_menu_background_color',
-					'default'     => 'rgba(255,255,255,0.96)',
+					'default'     => 'hsla(var(--awb-color1-h),var(--awb-color1-s),var(--awb-color1-l),calc(var(--awb-color1-a) - 6%))',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-or',
 					'required'    => [
@@ -1616,7 +1624,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Secondary Menu Divider Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the divider color of the first level secondary menu.', 'Avada' ),
 					'id'          => 'header_top_first_border_color',
-					'default'     => 'rgba(0,0,0,0.06)',
+					'default'     => 'var(--awb-color6)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1658,7 +1666,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Secondary Menu Dropdown Background Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background color of the secondary menu dropdown.', 'Avada' ),
 					'id'          => 'header_top_sub_bg_color',
-					'default'     => '#ffffff',
+					'default'     => 'var(--awb-color1)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1700,7 +1708,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Secondary Menu Dropdown Background Hover Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background hover color of the secondary menu dropdown.', 'Avada' ),
 					'id'          => 'header_top_menu_bg_hover_color',
-					'default'     => '#f9f9fb',
+					'default'     => 'var(--awb-color2)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1742,7 +1750,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Secondary Menu Dropdown Separator Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color of the separators in the secondary menu dropdown.', 'Avada' ),
 					'id'          => 'header_top_menu_sub_sep_color',
-					'default'     => '#e2e2e2',
+					'default'     => 'var(--awb-color3)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1916,7 +1924,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Secondary Menu Font Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color for secondary menu text.', 'Avada' ),
 					'id'          => 'snav_color',
-					'default'     => '#ffffff',
+					'default'     => 'var(--awb-color1)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1958,7 +1966,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Secondary Menu Dropdown Font Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color for secondary menu dropdown text.', 'Avada' ),
 					'id'          => 'header_top_menu_sub_color',
-					'default'     => '#4a4e57',
+					'default'     => 'var(--awb-color8)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -1999,7 +2007,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Secondary Menu Dropdown Font Hover Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the hover color for secondary menu dropdown text.', 'Avada' ),
 					'id'          => 'header_top_menu_sub_hover_color',
-					'default'     => '#65bc7b',
+					'default'     => 'var(--awb-color4)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-or-gutter',
 					'required'    => [
@@ -2370,7 +2378,7 @@ function avada_options_section_menu( $sections ) {
 					'label'           => esc_html__( 'Mobile Header Background Color', 'Avada' ),
 					'description'     => esc_html__( 'Controls the background color of the header on mobile devices.', 'Avada' ),
 					'id'              => 'mobile_header_bg_color',
-					'default'         => '#ffffff',
+					'default'         => 'var(--awb-color1)',
 					'type'            => 'color-alpha',
 					'required'        => [
 						[
@@ -2413,7 +2421,7 @@ function avada_options_section_menu( $sections ) {
 					'description'     => esc_html__( 'Controls the background color of the archive page header on mobile devices.', 'Avada' ),
 					'id'              => 'mobile_archive_header_bg_color',
 					'type'            => 'color-alpha',
-					'default'         => '#ffffff',
+					'default'         => 'var(--awb-color1)',
 					'required'        => [
 						[
 							'setting'  => 'responsive',
@@ -2439,7 +2447,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Mobile Menu Background Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background color of the mobile menu dropdown and classic mobile menu box.', 'Avada' ),
 					'id'          => 'mobile_menu_background_color',
-					'default'     => '#ffffff',
+					'default'     => 'var(--awb-color1)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-and-or-and-and',
 					'required'    => [
@@ -2485,7 +2493,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Mobile Menu Background Hover Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the background hover color of the mobile menu dropdown.', 'Avada' ),
 					'id'          => 'mobile_menu_hover_color',
-					'default'     => '#f9f9fb',
+					'default'     => 'var(--awb-color1)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-and-or-and-and',
 					'required'    => [
@@ -2531,7 +2539,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Mobile Menu Border Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the border and divider colors of the mobile menu dropdown and classic mobile menu box.', 'Avada' ),
 					'id'          => 'mobile_menu_border_color',
-					'default'     => '#e2e2e2',
+					'default'     => 'var(--awb-color3)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-and-or-and-and',
 					'required'    => [
@@ -2577,7 +2585,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Mobile Menu Toggle Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color of the mobile menu toggle icon.', 'Avada' ),
 					'id'          => 'mobile_menu_toggle_color',
-					'default'     => '#9ea0a4',
+					'default'     => 'var(--awb-color6)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-and-or-and-and',
 					'required'    => [
@@ -2638,28 +2646,32 @@ function avada_options_section_menu( $sections ) {
 					],
 				],
 				'mobile_menu_typography'         => [
-					'id'          => 'mobile_menu_typography',
-					'label'       => esc_html__( 'Mobile Menu Typography', 'Avada' ),
-					'description' => esc_html__( 'These settings control the typography for mobile menu.', 'Avada' ),
-					'type'        => 'typography',
-					'class'       => 'fusion-gutter-and-or-and',
-					'choices'     => [
+					'id'                        => 'mobile_menu_typography',
+					'label'                     => esc_html__( 'Mobile Menu Typography', 'Avada' ),
+					'description'               => esc_html__( 'These settings control the typography for mobile menu.', 'Avada' ),
+					'type'                      => 'typography',
+					'global'                    => true,
+					'text_transform_no_inherit' => true,
+					'class'                     => 'fusion-gutter-and-or-and',
+					'choices'                   => [
 						'font-family'    => true,
 						'font-size'      => true,
 						'font-weight'    => true,
 						'line-height'    => true,
 						'letter-spacing' => true,
 						'color'          => true,
+						'text-transform' => true,
 					],
-					'default'     => [
-						'font-family'    => 'Open Sans',
-						'font-size'      => '12px',
+					'default'                   => [
+						'font-family'    => 'var(--awb-typography3-font-family)',
+						'font-size'      => 'var(--awb-typography3-font-size)',
 						'font-weight'    => '400',
-						'line-height'    => '42px',
-						'letter-spacing' => '0',
-						'color'          => '#4a4e57',
+						'line-height'    => 'var(--awb-typography3-line-height)',
+						'letter-spacing' => 'var(--awb-typography3-letter-spacing)',
+						'color'          => 'var(--awb-color8)',
+						'text-transform' => 'none',
 					],
-					'required'    => [
+					'required'                  => [
 						[
 							'setting'  => 'responsive',
 							'operator' => '==',
@@ -2681,7 +2693,7 @@ function avada_options_section_menu( $sections ) {
 							'value'    => 'top',
 						],
 					],
-					'css_vars'    => [
+					'css_vars'                  => [
 						[
 							'name'     => '--mobile_menu_typography-font-family',
 							'choice'   => 'font-family',
@@ -2718,6 +2730,10 @@ function avada_options_section_menu( $sections ) {
 							'choice' => 'font-weight',
 						],
 						[
+							'name'   => '--mobile_menu_typography-text-transform',
+							'choice' => 'text-transform',
+						],
+						[
 							'name'     => '--mobile_menu_typography-font-size-30-or-24px',
 							'choice'   => 'font-size',
 							'callback' => [
@@ -2749,7 +2765,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Mobile Menu Hover Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the hover color of the mobile menu item. Also, used to highlight current mobile menu item.', 'Avada' ),
 					'id'          => 'mobile_menu_font_hover_color',
-					'default'     => '#212934',
+					'default'     => 'var(--awb-color8)',
 					'type'        => 'color-alpha',
 					'class'       => 'fusion-gutter-and-or-and',
 					'required'    => [
@@ -3225,7 +3241,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Icon Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the color of the top-level main menu icons.', 'Avada' ),
 					'id'          => 'menu_icon_color',
-					'default'     => '#212934',
+					'default'     => 'var(--awb-color6)',
 					'type'        => 'color-alpha',
 					'css_vars'    => [
 						[
@@ -3239,7 +3255,7 @@ function avada_options_section_menu( $sections ) {
 					'label'       => esc_html__( 'Main Menu Icon Hover Color', 'Avada' ),
 					'description' => esc_html__( 'Controls the hover color of the top-level main menu icons.', 'Avada' ),
 					'id'          => 'menu_icon_hover_color',
-					'default'     => '#65bc7b',
+					'default'     => 'var(--awb-color4)',
 					'type'        => 'color-alpha',
 					'css_vars'    => [
 						[

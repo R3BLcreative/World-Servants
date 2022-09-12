@@ -269,7 +269,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 					// Select 2.
 					$this->add_css_property( $this->base_selector . ' .select2-container--default .select2-selection--single .select2-selection__rendered', 'color', $this->args['field_text_color'], true );
 
-					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$placeholder_color  = Fusion_Color::new_color( $this->args['field_text_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$placeholder_inputs = [
 						$this->base_selector . ' input::placeholder',
 						$this->base_selector . ' textarea::placeholder',
@@ -296,7 +296,7 @@ if ( class_exists( 'WooCommerce' ) ) {
 				}
 
 				if ( ! $this->is_default( 'field_border_focus_color' ) ) {
-					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' );
+					$hover_color  = Fusion_Color::new_color( $this->args['field_border_focus_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					$hover_inputs = [
 						$this->base_selector . ' input:hover',
 						$this->base_selector . ' select:hover',

@@ -116,6 +116,11 @@ if ( fusion_is_element_enabled( 'fusion_post_card_image' ) ) {
 
 					'crossfade_bg_color'         => '',
 
+					// aspect ratio.
+					'aspect_ratio'               => '',
+					'custom_aspect_ratio'        => '',
+					'aspect_ratio_position'      => '',
+
 					// Animation.
 					'animation_type'             => '',
 					'animation_direction'        => 'down',
@@ -289,6 +294,16 @@ if ( fusion_is_element_enabled( 'fusion_post_card_image' ) ) {
 					add_filter( 'fusion_builder_post_links_target', [ $this, 'set_rollover_image_link_target' ], 11, 2 );
 				}
 
+				// Add necessary class for image variation changes.
+				if ( 'product' === get_post_type( $post_id ) ) {
+					$image_args['attributes'] = [
+						'class' => 'woocommerce-product-gallery__image',
+					];
+
+					add_filter( 'wp_get_attachment_image_attributes', [ $this, 'add_product_image_attr' ], 10, 3 );
+					add_filter( 'awb_crossfade_image_classes', [ $this, 'add_to_crossfade_attr' ], 10, 2 );
+				}
+
 				if ( 'crossfade' !== $this->args['layout'] || is_tax() ) {
 					$image = avada_first_featured_image_markup( $image_args );
 				} else {
@@ -299,9 +314,50 @@ if ( fusion_is_element_enabled( 'fusion_post_card_image' ) ) {
 					remove_filter( 'fusion_builder_post_links_target', [ $this, 'set_rollover_image_link_target' ], 11 );
 				}
 
+				if ( 'product' === get_post_type( $post_id ) ) {
+					remove_filter( 'wp_get_attachment_image_attributes', [ $this, 'add_product_image_attr' ], 10, 3 );
+					remove_filter( 'awb_crossfade_image_classes', [ $this, 'add_to_crossfade_attr' ], 10, 2 );
+				}
+
 				fusion_library()->images->set_grid_image_meta( [] );
 
 				return $image;
+			}
+
+			/**
+			 * Add data attribute to product image.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @param array  $attr       The attributes array.
+			 * @param array  $attachment The attachment data.
+			 * @param string $size       The size.
+			 * @return array
+			 */
+			public function add_product_image_attr( $attr, $attachment, $size ) {
+				$full_size = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
+				$full_src  = wp_get_attachment_image_src( $attachment->ID, $full_size );
+
+				$attr['data-caption']            = _wp_specialchars( get_post_field( 'post_excerpt', $attachment->ID ), ENT_QUOTES, 'UTF-8', true );
+				$attr['data-src']                = esc_url( $full_src[0] );
+				$attr['data-large_image']        = esc_url( $full_src[0] );
+				$attr['data-large_image_width']  = esc_attr( $full_src[1] );
+				$attr['data-large_image_height'] = esc_attr( $full_src[2] );
+				return $attr;
+			}
+
+			/**
+			 * Add data attribute to product image.
+			 *
+			 * @access public
+			 * @since 3.8
+			 * @param array $classes   The classes array.
+			 * @param array $attachment The attachment data.
+			 * @return array
+			 */
+			public function add_to_crossfade_attr( $classes, $attachment ) {
+				$classes[] = 'woocommerce-product-gallery__image';
+				return $classes;
 			}
 
 			/**
@@ -417,6 +473,16 @@ if ( fusion_is_element_enabled( 'fusion_post_card_image' ) ) {
 				if ( 'crossfade' === $this->args['layout'] ) {
 					$attr['class'] .= ' product-images';
 				}
+
+				if ( '' !== $this->args['aspect_ratio'] ) {
+					$attr['class'] .= ' has-aspect-ratio';
+				}
+
+				// Add necessary class for image variation changes.
+				if ( 'product' === get_post_type( get_the_ID() ) ) {
+					$attr['class'] .= ' images';
+				}
+
 				return $attr;
 
 			}
@@ -498,6 +564,8 @@ if ( fusion_is_element_enabled( 'fusion_post_card_image' ) ) {
 						'important' => false,
 					];
 				}
+
+				$this->generate_aspect_ratio_styles();
 			}
 
 			/**
@@ -513,7 +581,6 @@ if ( fusion_is_element_enabled( 'fusion_post_card_image' ) ) {
 				foreach ( $this->element_css as $rule ) {
 					$this->add_css_property( $rule['selector'], $rule['rule'], $rule['value'], $rule['important'] );
 				}
-
 				$css = $this->parse_css();
 
 				return $css ? '<style>' . $css . '</style>' : '';
@@ -539,6 +606,54 @@ if ( fusion_is_element_enabled( 'fusion_post_card_image' ) ) {
 				$this->styles_generated = false;
 
 				return $css;
+			}
+
+			/**
+			 * Generate aspect ratio styles.
+			 *
+			 * @access public
+			 * @since 3.7
+			 * @return string CSS output.
+			 */
+			public function generate_aspect_ratio_styles() {
+				if ( '' === $this->args['aspect_ratio'] ) {
+					return '';
+				}
+
+				$this->dynamic_css = [];
+				$selector          = '.fusion-post-card-image-' . $this->element_counter . '.has-aspect-ratio img';
+
+				// Calc Ratio.
+				if ( 'custom' === $this->args['aspect_ratio'] && '' !== $this->args['custom_aspect_ratio'] ) {
+					$this->element_css[] = [
+						'selector'  => $selector,
+						'rule'      => 'aspect-ratio',
+						'value'     => '100 / ' . $this->args['custom_aspect_ratio'],
+						'important' => false,
+					];
+				} else {
+					$aspect_ratio = explode( '-', $this->args['aspect_ratio'] );
+					$width        = isset( $aspect_ratio[0] ) ? $aspect_ratio[0] : '';
+					$height       = isset( $aspect_ratio[1] ) ? $aspect_ratio[1] : '';
+
+					$this->element_css[] = [
+						'selector'  => $selector,
+						'rule'      => 'aspect-ratio',
+						'value'     => "$width / $height",
+						'important' => false,
+					];
+
+				}
+
+				// Set Image Position.
+				if ( '' !== $this->args['aspect_ratio_position'] ) {
+					$this->element_css[] = [
+						'selector'  => $selector,
+						'rule'      => 'object-position',
+						'value'     => $this->args['aspect_ratio_position'],
+						'important' => false,
+					];
+				}
 			}
 
 			/**
@@ -602,6 +717,59 @@ function fusion_element_post_card_image() {
 							'function' => 'fusion_ajax',
 							'action'   => 'get_fusion_post_card_image',
 							'ajax'     => true,
+						],
+					],
+					[
+						'type'        => 'select',
+						'heading'     => esc_attr__( 'Image Aspect Ratio', 'fusion-builder' ),
+						'description' => esc_attr__( 'Select an aspect ratio for the image.', 'fusion-builder' ),
+						'param_name'  => 'aspect_ratio',
+						'value'       => [
+							''       => esc_attr__( 'Automatic', 'fusion-builder' ),
+							'1-1'    => esc_attr__( '1:1', 'fusion-builder' ),
+							'2-1'    => esc_attr__( '2:1', 'fusion-builder' ),
+							'2-3'    => esc_attr__( '2:3', 'fusion-builder' ),
+							'3-1'    => esc_attr__( '3:1', 'fusion-builder' ),
+							'3-2'    => esc_attr__( '3:2', 'fusion-builder' ),
+							'4-1'    => esc_attr__( '4:1', 'fusion-builder' ),
+							'4-3'    => esc_attr__( '4:3', 'fusion-builder' ),
+							'5-4'    => esc_attr__( '5:4', 'fusion-builder' ),
+							'16-9'   => esc_attr__( '16:9', 'fusion-builder' ),
+							'9-16'   => esc_attr__( '9:16', 'fusion-builder' ),
+							'21-9'   => esc_attr__( '21:9', 'fusion-builder' ),
+							'9-21'   => esc_attr__( '9:21', 'fusion-builder' ),
+							'custom' => esc_attr__( 'Custom', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'range',
+						'heading'     => esc_attr__( 'Custom Aspect Ratio', 'fusion-builder' ),
+						'description' => esc_attr__( 'Set a custom aspect ratio for the image.', 'fusion-builder' ),
+						'param_name'  => 'custom_aspect_ratio',
+						'min'         => 1,
+						'max'         => 500,
+						'value'       => 100,
+						'dependency'  => [
+							[
+								'element'  => 'aspect_ratio',
+								'value'    => 'custom',
+								'operator' => '==',
+							],
+						],
+					],
+					[
+						'type'        => 'image_focus_point',
+						'heading'     => esc_attr__( 'Image Focus Point', 'fusion-builder' ),
+						'description' => esc_attr__( 'Set the image focus point by dragging the blue dot.', 'fusion-builder' ),
+						'param_name'  => 'aspect_ratio_position',
+						'image'       => 'element_content',
+						'image_id'    => 'image_id',
+						'dependency'  => [
+							[
+								'element'  => 'aspect_ratio',
+								'value'    => '',
+								'operator' => '!=',
+							],
 						],
 					],
 					[

@@ -74,6 +74,9 @@ require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/helpers/class-fusion-builder-gradi
 require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/helpers/class-fusion-builder-form-helper.php';
 require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/helpers/class-fusion-builder-form-logics-helper.php';
 require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/helpers/class-fusion-builder-conditional-render-helper.php';
+require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/helpers/class-fusion-builder-transform-helper.php';
+require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/helpers/class-fusion-builder-pattern-helper.php';
+require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/helpers/class-fusion-builder-mask-helper.php';
 require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/class-fusion-builder-element-helper.php';
 
 require_once FUSION_BUILDER_PLUGIN_DIR . 'inc/class-fusion-dummy-post.php';

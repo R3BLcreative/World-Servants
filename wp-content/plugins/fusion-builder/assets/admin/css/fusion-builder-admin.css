@@ -9,6 +9,20 @@
     opacity: 0.3;
   }
 }
+@keyframes highlight {
+  0% {
+    box-shadow: none;
+  }
+  33% {
+    box-shadow: 0 0 0 3px rgba(25, 143, 217, 0.4);
+  }
+  66% {
+    box-shadow: 0 0 0 3px rgba(25, 143, 217, 0.4);
+  }
+  100% {
+    text-shadow: none;
+  }
+}
 .avada-dashboard .layoutbox {
   background: #fff;
   border-radius: 0.35em;
@@ -167,6 +181,10 @@
 }
 .avada-dashboard .layoutbox.is-selecting .layoutbox-heading .layoutbox-title {
   padding: 0 15px;
+}
+.avada-dashboard .layoutbox.awb-layout-highlight {
+  animation: highlight 1.5s ease-in-out 350ms;
+  animation-iteration-count: 3;
 }
 .avada-dashboard .layoutbox .layoutbox-heading {
   display: flex;
@@ -439,7 +457,7 @@
   font-size: 16px;
 }
 .avada-dashboard .fusion-layouts-grid .fusion-layout .layoutbox-content .layout-templates > div .select-template-container .template-type-label {
-  max-width: 135px;
+  max-width: 165px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1383,8 +1401,7 @@
   -moz-border-top-colors: none;
   background: #fff none repeat scroll 0 0;
   border-color: -moz-use-text-color #dfdfdf #dfdfdf;
-  -o-border-image: none;
-     border-image: none;
+  border-image: none;
   border: 1px solid #dfdfdf;
   border-style: none solid solid;
   border-width: medium 1px 1px;

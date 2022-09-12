@@ -45,9 +45,10 @@
 									<div class="fusion-builder-element-content fusion-loader"><span class="fusion-builder-loader"></span></div>
 									<ul class="studio-imports"></ul>
 								</section>
+								<?php AWB_Studio::studio_import_options_template(); ?>
 							</div>
 						<?php else : ?>
-							<h2><?php esc_html_e( 'You need to be registered to access the Avada Studio.', 'fusion-builder' ); ?></h2>
+							<h2 class="awb-studio-not-reg"><?php esc_html_e( 'The product needs to be registered to access the Avada Studio.', 'fusion-builder' ); ?></h2>
 						<?php endif; ?>
 					</div>
 				<# } #>

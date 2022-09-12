@@ -73,6 +73,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// Deprecated 5.2.1 hide value, mapped to no.
 				values.excerpt = 'hide' === values.excerpt ? 'no' : values.excerpt;
+
+				values.margin_bottom    = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left      = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right     = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top       = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -121,8 +126,25 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					// recentPostsShortcode Attributes.
 					recentPostsShortcode = _.fusionVisibilityAtts( atts.values.hide_on_mobile, {
-						class: 'fusion-recent-posts avada-container layout-' + atts.values.layout + ' layout-columns-' + atts.values.columns
+						class: 'fusion-recent-posts fusion-recent-posts-' + this.model.get( 'cid' ) + ' avada-container layout-' + atts.values.layout + ' layout-columns-' + atts.values.columns,
+						style: ''
 					} );
+
+					if ( '' !== atts.values.margin_top ) {
+						recentPostsShortcode.style += 'margin-top:' + atts.values.margin_top + ';';
+					}
+
+					if ( '' !== atts.values.margin_right ) {
+						recentPostsShortcode.style += 'margin-right:' + atts.values.margin_right + ';';
+					}
+
+					if ( '' !== atts.values.margin_bottom ) {
+						recentPostsShortcode.style += 'margin-bottom:' + atts.values.margin_bottom + ';';
+					}
+
+					if ( '' !== atts.values.margin_left ) {
+						recentPostsShortcode.style += 'margin-left:' + atts.values.margin_left + ';';
+					}
 
 					if ( '' !== atts.values[ 'class' ] ) {
 						recentPostsShortcode[ 'class' ] += ' ' + atts.values[ 'class' ];
@@ -156,6 +178,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				attributes.query_data                    = atts.query_data;
 				attributes.extras                        = atts.extras;
 				attributes.values                        = atts.values;
+				attributes.style                         = this.getStyleElement( atts.values );
+				attributes.titleTag                      = this.getTitleTag( atts.values );
 				attributes.recentPostsShortcode          = recentPostsShortcode;
 				attributes.recentPostsShortcodeColumn    = recentPostsShortcodeColumn;
 				attributes.recentPostsShortcodeImgLink   = recentPostsShortcodeImgLink;
@@ -163,6 +187,59 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				attributes.recentPostsShortcodeSlideshow = recentPostsShortcodeSlideshow;
 
 				return attributes;
+			},
+
+			getTitleTag: function( values ) {
+				if ( ! values.title_size ) {
+					return 'h4';
+				}
+
+				if ( !isNaN( values.title_size ) && !isNaN( parseFloat( values.title_size ) ) ) {
+					return 'h' + values.title_size;
+				}
+
+				return values.title_size;
+			},
+
+			/**
+			 * Create the style HTML element.
+			 *
+			 * @since 3.5
+			 * @param {Object} values - The values.
+			 * @returns {string}
+			 */
+			getStyleElement: function( values ) {
+				var style,
+					baseSelector = '.fusion-recent-posts.fusion-recent-posts-' + this.model.get( 'cid' ),
+					self = this,
+					titleSelector = baseSelector + ' .columns .column .entry-title';
+
+				this.dynamic_css = {};
+				this.values = values;
+
+				jQuery.each( _.fusionGetFontStyle( 'title_font', values, 'object' ), function( rule, value ) {
+					self.addCssProperty( titleSelector, rule, value );
+				} );
+
+				if ( ! _.isEmpty( values.title_font_size ) ) {
+					this.addCssProperty( titleSelector, 'font-size', values.title_font_size );
+				}
+
+				if ( ! _.isEmpty( values.title_line_height ) ) {
+					this.addCssProperty( titleSelector, 'line-height', values.title_line_height );
+				}
+
+				if ( ! _.isEmpty( values.title_letter_spacing ) ) {
+					this.addCssProperty( titleSelector, 'letter-spacing', values.title_letter_spacing );
+				}
+
+				if ( ! _.isEmpty( values.title_text_transform ) ) {
+					this.addCssProperty( titleSelector, 'text-transform', values.title_text_transform );
+				}
+
+				style = this.parseCSS();
+
+				return style ? '<style>' + style + '</style>' : '';
 			}
 		} );
 	} );

@@ -348,7 +348,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					this.mapStudioImages( options, values );
 
 				if ( '' !== values.icon && 'fusion-prefix-' === values.icon.substr( 0, 14 ) ) {
-						if ( undefined !== typeof fusionAppConfig.customIcons ) {
+						if ( 'undefined' !== typeof fusionAppConfig.customIcons ) {
 							iconWithoutFusionPrefix = values.icon.substr( 14 );
 
 							// TODO: try to optimize this check.

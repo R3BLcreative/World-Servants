@@ -69,6 +69,7 @@ if ( fusion_is_element_enabled( 'fusion_form_image_select' ) ) {
 					'label'              => '',
 					'name'               => '',
 					'required'           => '',
+					'empty_notice'       => '',
 					'multiple_select'    => '',
 					'placeholder'        => 'no',
 					'form_field_layout'  => '',
@@ -217,7 +218,7 @@ if ( fusion_is_element_enabled( 'fusion_form_image_select' ) ) {
 
 				if ( '' !== $this->args['active_color'] ) {
 					$styles .= $base_selector . ' .fusion-form-image-select .fusion-form-input:checked + label{border-color:' . $this->args['active_color'] . ';}';
-					$styles .= $base_selector . ' .fusion-form-image-select .fusion-form-input:hover:not(:checked) + label{border-color:' . Fusion_Color::new_color( $this->args['active_color'] )->get_new( 'alpha', '0.5' )->to_css( 'rgba' ) . ';}';
+					$styles .= $base_selector . ' .fusion-form-image-select .fusion-form-input:hover:not(:checked) + label{border-color:' . Fusion_Color::new_color( $this->args['active_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba() . ';}';
 				}
 
 				// Padding.
@@ -279,7 +280,9 @@ if ( fusion_is_element_enabled( 'fusion_form_image_select' ) ) {
 				$label_id       = $type . '-' . str_replace( ' ', '-', strtolower( $value ) ) . $this->child_counter;
 
 				$html .= '<div class="' . $checkbox_class . '">';
-				$html .= '<input tabindex="' . $this->args['tab_index'] . '" id="' . esc_attr( $label_id ) . '" type="' . $input_type . '" value="' . esc_attr( $value ) . '" name="' . esc_attr( $element_name ) . '"' . $element_data['class'] . $element_data['required'] . $checked . $element_data['holds_private_data'] . '/>';
+				$html .= '<input ';
+				$html .= '' !== $element_data['empty_notice'] ? 'data-empty-notice="' . $element_data['empty_notice'] . '" ' : '';
+				$html .= 'tabindex="' . $this->args['tab_index'] . '" id="' . esc_attr( $label_id ) . '" type="' . $input_type . '" value="' . esc_attr( $value ) . '" name="' . esc_attr( $element_name ) . '"' . $element_data['class'] . $element_data['required'] . $checked . $element_data['holds_private_data'] . '/>';
 				$html .= '<label for="' . esc_attr( $label_id ) . '">';
 
 				// Perhaps an option whether to show label or not.
@@ -412,7 +415,7 @@ function fusion_form_image_select() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Field Name', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the field name. Should be single word without spaces. Underscores and dashes are allowed.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter the field name. Please use only lowercase alphanumeric characters, dashes, and underscores.', 'fusion-builder' ),
 						'param_name'  => 'name',
 						'value'       => '',
 						'placeholder' => true,
@@ -437,6 +440,20 @@ function fusion_form_image_select() {
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Empty Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter text validation notice that should display if data input is empty.', 'fusion-builder' ),
+						'param_name'  => 'empty_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'required',
+								'value'    => 'yes',
+								'operator' => '==',
+							],
 						],
 					],
 					[

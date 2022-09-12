@@ -87,6 +87,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					},
 					iconOutput                   = '',
 					animations                   = '',
+					titleTag                     = '',
 					flipBoxShortcodeGrafix       = '',
 					flipBoxShortcodeHeadingFront = '',
 					titleFrontOutput             = '',
@@ -210,29 +211,74 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				if ( '' !== values.title_front ) {
 					flipBoxShortcodeHeadingFront = {
-						class: 'flip-box-heading'
+						class: 'flip-box-heading',
+						style: ''
 					};
+
+					jQuery.each( _.fusionGetFontStyle( 'front_title_font', values, 'object' ), function( rule, value ) {
+						flipBoxShortcodeHeadingFront.style += rule + ':' + value + ';';
+					} );
+
+					if ( ! _.isEmpty( values.front_title_font_size ) ) {
+						flipBoxShortcodeHeadingFront.style += 'font-size:' + values.front_title_font_size + ';';
+					}
+
+					if ( ! _.isEmpty( values.front_title_line_height ) ) {
+						flipBoxShortcodeHeadingFront.style += 'line-height:' + values.front_title_line_height + ';';
+					}
+
+					if ( ! _.isEmpty( values.front_title_letter_spacing ) ) {
+						flipBoxShortcodeHeadingFront.style += 'letter-spacing:' + values.front_title_letter_spacing + ';';
+					}
+
+					if ( ! _.isEmpty( values.front_title_text_transform ) ) {
+						flipBoxShortcodeHeadingFront.style += 'text-transform:' + values.front_title_text_transform + ';';
+					}
 
 					if ( ! values.text_front ) {
 						flipBoxShortcodeHeadingFront[ 'class' ] += ' without-text';
 					}
 
 					if ( values.title_front_color ) {
-						flipBoxShortcodeHeadingFront.style = 'color:' + values.title_front_color + ';';
+						flipBoxShortcodeHeadingFront.style += 'color:' + values.title_front_color + ';';
 					}
 
-					titleFrontOutput = '<h2 ' + _.fusionGetAttributes( flipBoxShortcodeHeadingFront ) + '>' + values.title_front + '</h2>';
+					titleTag = this.getTitleTag( values, 'front' );
+					titleFrontOutput = '<' + titleTag + ' ' + _.fusionGetAttributes( flipBoxShortcodeHeadingFront ) + '>' + values.title_front + '</' + titleTag + '>';
 				}
 
 				if ( '' !== values.title_back ) {
 					flipBoxShortcodeHeadingBack = {
-						class: 'flip-box-heading-back'
+						class: 'flip-box-heading-back',
+						style: ''
 					};
 
-					if ( values.title_back_color ) {
-						flipBoxShortcodeHeadingBack.style = 'color:' + values.title_back_color + ';';
+					jQuery.each( _.fusionGetFontStyle( 'back_title_font', values, 'object' ), function( rule, value ) {
+						flipBoxShortcodeHeadingBack.style += rule + ':' + value + ';';
+					} );
+
+					if ( ! _.isEmpty( values.back_title_font_size ) ) {
+						flipBoxShortcodeHeadingBack.style += 'font-size:' + values.back_title_font_size + ';';
 					}
-					titleBackOutput = '<h3 ' + _.fusionGetAttributes( flipBoxShortcodeHeadingBack ) + '>' + values.title_back + '</h3>';
+
+					if ( ! _.isEmpty( values.back_title_line_height ) ) {
+						flipBoxShortcodeHeadingBack.style += 'line-height:' + values.back_title_line_height + ';';
+					}
+
+					if ( ! _.isEmpty( values.back_title_letter_spacing ) ) {
+						flipBoxShortcodeHeadingBack.style += 'letter-spacing:' + values.back_title_letter_spacing + ';';
+					}
+
+					if ( ! _.isEmpty( values.back_title_text_transform ) ) {
+						flipBoxShortcodeHeadingBack.style += 'text-transform:' + values.back_title_text_transform + ';';
+					}
+
+					if ( values.title_back_color ) {
+						flipBoxShortcodeHeadingBack.style += 'color:' + values.title_back_color + ';';
+					}
+
+					titleTag = this.getTitleTag( values, 'back' );
+					titleBackOutput = '<' + titleTag + ' ' + _.fusionGetAttributes( flipBoxShortcodeHeadingBack ) + '>' + values.title_back + '</' + titleTag + '>';
 				}
 
 				frontInner = '<div class="flip-box-front-inner">' + iconOutput + titleFrontOutput + values.text_front + '</div>';
@@ -270,7 +316,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( values.background_image_front ) {
 					flipBoxShortcodeFrontBox.style += 'background-image: url(\'' + values.background_image_front + '\');';
 					if ( values.background_color_front ) {
-						alpha = jQuery.Color( values.background_color_front ).alpha();
+						alpha = jQuery.AWB_Color( values.background_color_front ).alpha();
 						if ( 1 > alpha && 0 !== alpha ) {
 							flipBoxShortcodeFrontBox.style += 'background-blend-mode: overlay;';
 						}
@@ -310,7 +356,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( values.background_image_back ) {
 					flipBoxShortcodeBackBox.style += 'background-image: url(\'' + values.background_image_back + '\');';
 					if ( values.background_color_back ) {
-						alpha = jQuery.Color( values.background_color_back ).alpha();
+						alpha = jQuery.AWB_Color( values.background_color_back ).alpha();
 						if ( 1 > alpha && 0 !== alpha ) {
 							flipBoxShortcodeBackBox.style += 'background-blend-mode: overlay;';
 						}
@@ -352,7 +398,35 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				atts.icon_output              = iconOutput;
 
 				return atts;
+			},
+
+			/**
+			 * Get the title HTML tag.
+			 *
+			 * @param {Array} values
+			 * @param {string} title 'front' or 'back' for title type.
+			 * @returns
+			 */
+			getTitleTag: function( values, title ) {
+			var title_value;
+			if ( 'front' === title ) {
+				title_value = values.front_title_size;
+				if ( ! title_value ) {
+					return 'h2';
+				}
+			} else {
+				title_value = values.back_title_size;
+				if ( ! title_value ) {
+					return 'h3';
+				}
 			}
+
+			if ( !isNaN( title_value ) && !isNaN( parseFloat( title_value ) ) ) {
+				return 'h' + title_value;
+			}
+
+			return title_value;
+		}
 
 		} );
 	} );

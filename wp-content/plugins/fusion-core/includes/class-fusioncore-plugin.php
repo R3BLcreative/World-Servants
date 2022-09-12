@@ -311,9 +311,15 @@ s	 * @since 5.1.2
 		}
 
 		wp_enqueue_style( 'fusion-core-comment-form', FUSION_CORE_URL . 'css/comment-form.min.css', [], FUSION_CORE_VERSION );
-		wp_enqueue_style( 'fusion-core-faqs', FUSION_CORE_URL . 'css/faqs.min.css', [], FUSION_CORE_VERSION );
-		wp_enqueue_style( 'fusion-core-portfolio', FUSION_CORE_URL . 'css/portfolio.min.css', [], FUSION_CORE_VERSION );
 		wp_enqueue_style( 'fusion-core-privacy', FUSION_CORE_URL . 'css/privacy.min.css', [], FUSION_CORE_VERSION );
+
+		if ( false === $fusion_settings || '0' !== $fusion_settings->get( 'status_fusion_faqs' ) ) {
+			wp_enqueue_style( 'fusion-core-faqs', FUSION_CORE_URL . 'css/faqs.min.css', [], FUSION_CORE_VERSION );
+		}
+
+		if ( false === $fusion_settings || '0' !== $fusion_settings->get( 'status_fusion_portfolio' ) ) {
+			wp_enqueue_style( 'fusion-core-portfolio', FUSION_CORE_URL . 'css/portfolio.min.css', [], FUSION_CORE_VERSION );
+		}
 	}
 
 	/**
@@ -323,6 +329,7 @@ s	 * @since 5.1.2
 	 * @since 4.0
 	 */
 	public function live_scripts() {
+
 		wp_enqueue_script( 'fusion_builder_portfolio_element', FUSION_CORE_URL . 'shortcodes/previews/front-end/elements/view-portfolio.js', [], self::VERSION, true );
 		wp_enqueue_script( 'fusion_builder_faq_element', FUSION_CORE_URL . 'shortcodes/previews/front-end/elements/view-faq.js', [], self::VERSION, true );
 		wp_enqueue_script( 'fusion_builder_fusionslider_element', FUSION_CORE_URL . 'shortcodes/previews/front-end/elements/view-fusionslider.js', [], self::VERSION, true );
@@ -957,67 +964,110 @@ s	 * @since 5.1.2
 		];
 
 		// FAQs.
-		$shortcode_option_map['featured_image']['fusion_faq']            = [
+		$shortcode_option_map['featured_image']['fusion_faq']             = [
 			'theme-option' => 'faq_featured_image',
 			'type'         => 'yesno',
 		];
-		$shortcode_option_map['filters']['fusion_faq']                   = [
+		$shortcode_option_map['filters']['fusion_faq']                    = [
 			'theme-option' => 'faq_filters',
 			'type'         => 'select',
 		];
-		$shortcode_option_map['type']['fusion_faq']                      = [
+		$shortcode_option_map['type']['fusion_faq']                       = [
 			'theme-option' => 'faq_accordion_type',
 			'type'         => 'select',
 		];
-		$shortcode_option_map['divider_line']['fusion_faq']              = [
+		$shortcode_option_map['divider_line']['fusion_faq']               = [
 			'theme-option' => 'faq_accordion_divider_line',
 			'type'         => 'yesno',
 		];
-		$shortcode_option_map['boxed_mode']['fusion_faq']                = [
+		$shortcode_option_map['divider_color']['fusion_faq']              = [
+			'theme-option' => 'faq_accordion_divider_color',
+			'reset'        => true,
+		];
+		$shortcode_option_map['divider_hover_color']['fusion_faq']        = [
+			'theme-option' => 'faq_accordion_divider_hover_color',
+			'reset'        => true,
+		];
+		$shortcode_option_map['title_font']['fusion_faq']                 = [
+			'theme-option' => 'faq_accordion_title_typography',
+			'subset'       => 'font-family',
+			'type'         => 'select',
+		];
+		$shortcode_option_map['title_font_size']['fusion_faq']            = [
+			'theme-option' => 'faq_accordion_title_typography',
+			'subset'       => 'font-size',
+			'type'         => 'select',
+		];
+		$shortcode_option_map['title_color']['fusion_faq']                = [
+			'theme-option' => 'faq_accordion_title_typography',
+			'subset'       => 'color',
+			'reset'        => true,
+		];
+		$shortcode_option_map['content_font']['fusion_faq']               = [
+			'theme-option' => 'faq_accordion_content_typography',
+			'subset'       => 'font-family',
+			'type'         => 'select',
+		];
+		$shortcode_option_map['content_font_size']['fusion_faq']          = [
+			'theme-option' => 'faq_accordion_content_typography',
+			'subset'       => 'font-size',
+			'type'         => 'select',
+		];
+		$shortcode_option_map['content_color']['fusion_faq']              = [
+			'theme-option' => 'faq_accordion_content_typography',
+			'subset'       => 'color',
+			'reset'        => true,
+		];
+		$shortcode_option_map['boxed_mode']['fusion_faq']                 = [
 			'theme-option' => 'faq_accordion_boxed_mode',
 			'type'         => 'yesno',
 		];
-		$shortcode_option_map['border_size']['fusion_faq']               = [
+		$shortcode_option_map['border_size']['fusion_faq']                = [
 			'theme-option' => 'faq_accordion_border_size',
 			'type'         => 'range',
 		];
-		$shortcode_option_map['border_color']['fusion_faq']              = [
+		$shortcode_option_map['border_color']['fusion_faq']               = [
 			'theme-option' => 'faq_accordian_border_color',
 			'reset'        => true,
 		];
-		$shortcode_option_map['background_color']['fusion_faq']          = [
+		$shortcode_option_map['background_color']['fusion_faq']           = [
 			'theme-option' => 'faq_accordian_background_color',
 			'reset'        => true,
 		];
-		$shortcode_option_map['hover_color']['fusion_faq']               = [
+		$shortcode_option_map['hover_color']['fusion_faq']                = [
 			'theme-option' => 'faq_accordian_hover_color',
 			'reset'        => true,
 		];
-		$shortcode_option_map['title_font_size']['fusion_faq']           = [
-			'theme-option' => 'faq_accordion_title_font_size',
+		$shortcode_option_map['title_font_size']['fusion_faq']            = [
+			'theme-option' => 'faq_accordion_title_typography',
+			'subset'       => 'font-size',
 		];
-		$shortcode_option_map['icon_size']['fusion_faq']                 = [
+		$shortcode_option_map['icon_size']['fusion_faq']                  = [
 			'theme-option' => 'faq_accordion_icon_size',
 			'type'         => 'range',
 		];
-		$shortcode_option_map['icon_color']['fusion_faq']                = [
+		$shortcode_option_map['icon_color']['fusion_faq']                 = [
 			'theme-option' => 'faq_accordian_icon_color',
 			'reset'        => true,
 		];
-		$shortcode_option_map['icon_boxed_mode']['fusion_faq']           = [
+		$shortcode_option_map['icon_boxed_mode']['fusion_faq']            = [
 			'theme-option' => 'faq_accordion_icon_boxed',
 			'type'         => 'yesno',
 		];
-		$shortcode_option_map['icon_box_color']['fusion_faq']            = [
+		$shortcode_option_map['icon_box_color']['fusion_faq']             = [
 			'theme-option' => 'faq_accordian_inactive_color',
 			'reset'        => true,
 		];
-		$shortcode_option_map['icon_alignment']['fusion_faq']            = [
+		$shortcode_option_map['icon_alignment']['fusion_faq']             = [
 			'theme-option' => 'faq_accordion_icon_align',
 			'type'         => 'select',
 		];
-		$shortcode_option_map['toggle_hover_accent_color']['fusion_faq'] = [
+		$shortcode_option_map['toggle_hover_accent_color']['fusion_faq']  = [
 			'theme-option' => 'faq_accordian_active_color',
+			'reset'        => true,
+		];
+		$shortcode_option_map['toggle_active_accent_color']['fusion_faq'] = [
+			'theme-option' => 'faq_accordian_active_accent_color',
 			'reset'        => true,
 		];
 
@@ -1057,7 +1107,7 @@ s	 * @since 5.1.2
 	public function add_dashboard_widget() {
 
 		// Create the widget.
-		wp_add_dashboard_widget( 'themefusion-news', apply_filters( 'avada_dashboard_widget_title', esc_attr__( 'ThemeFusion News', 'Avada' ) ), [ $this, 'display_news_dashboard_widget' ] );
+		wp_add_dashboard_widget( 'themefusion-news', apply_filters( 'avada_dashboard_widget_title', esc_attr__( 'Avada News', 'Avada' ) ), [ $this, 'display_news_dashboard_widget' ] );
 
 		// Make sure our widget is on top off all others.
 		global $wp_meta_boxes;
@@ -1099,7 +1149,7 @@ s	 * @since 5.1.2
 			'news' => [
 				'link'         => 'https://theme-fusion.com/blog/',
 				'url'          => 'https://theme-fusion.com/feed/',
-				'title'        => esc_attr__( 'ThemeFusion News', 'fusion-core' ),
+				'title'        => esc_attr__( 'Avada News', 'fusion-core' ),
 				'items'        => 4,
 				'show_summary' => 1,
 				'show_author'  => 0,

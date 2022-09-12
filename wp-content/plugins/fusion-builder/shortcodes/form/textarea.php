@@ -58,6 +58,7 @@ if ( fusion_is_element_enabled( 'fusion_form_textarea' ) ) {
 					'name'             => '',
 					'disabled'         => '',
 					'required'         => '',
+					'empty_notice'     => '',
 					'placeholder'      => '',
 					'input_field_icon' => '',
 					'rows'             => '4',
@@ -100,7 +101,9 @@ if ( fusion_is_element_enabled( 'fusion_form_textarea' ) ) {
 					$max_length = ' maxlength="' . $this->args['maxlength'] . '"';
 				}
 
-				$element_html = '<textarea cols="40" ' . $min_lenght . ' ' . $max_length . ' rows="' . $this->args['rows'] . '" tabindex="' . $this->args['tab_index'] . '" id="' . $this->args['name'] . '" name="' . $this->args['name'] . '"' . $element_data['class'] . $element_data['required'] . $element_data['disabled'] . $element_data['placeholder'] . $element_data['style'] . $element_data['holds_private_data'] . '>' . $content . '</textarea>';
+				$element_html  = '<textarea cols="40" ';
+				$element_html .= '' !== $element_data['empty_notice'] ? 'data-empty-notice="' . $element_data['empty_notice'] . '" ' : '';
+				$element_html .= $min_lenght . ' ' . $max_length . ' rows="' . $this->args['rows'] . '" tabindex="' . $this->args['tab_index'] . '" id="' . $this->args['name'] . '" name="' . $this->args['name'] . '"' . $element_data['class'] . $element_data['required'] . $element_data['disabled'] . $element_data['placeholder'] . $element_data['style'] . $element_data['holds_private_data'] . '>' . $content . '</textarea>';
 
 				if ( isset( $this->args['input_field_icon'] ) && '' !== $this->args['input_field_icon'] ) {
 					$icon_html     = '<div class="fusion-form-input-with-icon">';
@@ -152,7 +155,7 @@ function fusion_form_textarea() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Field Name', 'fusion-builder' ),
-						'description' => esc_attr__( 'Enter the field name. Should be single word without spaces. Underscores and dashes are allowed.', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter the field name. Please use only lowercase alphanumeric characters, dashes, and underscores.', 'fusion-builder' ),
 						'param_name'  => 'name',
 						'value'       => '',
 						'placeholder' => true,
@@ -166,6 +169,20 @@ function fusion_form_textarea() {
 						'value'       => [
 							'yes' => esc_attr__( 'Yes', 'fusion-builder' ),
 							'no'  => esc_attr__( 'No', 'fusion-builder' ),
+						],
+					],
+					[
+						'type'        => 'textfield',
+						'heading'     => esc_attr__( 'Empty Input Notice', 'fusion-builder' ),
+						'description' => esc_attr__( 'Enter text validation notice that should display if data input is empty.', 'fusion-builder' ),
+						'param_name'  => 'empty_notice',
+						'value'       => '',
+						'dependency'  => [
+							[
+								'element'  => 'required',
+								'value'    => 'yes',
+								'operator' => '==',
+							],
 						],
 					],
 					[

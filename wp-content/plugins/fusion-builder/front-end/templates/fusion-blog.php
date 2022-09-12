@@ -22,6 +22,8 @@ if ( 'undefined' !== typeof query_data && 'undefined' !== typeof query_data.post
 		html += '<style type="text/css">' + styles + '</style>';
 	}
 
+	html += blogStyles;
+
 	html += '<div ' + _.fusionGetAttributes( attrPostsContainer ) + '>';
 
 	if ( 'timeline' === values.layout ) {

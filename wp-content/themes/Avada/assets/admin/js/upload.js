@@ -7,6 +7,7 @@ jQuery( document ).ready( function() {
 
 		jQuery( '.fusion_upload_button' ).on( 'click', function() {
 			window.avadaUploadfield = jQuery( '.upload_field', jQuery( this ).parent() );
+			window.avadaUploadfieldId = jQuery( '.upload_field_id', jQuery( this ).parent() );
 
 			if ( window.mediaUploader ) {
 				window.mediaUploader.open();
@@ -35,6 +36,9 @@ jQuery( document ).ready( function() {
 
 				// Get selected media.
 				selected  = window.avadaUploadfield.val();
+				if ( selected.startsWith( 'http' ) ) {
+					selected  = window.avadaUploadfieldId.val();
+				}
 				if ( selected ) {
 
 					// Get library.
@@ -99,7 +103,12 @@ jQuery( document ).ready( function() {
 						sizes: '',
 						style: ''
 					} );
-					jQuery( window.avadaUploadfield ).val( imageId ).trigger( 'change' );
+					if ( featuredImageWrapper.hasClass( 'upload-plus-style' ) ) {
+						jQuery( window.avadaUploadfield ).val( imageUrl ).trigger( 'change' );
+						jQuery( window.avadaUploadfieldId ).val( imageId ).trigger( 'change' );
+					} else {
+						jQuery( window.avadaUploadfield ).val( imageId ).trigger( 'change' );
+					}
 
 					featuredImageWrapper.find( '.fusion-remove-featured-image' ).show();
 					featuredImageWrapper.find( '.fusion-set-featured-image' ).hide();

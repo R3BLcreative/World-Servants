@@ -1,4 +1,4 @@
-/* global FusionApp, fusionAllElements, FusionPageBuilderViewManager, FusionPageBuilderElements, FusionEvents, fusionMultiElements, FusionPageBuilderApp, fusionBuilderText, diffDOM, tinyMCE, fusionGetPercentPaddingHorizontalNegativeMargin, fusionGetPercentPaddingHorizontalNegativeMarginIfSiteWidthPercent, fusionTriggerEvent, fusionVendorShortcodes, fusionSanitize */
+/* global FusionApp, fusionAllElements, fusionAppConfig, FusionPageBuilderViewManager, FusionPageBuilderElements, FusionEvents, fusionMultiElements, FusionPageBuilderApp, fusionBuilderText, diffDOM, tinyMCE, fusionGetPercentPaddingHorizontalNegativeMargin, fusionGetPercentPaddingHorizontalNegativeMarginIfSiteWidthPercent, fusionTriggerEvent, fusionVendorShortcodes, fusionSanitize */
 /* eslint no-useless-escape: 0 */
 /* eslint no-shadow: 0 */
 /* eslint max-depth: 0 */
@@ -110,11 +110,14 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			this.inlineEditorHelpers = new FusionPageBuilder.InlineEditorHelpers();
 			this.DraggableHelpers    = new FusionPageBuilder.DraggableHelpers();
 			this.SettingsHelpers     = new FusionPageBuilder.SettingsHelpers();
-			this.wireframe           = new FusionPageBuilder.Wireframe();
+			this.navigator           = new FusionPageBuilder.Navigator();
+			this.navigatorView       = new FusionPageBuilder.NavigatorView( { model: this.navigator } );
 			this.dynamicValues       = new FusionPageBuilder.DynamicValues();
 			this.studio              = new FusionPageBuilder.Studio();
 			this.website             = new FusionPageBuilder.Website();
 			this.formStyles          = false;
+			this.offCanvasStyles     = false;
+			this.activeStudio        = false;
 
 			// Post contents
 			this.postContent = false;
@@ -135,9 +138,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			// Listen for preview update to set some global styles.
 			this.listenTo( FusionEvents, 'fusion-preview-update', this.setGlobalStyles );
 
-			// Listen for wireframe mode toggle click.
-			this.listenTo( FusionEvents, 'fusion-wireframe-toggle', this.wireFrameToggled );
-
 			// Listen for frame resizes and sets helper class for CSS.
 			this.listenTo( FusionEvents, 'fusion-preview-resize', this.setStackedContentClass );
 			this.listenTo( FusionEvents, 'fusion-to-content_break_point-changed', this.setStackedContentClass );
@@ -150,6 +150,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			this.listenTo( window.FusionEvents, 'fusion-preferences-tooltips-updated', this.toggleTooltips );
 			this.listenTo( window.FusionEvents, 'fusion-preferences-element_filters-updated', this.toggleElementFilters );
 			this.listenTo( window.FusionEvents, 'fusion-preferences-transparent_header-updated', this.toggleTransparentHeader );
+			this.listenTo( window.FusionEvents, 'fusion-preferences-styling_mode-updated', this.toggleDarkMode );
+			this.listenTo( window.FusionEvents, 'fusion-preferences-element_transform-updated', this.toggleElementTransform );
+			this.listenTo( window.FusionEvents, 'fusion-preferences-options_subtabs-updated', this.optionsSubTabs );
 
 			// Listen to the fusion-content-changed event and re-trigger sticky header resize.
 			this.listenTo( FusionEvents, 'fusion-content-changed', function() {
@@ -163,9 +166,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 			// Make sure to delay ajax requests to prevent duplicates.
 			this._fusion_do_shortcode = _.debounce( _.bind( FusionApp.callback.fusion_do_shortcode, this ), 300 );
-
-			// Debounced event for wireframe mode.
-			this._wireframeToggle = _.debounce( _.bind( this.wireframeToggle, this ), 200 );
 
 			this.blankPage = false;
 
@@ -201,8 +201,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			this.documentWrite        = false;
 			this.previewDocumentWrite = false;
 
-			this.wireframeActive      = false;
-
 			this.viewsToRerender  = [];
 
 			this.listenTo( FusionEvents, 'fusion-data-updated', this.resetRenderVariable );
@@ -213,7 +211,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				forms: {},
 				post_cards: {},
 				videos: {},
-				icons: {}
+				icons: {},
+				off_canvases: {}
 			};
 			this.listenTo( FusionEvents, 'fusion-content-preview-width', this.contentPreviewWidth );
 		},
@@ -412,6 +411,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( ! tooltip.length ) {
 					return;
 				}
+				if ( jQuery( this ).closest( '.fusion-has-filters, .awb-sticky' ).length ) {
+					return;
+				}
 
 				tooltip.children( '.fusion-tooltip-text' ).removeAttr( 'style' );
 
@@ -422,8 +424,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				referenceWrapperOffsetLeft  = 0;
 				referenceWrapperOffsetRight = self.$el.width();
 
-				jQuery( this ).closest( '.fusion-fullwidth:not(.video-background) .fusion-row' ).css( 'z-index', 'auto' );
-				jQuery( this ).closest( '.fusion-fullwidth:not(.video-background)' ).children( '.fullwidth-faded' ).css( 'z-index', 'auto' );
+				jQuery( this ).closest( '.fusion-fullwidth:not(.video-background):not(.has-pattern-background):not(.has-mask-background) .fusion-row' ).css( 'z-index', 'auto' );
+				jQuery( this ).closest( '.fusion-fullwidth:not(.video-background):not(.has-pattern-background):not(.has-mask-background)' ).children( '.fullwidth-faded' ).css( 'z-index', 'auto' );
 
 				if ( ! jQuery( this ).closest( '.fusion-element-alignment-left' ).length && ! jQuery( this ).closest( '.fusion-element-alignment-right' ).length ) {
 					jQuery( this ).closest( '.fusion-builder-container' ).css( 'z-index', 'auto' );
@@ -574,6 +576,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			setTimeout( function() {
 				self.scrollingContainers();
 				self.maybeFormStyles();
+				self.maybeOfCanvasStyles();
 			}, 100 );
 		},
 
@@ -586,11 +589,13 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		 */
 		validateLibraryContent: function( content ) {
 			var contentIsEmpty = '' === content,
-				openContainer  = '[fusion_builder_container type="flex" hundred_percent="no" flex_column_spacing="0px" equal_height_columns="no" menu_anchor="" hide_on_mobile="small-visibility,medium-visibility,large-visibility" class="" id="" background_color="" background_image="" background_position="center center" background_repeat="no-repeat" fade="no" background_parallax="none" parallax_speed="0.3" video_mp4="" video_webm="" video_ogv="" video_url="" video_aspect_ratio="16:9" video_loop="yes" video_mute="yes" overlay_color="" overlay_opacity="0.5" video_preview_image="" border_size="" border_color="" border_style="solid" padding_top="" padding_bottom="" padding_left="" padding_right=""][fusion_builder_row]',
+				openContainer  = '[fusion_builder_container type="flex" hundred_percent="no" flex_column_spacing="' + FusionApp.settings.col_spacing + '" equal_height_columns="no" menu_anchor="" hide_on_mobile="small-visibility,medium-visibility,large-visibility" class="" id="" background_color="" background_image="" background_position="center center" background_repeat="no-repeat" fade="no" background_parallax="none" parallax_speed="0.3" video_mp4="" video_webm="" video_ogv="" video_url="" video_aspect_ratio="16:9" video_loop="yes" video_mute="yes" overlay_color="" overlay_opacity="0.5" video_preview_image="" border_size="" border_color="" border_style="solid" padding_top="" padding_bottom="" padding_left="" padding_right=""][fusion_builder_row]',
 				closeContainer = '[/fusion_builder_row][/fusion_builder_container]',
 				openColumn     = '[fusion_builder_column type="1_1" background_position="left top" background_color="" border_size="" border_color="" border_style="solid" border_position="all" spacing="yes" background_image="" background_repeat="no-repeat" padding="" margin_top="0px" margin_bottom="0px" class="" id="" animation_type="" animation_speed="0.3" animation_direction="left" hide_on_mobile="small-visibility,medium-visibility,large-visibility" center_content="no" last="no" min_height="" hover_type="none" link=""]',
 				closeColumn    = '[/fusion_builder_column]',
-				columnEdit     = 'columns' === FusionApp.data.fusion_element_type || 'post_cards' === FusionApp.data.fusion_element_type;
+				columnEdit     = 'columns' === FusionApp.data.fusion_element_type || 'post_cards' === FusionApp.data.fusion_element_type,
+				elementEdit    = 'elements' === FusionApp.data.fusion_element_type,
+				containerEdit  = 'sections' === FusionApp.data.fusion_element_type;
 
 			// The way it is setup now, we dont want blank page template on library items.
 			if ( columnEdit && '[fusion_builder_blank_page][/fusion_builder_blank_page]' === content ) {
@@ -598,18 +603,28 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				contentIsEmpty = false;
 			}
 
-			if ( ! contentIsEmpty ) {
-				// Editing element
-				if ( 'elements' === FusionApp.data.fusion_element_type ) {
-					content = openContainer + openColumn + content + closeColumn + closeContainer;
-				} else if ( 'columns' === FusionApp.data.fusion_element_type || 'post_cards' === FusionApp.data.fusion_element_type ) {
-					content = openContainer + content + closeContainer;
-				}
+			if ( elementEdit && '[fusion_builder_blank_page][/fusion_builder_blank_page]' === content ) {
+				content        = '';
+				contentIsEmpty = true;
 			}
 
-			// If library element is blank
-			if ( '' === content && 'elements' === FusionApp.data.fusion_element_type ) {
-				content = openContainer + openColumn + closeColumn + closeContainer;
+			if ( containerEdit && '[fusion_builder_blank_page][/fusion_builder_blank_page]' === content ) {
+				content        = openContainer + closeContainer;
+				contentIsEmpty = false;
+			}
+
+			if ( ! contentIsEmpty ) {
+				// Editing element
+				if ( elementEdit ) {
+					content = openContainer + openColumn + content + closeColumn + closeContainer;
+				} else if ( columnEdit ) {
+					content = openContainer + content + closeContainer;
+				}
+			} else {
+				// If library element is blank
+				if ( elementEdit ) { // eslint-disable-line no-lonely-if
+					content = openContainer + openColumn + closeColumn + closeContainer;
+				}
 			}
 
 			function replaceDollars() {
@@ -674,6 +689,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			}
 
 			FusionApp.setPost( 'post_content', shortcode );
+
+			this.navigator.update();
 		},
 
 		/**
@@ -724,6 +741,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						self.scrollingContainers();
 						self.reRenderElements = true;
 						self.maybeFormStyles();
+						self.maybeOfCanvasStyles();
 
 						if ( 0 < FusionPageBuilderViewManager.countElementsByType( 'fusion_builder_next_page' ) ) {
 							FusionEvents.trigger( 'fusion-next-page' );
@@ -1034,12 +1052,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			}
 
 			// Disable context menu if right clicking on text block.
-			if ( ! $target.length || ( 'fusion_text' === $target.data( 'type' ) && ! this.wireframeActive && ! $clickTarget.parents( '.fusion-builder-module-controls-container' ).length && ! inlineElement ) ) {
+			if ( ! $target.length || ( 'fusion_text' === $target.data( 'type' ) && ! $clickTarget.parents( '.fusion-builder-module-controls-container' ).length && ! inlineElement ) ) {
 				return;
 			}
 
 			// If we are not editing nested columns element, but clicking on a child, only use the nested columns element.
-			if ( ! jQuery( 'body' ).hasClass( 'nested-ui-active' ) && ! this.$el.hasClass( 'fusion-builder-nested-cols-dialog-open' ) && $clickTarget.closest( '.fusion_builder_row_inner' ).length ) {
+			if ( ! jQuery( 'body' ).hasClass( 'nested-ui-active' ) && $clickTarget.closest( '.fusion_builder_row_inner' ).length ) {
 				$target = $clickTarget.closest( '.fusion_builder_row_inner' );
 			}
 
@@ -1227,7 +1245,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					newViewOutput = self.inlineEditorHelpers.getInlineElementMarkup( newModel );
 
 					if ( insideInlineEditor ) {
-						content = content.replace( shortcode.content, '<span class="fusion-disable-editing fusion-inline-element" contenteditable="false" data-id="' + shortcode.settings.cid + '">' + newViewOutput + '</span>' );
+						content = content.replace( shortcode.content, '<span class="fusion-disable-editing fusion-inline-element" contenteditable="false" data-id="' + shortcode.settings.cid + '">' + newViewOutput.trim() + '</span>' );
 					} else {
 						content = content.replace( shortcode.content, newViewOutput );
 					}
@@ -1660,7 +1678,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						if ( 'overlay_color' === key && '' !== shortcodeAttributes.named[ key ] && 'fusion_builder_container' === shortcodeName ) {
 							delete prefixedAttributes.params[ prefixedKey ];
 							alpha = ( 'undefined' !== typeof shortcodeAttributes.named.overlay_opacity ) ? shortcodeAttributes.named.overlay_opacity : 1;
-							prefixedAttributes.params.background_color = jQuery.Color( shortcodeAttributes.named[ key ] ).alpha( alpha ).toRgbaString();
+							prefixedAttributes.params.background_color = jQuery.AWB_Color( shortcodeAttributes.named[ key ] ).alpha( alpha ).toRgbaString();
 						}
 						if ( 'overlay_opacity' === key ) {
 							delete prefixedAttributes.params[ prefixedKey ];
@@ -1700,6 +1718,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 							if ( 'backgroundcolor' === key && ! shortcodeAttributes.named.hasOwnProperty( 'background_color_hover' ) ) {
 								prefixedAttributes.params.background_color_hover = shortcodeAttributes.named.bordercolor;
 							}
+						}
+
+						if ( 'type' === key && ( 'fusion_widget' === shortcodeName ) && -1 !== prefixedAttributes.params[ key ].indexOf( 'Tribe' ) ) {
+							prefixedAttributes.params[ key ] = prefixedAttributes.params[ key ].replace( /\\/g, '' ).split( /(?=[A-Z])/ ).join( '\\' ).replace( '_\\', '_' );
 						}
 
 						if ( 'padding' === key && ( 'fusion_widget_area' === shortcodeName || 'fusion_builder_column' === shortcodeName || 'fusion_builder_column_inner' === shortcodeName ) ) {
@@ -1850,13 +1872,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					// Find typography options and then get values.
 					_.each( fusionAllElements[ elementSettings.element_type ].params, function( optionParam ) {
-						if ( 'font_family' === optionParam.type ) {
-
+						if ( 'typography' === optionParam.type ) {
 							// If we have a family value, add to array.
-							if ( 'string' === typeof elementSettings.params[ 'fusion_font_family_' + optionParam.param_name ] && '' !== elementSettings.params[ 'fusion_font_family_' + optionParam.param_name ] ) {
+							if ( 'string' === typeof elementSettings.params[ 'fusion_font_family_' + optionParam.choices[ 'font-family' ] ] && '' !== elementSettings.params[ 'fusion_font_family_' + optionParam.choices[ 'font-family' ] ] ) {
 								elementFonts.push( {
-									family: elementSettings.params[ 'fusion_font_family_' + optionParam.param_name ],
-									variant: elementSettings.params[ 'fusion_font_variant_' + optionParam.param_name ]
+									family: elementSettings.params[ 'fusion_font_family_' + optionParam.choices[ 'font-family' ] ],
+									variant: elementSettings.params[ 'fusion_font_variant_' + optionParam.choices[ 'font-family' ] ]
 								} );
 							}
 						}
@@ -1864,16 +1885,16 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					if ( ! _.isEmpty( elementFonts ) ) {
 						// If webfonts are not defined, init them and re-run this method.
-						if ( ! FusionApp.assets.webfonts ) {
-							jQuery.when( FusionApp.assets.getWebFonts() ).done( function() {
+						if ( _.isUndefined( window.awbTypographySelect ) || _.isUndefined( window.awbTypographySelect.webfonts ) ) {
+							jQuery.when( window.awbTypographySelect.getWebFonts() ).done( function() {
 								_.each( elementFonts, function( font ) {
-									FusionPageBuilder.options.fusionTypographyField.webFontLoad( font.family, font.variant, false );
+									window.awbTypographySelect.webFontLoad( font.family, font.variant );
 								} );
 							} );
 							return this;
 						}
 						_.each( elementFonts, function( font ) {
-							FusionPageBuilder.options.fusionTypographyField.webFontLoad( font.family, font.variant, false );
+							window.awbTypographySelect.webFontLoad( font.family, font.variant );
 						} );
 					}
 				}
@@ -1895,6 +1916,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 
 			} );
+
+			this.navigator.update();
+
 			if ( noCollection ) {
 				return renderElements;
 			}
@@ -2265,7 +2289,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		 */
 		builderToShortcodes: function() {
 			var shortcode = '',
-				thisEl    = this;
+				thisEl    = this,
+				plugins   = 'object' === typeof FusionApp.data.plugins_active ? FusionApp.data.plugins_active : false,
+				referencedOffCanvases = {},
+				offCanvases;
 
 			// Reset the media map.
 			this.mediaMap = {
@@ -2274,7 +2301,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				forms: {},
 				post_cards: {},
 				videos: {},
-				icons: {}
+				icons: {},
+				off_canvases: {}
 			};
 
 			if ( FusionApp.data.is_fusion_element ) {
@@ -2320,11 +2348,26 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				FusionApp.setPost( 'post_content', shortcode );
 			}
 
+			// Add referenced Off Canvases.
+			if ( false !== plugins && true === plugins.awb_studio ) {
+				offCanvases = 'undefined' !== typeof FusionApp.data.postMeta._fusion.off_canvases ? FusionApp.data.postMeta._fusion.off_canvases : [];
+
+				if ( 'object' === typeof offCanvases && Object.keys( offCanvases ).length ) {
+					_.each( offCanvases, function( key, value ) {
+						referencedOffCanvases[ key ] = true;
+					} );
+				}
+
+				this.mediaMap.off_canvases = referencedOffCanvases;
+			}
+
 			// If media map exists, add to post meta for saving.
 			if ( ! _.isEmpty( this.mediaMap ) && 'undefined' !== typeof FusionApp.data.replaceAssets && FusionApp.data.replaceAssets ) {
 				FusionApp.data.postMeta.avada_media = this.mediaMap; // eslint-disable-line camelcase
 				FusionApp.contentChange( 'page', 'page-option' );
 			}
+
+			this.navigator.update();
 		},
 
 		/**
@@ -2339,8 +2382,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		generateElementShortcode: function( $element, openTagOnly, generator ) {
 			var attributes = '',
 				content    = '',
-				plugins    = 'object' === typeof FusionApp.data.plugins_active ? FusionApp.data.plugins_active : false,
-				metaValue  = 'undefined' !== typeof FusionApp.data.postMeta._fusion.studio_replace_params ? FusionApp.data.postMeta._fusion.studio_replace_params : '',
 				element,
 				$thisElement,
 				elementCID,
@@ -2407,11 +2448,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			elementSettings = '';
 			shortcode       = '';
 			elementSettings = element.attributes;
-
-			// If studio active.
-			if ( false !== plugins && true === plugins.awb_studio  && 'undefined' !== elementType && 'yes' === metaValue && 'params' in elementSettings ) {
-				element.set( 'params', jQuery.extend( true, {}, fusionAllElements[ elementType ].defaults, _.fusionCleanParameters( element.get( 'params' ) ) ) );
-			}
 
 			// Ignored shortcode attributes
 			ignoredAtts = 'undefined' !== typeof fusionAllElements[ elementType ].remove_from_atts ? fusionAllElements[ elementType ].remove_from_atts : [];
@@ -2498,7 +2534,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								optionValue = elementView.sanitizeValue( param, optionValue );
 							}
 
-							attributes += ' ' + param + '="' + this.getParamValue( param, optionValue, element ) + '"';
+							if ( ( 'on' === fusionAppConfig.removeEmptyAttributes && '' !== optionValue ) || 'off' === fusionAppConfig.removeEmptyAttributes ) {
+								attributes += ' ' + param + '="' + optionValue + '"';
+							}
 						}
 					}
 				}
@@ -2518,59 +2556,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			}
 
 			return shortcode;
-		},
-
-		/**
-		 * Gets param value.
-		 *
-		 * @since 3.6
-		 * @return {string}
-		 */
-		getParamValue: function( param, optionValue, element ) {
-			var plugins     = 'object' === typeof FusionApp.data.plugins_active ? FusionApp.data.plugins_active : false,
-				elementType = 'undefined' !== typeof element ? element.get( 'element_type' ) : 'undefined',
-				metaValue   = 'undefined' !== typeof FusionApp.data.postMeta._fusion.studio_replace_params ? FusionApp.data.postMeta._fusion.studio_replace_params : '',
-				params      = 'undefined' !== typeof fusionAllElements[ elementType ] ? fusionAllElements[ elementType ].params : 'undefined',
-				globalOptionName,
-				subset,
-				subsets;
-
-			// Early exit.
-			if ( false === plugins || true !== plugins.awb_studio || 'undefined' === elementType || 'yes' !== metaValue || 'undefined' === typeof fusionAllElements[ elementType ] || 'string' !== typeof param || 'string' !== typeof optionValue || '' !== optionValue || 'object' !== typeof FusionApp.settings || this.shouldExclude( param, elementType ) ) {
-				return optionValue;
-			}
-
-			// Check if params exist.
-			if ( 'undefined' !== params ) {
-
-				if ( 'undefined' === typeof params[ param ]  ) { // If param does not exist.
-					jQuery.each( params, function( index, name ) {
-						if ( 'undefined' !== typeof params[ index ].value && params[ index ].value.hasOwnProperty( param ) ) {
-							globalOptionName = 'undefined' !== typeof params[ index ].default_option ? params[ index ].default_option : '';
-							subsets          = 'undefined' !== typeof params[ index ].default_subset ? params[ index ].default_subset : [];
-
-							jQuery.each( subsets, function( i, v ) {
-								if ( param.includes( v ) ) {
-									subset = v;
-									return false;
-								}
-							} );
-
-							optionValue =  'undefined' !== typeof FusionApp.settings[ globalOptionName ] && 'undefined' !== typeof FusionApp.settings[ globalOptionName ][ subset ] ? FusionApp.settings[ globalOptionName ][ subset ] : optionValue;
-							return false;
-						}
-					} );
-				} else if ( 'undefined' !== typeof params[ param ].default_option && ( 'undefined' === typeof params[ param ].default_subset || '' === params[ param ].default_subset ) ) { // check if param has got global option.
-					optionValue = 'undefined' !== typeof FusionApp.settings[ params[ param ].default_option ] ? FusionApp.settings[ params[ param ].default_option ] : optionValue;
-				} else if ( 'undefined' !== typeof params[ param ].default_option && 'undefined' !== typeof params[ param ].default_subset && '' !== params[ param ].default_subset ) { //  handle fonts.
-					globalOptionName = params[ param ].default_option;
-					subset           = params[ param ].default_subset;
-
-					optionValue = 'undefined' !== typeof FusionApp.settings[ globalOptionName ] && 'undefined' !== typeof FusionApp.settings[ globalOptionName ][ subset ] ? FusionApp.settings[ globalOptionName ][ subset ] : optionValue;
-				}
-			}
-
-			return optionValue;
 		},
 
 		/**
@@ -2921,11 +2906,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		},
 
 		createScrollingSections: function() {
-			var $containers              = this.$el.find( '.fusion-builder-container ' ),
+			var $containers              = this.$el.find( '.fusion-builder-container' ),
 				scrollNavigationPosition = ( 'right' === FusionApp.settings.header_position.toLowerCase() || jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).hasClass( 'rtl' ) ) ? 'scroll-navigation-left' : 'scroll-navigation-right',
 				scrollingSections        = {},
 				scrollingActive          = false,
 				scrollingIndex           = 0;
+
+			if ( this.previewMode ) {
+				$containers = $containers.not( '.fusion-builder-container-status-draft' );
+			}
 
 			$containers.each( function() {
 				if ( jQuery( this ).find( '.fusion-scrolling-section-edit' ).length ) {
@@ -3040,6 +3029,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 		 */
 		toggleTooltips: function() {
 
+			// Do nothing for Off Canvas.
+			if ( 'awb_off_canvas' === FusionApp.data.postDetails.post_type ) {
+				return;
+			}
+
 			// Tooltips.
 			if ( 'undefined' !== typeof FusionApp && 'off' === FusionApp.preferencesData.tooltips ) {
 				jQuery( 'body' ).addClass( 'fusion-hide-all-tooltips' );
@@ -3080,7 +3074,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			// Transparent Header.
 			if ( 'undefined' !== typeof FusionApp && 'off' === FusionApp.preferencesData.transparent_header ) {
 				$html.removeClass( 'avada-header-color-not-opaque' );
-			} else if ( 1 > jQuery.Color( HeaderBGColor ).alpha() ) {
+			} else if ( 1 > jQuery.AWB_Color( HeaderBGColor ).alpha() ) {
 				$html.addClass( 'avada-header-color-not-opaque' );
 			}
 
@@ -3089,6 +3083,59 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				$body.addClass( 'fusion-no-absolute-containers' );
 			} else {
 				$html.removeClass( 'fusion-no-absolute-containers' );
+			}
+		},
+
+		/**
+		 * Toggles dark mode.
+		 *
+		 * @since 3.8.0
+		 * @return {void}
+		 */
+		toggleDarkMode: function() {
+			if ( 'undefined' !== typeof FusionApp && 'dark' === FusionApp.preferencesData.styling_mode ) {
+				jQuery( 'body' ).addClass( 'dark-mode' );
+			} else {
+				jQuery( 'body' ).removeClass( 'dark-mode' );
+			}
+		},
+
+		/**
+		 * Toggles element transform options preview.
+		 *
+		 * @since 3.8.0
+		 * @return {void}
+		 */
+		toggleElementTransform: function() {
+			if ( 'undefined' !== typeof FusionApp && 'never' === FusionApp.preferencesData.element_transform ) {
+
+				jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).addClass( 'fusion-disable-element-transform' );
+				jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).removeClass( 'fusion-element-transform-on-edit' );
+
+			} else if ( 'undefined' !== typeof FusionApp && 'editing' === FusionApp.preferencesData.element_transform ) {
+
+				jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).addClass( 'fusion-element-transform-on-edit' );
+				jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).removeClass( 'fusion-disable-element-transform' );
+
+			} else {
+
+				jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).removeClass( 'fusion-disable-element-transform' );
+				jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).removeClass( 'fusion-element-transform-on-edit' );
+
+			}
+		},
+
+		/**
+		 * Options sub tabs.
+		 *
+		 * @since 3.8.0
+		 * @return {void}
+		 */
+		optionsSubTabs: function() {
+			if ( 'undefined' !== typeof FusionApp && 'collapsed' === FusionApp.preferencesData.options_subtabs ) {
+				jQuery( 'body' ).addClass( 'fusion-options-subtabs-collapsed' );
+			} else {
+				jQuery( 'body' ).removeClass( 'fusion-options-subtabs-collapsed' );
 			}
 		},
 
@@ -3105,80 +3152,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					jQuery( this ).parent().find( '.fusion-builder-column-size' ).trigger( 'click' );
 				} );
 			}
-		},
-
-		/**
-		 * Fired when wireframe mode is toggled.
-		 *
-		 * @since 2.0.0
-		 * @return {void}
-		 */
-		wireFrameToggled: function() {
-			this._wireframeToggle();
-
-			if ( this.wireframeActive ) {
-				this.enableSortableContainers();
-			} else {
-				this.disableSortableContainers();
-			}
-		},
-
-		/**
-		 * Trigger event on body for other page elements.
-		 *
-		 * @since 3.0
-		 * @return {void}
-		 */
-		wireframeToggle: function() {
-			jQuery( '#fb-preview' )[ 0 ].contentWindow.jQuery( 'body' ).trigger( 'fusion-wireframe-toggle' );
-		},
-
-		/**
-		 * Initialize or enable the container sortable.
-		 *
-		 * @since 2.0.0
-		 * @return {void}
-		 */
-		enableSortableContainers: function() {
-			if ( 'undefined' !== typeof this.$el.sortable( 'instance' ) ) {
-				this.$el.sortable( 'enable' );
-			} else {
-				this.sortableContainers();
-			}
-		},
-
-		/**
-		 * Destroy or disable container sortable.
-		 *
-		 * @since 2.0.0
-		 * @return {void}
-		 */
-		disableSortableContainers: function() {
-			if ( 'undefined' !== typeof this.$el.sortable( 'instance' ) ) {
-				this.$el.sortable( 'disable' );
-			}
-		},
-
-		/**
-		 * Enable sortable for wireframe mode.
-		 *
-		 * @since 2.0.0
-		 * @return {void}
-		 */
-		sortableContainers: function() {
-			this.$el.sortable( {
-				handle: '.fusion-builder-section-header',
-				items: '.fusion-builder-container, .fusion-builder-next-page, .fusion-checkout-form',
-				cancel: '.fusion-builder-section-name, .fusion-builder-settings, .fusion-builder-clone, .fusion-builder-remove, .fusion-builder-section-add, .fusion-builder-add-element, .fusion-builder-insert-column, #fusion_builder_controls, .fusion-builder-save-element',
-				cursor: 'move',
-				update: function() {
-					FusionEvents.trigger( 'fusion-content-changed' );
-
-					FusionPageBuilderApp.scrollingContainers();
-
-					FusionEvents.trigger( 'fusion-history-save-step', fusionBuilderText.full_width_section + ' order changed' );
-				}
-			} );
 		},
 
 		setStackedContentClass: function() {
@@ -3317,6 +3290,27 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			}
 
 			this.formStyles.buildStyles();
+		},
+
+		/**
+		 * If editing off canvas.
+		 *
+		 * @since 3.6
+		 * @return {void}
+		 */
+		maybeOfCanvasStyles: function() {
+
+			// Not editing a form then skip.
+			if ( 'awb_off_canvas' !== FusionApp.getPost( 'post_type' ) ) {
+				return;
+			}
+
+			if ( false === this.offCanvasStyles ) {
+				this.offCanvasStyles = new FusionPageBuilder.offCanvasStyles();
+				return;
+			}
+
+			this.offCanvasStyles.buildStyles();
 		},
 
 		contentPreviewWidth: function() {

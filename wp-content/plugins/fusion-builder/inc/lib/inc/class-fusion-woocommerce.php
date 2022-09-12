@@ -22,13 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Fusion_WooCommerce {
 
 	/**
-	 * Used to check if we're on new type checkout page.
+	 * Used to check if we're on a checkout page using a layout.
 	 *
 	 * @since 3.3.0
 	 * @access protected
 	 * @var bool
 	 */
-	protected $is_new_checkout = false;
+	protected $is_checkout_layout = false;
 
 	/**
 	 * Stores cart products IDs.
@@ -76,19 +76,19 @@ class Fusion_WooCommerce {
 		}
 
 		if ( class_exists( 'WooCommerce' ) && isset( $post->post_content ) ) {
-			$this->is_new_checkout = false === strpos( $post->post_content, '[woocommerce_checkout]' ) && false !== strpos( $post->post_content, 'fusion_tb_woo_checkout_' ) ? true : false;
+			$this->is_checkout_layout = false === strpos( $post->post_content, '[woocommerce_checkout]' ) && false !== strpos( $post->post_content, 'fusion_tb_woo_checkout_' ) ? true : false;
 		}
 	}
 
 	/**
-	 * Get is_new_checkout flag.
+	 * Get is_checkout_layout flag.
 	 *
 	 * @access public
 	 * @since 3.3
 	 * @return bool
 	 */
-	public function is_new_checkout() {
-		return $this->is_new_checkout;
+	public function is_checkout_layout() {
+		return $this->is_checkout_layout;
 	}
 
 	/**
@@ -160,7 +160,7 @@ class Fusion_WooCommerce {
 			$gallery = '[product-gallery]';
 		}
 
-		$html = str_replace( '</div>', '<a class="avada-product-gallery-lightbox-trigger" href="' . esc_url( $full_size_image[0] ) . '" data-rel="iLightbox' . $gallery . '" alt="' . $attachment_data['alt'] . '" data-title="' . $attachment_data['title_attribute'] . '" data-caption="' . $attachment_data['caption_attribute'] . '"></a></div>', $html );
+		$html = str_replace( '</div>', '<a class="avada-product-gallery-lightbox-trigger" href="' . esc_url( $full_size_image[0] ) . '" data-rel="iLightbox' . $gallery . '" alt="' . $attachment_data['alt'] . '" data-title="' . $attachment_data['title_attribute'] . '" title="' . $attachment_data['title_attribute'] . '" data-caption="' . $attachment_data['caption_attribute'] . '"></a></div>', $html );
 
 		return $html;
 	}

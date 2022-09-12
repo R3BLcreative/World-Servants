@@ -1,10 +1,11 @@
+/* global FusionEvents */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function() {
 
 	jQuery( document ).ready( function() {
 
-		// Builder Container View
+		// Studio import modal view.
 		FusionPageBuilder.StudioImportModalView = window.wp.Backbone.View.extend( {
 
 			template: FusionPageBuilder.template( jQuery( '#fusion-builder-studio-import-modal' ).html() ),
@@ -64,6 +65,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( event ) {
 					event.preventDefault();
 				}
+
+				FusionEvents.trigger( 'awb-studio-import-modal-closed' );
 
 				this.remove();
 

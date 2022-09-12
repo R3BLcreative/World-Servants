@@ -91,6 +91,10 @@ if ( fusion_is_element_enabled( 'fusion_chart' ) ) {
 				$fusion_settings = awb_get_fusion_settings();
 
 				$parent = [
+					'margin_bottom'            => '',
+					'margin_left'              => '',
+					'margin_right'             => '',
+					'margin_top'               => '',
 					'hide_on_mobile'           => fusion_builder_default_visibility( 'string' ),
 					'title'                    => '',
 					'chart_padding'            => '',
@@ -193,6 +197,13 @@ if ( fusion_is_element_enabled( 'fusion_chart' ) ) {
 
 				$this->parent_args = $defaults;
 
+				$this->parent_args['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_bottom'], 'px' );
+				$this->parent_args['margin_left']   = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_left'], 'px' );
+				$this->parent_args['margin_right']  = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_right'], 'px' );
+				$this->parent_args['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $this->parent_args['margin_top'], 'px' );
+
+				$this->validate_parent_args();
+
 				$html  = '<div ' . FusionBuilder::attributes( 'chart-shortcode' ) . '>';
 				$html .= do_shortcode( $content );
 
@@ -266,6 +277,7 @@ if ( fusion_is_element_enabled( 'fusion_chart' ) ) {
 					[
 						'id'    => 'fusion-chart-' . $this->chart_sc_counter,
 						'class' => 'fusion-chart',
+						'style' => '',
 					]
 				);
 
@@ -323,25 +335,27 @@ if ( fusion_is_element_enabled( 'fusion_chart' ) ) {
 					$attr['data-chart_point_style'] = $this->parent_args['chart_point_style'];
 				}
 
-				if ( $this->parent_args['chart_point_size'] ) {
+				if ( '' !== $this->parent_args['chart_point_size'] ) {
 					$attr['data-chart_point_size'] = $this->parent_args['chart_point_size'];
 				}
 
 				if ( $this->parent_args['chart_point_bg_color'] ) {
-					$attr['data-chart_point_bg_color'] = $this->parent_args['chart_point_bg_color'];
+					$attr['data-chart_point_bg_color'] = Fusion_Color::new_color( $this->parent_args['chart_point_bg_color'] )->toCss( 'rgba' );
 				}
 
 				if ( $this->parent_args['chart_point_border_color'] ) {
-					$attr['data-chart_point_border_color'] = $this->parent_args['chart_point_border_color'];
+					$attr['data-chart_point_border_color'] = Fusion_Color::new_color( $this->parent_args['chart_point_border_color'] )->toCss( 'rgba' );
 				}
 
 				if ( $this->parent_args['chart_axis_text_color'] ) {
-					$attr['data-chart_axis_text_color'] = $this->parent_args['chart_axis_text_color'];
+					$attr['data-chart_axis_text_color'] = Fusion_Color::new_color( $this->parent_args['chart_axis_text_color'] )->toCss( 'rgba' );
 				}
 
 				if ( $this->parent_args['chart_gridline_color'] ) {
-					$attr['data-chart_gridline_color'] = $this->parent_args['chart_gridline_color'];
+					$attr['data-chart_gridline_color'] = Fusion_Color::new_color( $this->parent_args['chart_gridline_color'] )->toCss( 'rgba' );
 				}
+
+				$attr['style'] = Fusion_Builder_Margin_Helper::get_margins_style( $this->parent_args );
 
 				if ( $this->parent_args['class'] ) {
 					$attr['class'] .= ' ' . $this->parent_args['class'];
@@ -404,15 +418,54 @@ if ( fusion_is_element_enabled( 'fusion_chart' ) ) {
 				}
 
 				if ( $this->child_args['background_color'] ) {
-					$attr['data-background_color'] = $this->child_args['background_color'];
+					$attr['data-background_color'] = Fusion_Color::new_color( $this->child_args['background_color'] )->toCss( 'rgba' );
 				}
 
 				if ( $this->child_args['border_color'] ) {
-					$attr['data-border_color'] = $this->child_args['border_color'];
+					$attr['data-border_color'] = Fusion_Color::new_color( $this->child_args['border_color'] )->toCss( 'rgba' );
 				}
 
 				return $attr;
 
+			}
+
+			/**
+			 * Validate parent args and set to object array.
+			 *
+			 * @access public
+			 * @since 3.6
+			 * @return void
+			 */
+			public function validate_parent_args() {
+				// validate bg_colors.
+				if ( $this->parent_args['bg_colors'] ) {
+					$this->parent_args['bg_colors'] = $this->global_color_to_rgba( $this->parent_args['bg_colors'] );
+				}
+
+				// validate border_colors.
+				if ( $this->parent_args['border_colors'] ) {
+					$this->parent_args['border_colors'] = $this->global_color_to_rgba( $this->parent_args['border_colors'] );
+				}
+			}
+
+			/**
+			 * Convert global colors to rgba.
+			 *
+			 * @access public
+			 * @since 3.6
+			 * @param  string $value    Color parameters.
+			 * @return string
+			 */
+			public function global_color_to_rgba( $value ) {
+				$colors     = explode( '|', $value );
+				$new_colors = [];
+				if ( $colors ) {
+					foreach ( $colors as $color ) {
+						$new_colors[] = ! empty( $color ) ? Fusion_Color::new_color( $color )->toCss( 'rgba' ) : '';
+					}
+					return implode( '|', $new_colors );
+				}
+				return $value;
 			}
 
 			/**
@@ -471,7 +524,7 @@ if ( fusion_is_element_enabled( 'fusion_chart' ) ) {
 								'label'       => esc_attr__( 'Chart Axis Text Color', 'fusion-builder' ),
 								'description' => esc_attr__( 'Controls the text color of the x-axis and y-axis.', 'fusion-builder' ),
 								'id'          => 'chart_axis_text_color',
-								'default'     => '#4a4e57',
+								'default'     => 'var(--awb-color8)',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -479,7 +532,7 @@ if ( fusion_is_element_enabled( 'fusion_chart' ) ) {
 								'label'       => esc_attr__( 'Chart Gridline Color', 'fusion-builder' ),
 								'description' => esc_attr__( 'Controls the color of the chart background grid lines and values.', 'fusion-builder' ),
 								'id'          => 'chart_gridline_color',
-								'default'     => 'rgba(0,0,0,0.1)',
+								'default'     => 'hsla(var(--awb-color8-h),var(--awb-color8-s),var(--awb-color8-l),calc(var(--awb-color8-a) - 90%))',
 								'type'        => 'color-alpha',
 								'transport'   => 'postMessage',
 							],
@@ -568,7 +621,7 @@ function fusion_element_chart() {
 				'admin_enqueue_js'                        => FUSION_BUILDER_PLUGIN_URL . 'shortcodes/js/fusion-chart.js',
 				'preview_id'                              => 'fusion-builder-block-module-chart-preview-template',
 				'child_ui'                                => true,
-				'help_url'                                => 'https://theme-fusion.com/documentation/fusion-builder/elements/chart-element/',
+				'help_url'                                => 'https://theme-fusion.com/documentation/avada/elements/chart-element/',
 				'params'                                  => [
 					[
 						'type'             => 'hidden',
@@ -848,6 +901,16 @@ function fusion_element_chart() {
 							],
 						],
 					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-builder' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_right'  => '',
+							'margin_bottom' => '',
+							'margin_left'   => '',
+						],
+					],
 					[
 						'type'        => 'checkbox_button_set',
 						'heading'     => esc_attr__( 'Element Visibility', 'fusion-builder' ),
@@ -906,7 +969,7 @@ function fusion_element_chart_value() {
 					[
 						'type'        => 'textfield',
 						'heading'     => esc_attr__( 'Value', 'fusion-builder' ),
-						'description' => __( 'Enter values for axis. <strong>Note:</strong> Separate values with "|".', 'fusion-builder' ),
+						'description' => __( 'Enter values for axis. <strong>NOTE:</strong> Separate values with "|".', 'fusion-builder' ),
 						'param_name'  => 'values',
 						'placeholder' => true,
 					],

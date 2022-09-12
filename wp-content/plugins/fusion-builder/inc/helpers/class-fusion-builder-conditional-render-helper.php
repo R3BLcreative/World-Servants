@@ -39,12 +39,52 @@ class Fusion_Builder_Conditional_Render_Helper {
 	 */
 	public static function get_params( $args ) {
 
+		// Post Categories.
+		$post_categories_field   = 'text';
+		$post_categories_options = '';
+
+		if ( 25 > wp_count_terms( 'category' ) ) {
+			$post_categories = [];
+			$categories      = get_terms(
+				'category',
+				[
+					'hide_empty' => false,
+				]
+			);
+			foreach ( $categories as $category ) {
+				$post_categories[ $category->term_id ] = $category->name;
+			}
+
+			$post_categories_field   = 'select';
+			$post_categories_options = $post_categories;
+		}
+
+		// Post Tags.
+		$post_tags_field   = 'text';
+		$post_tags_options = '';
+
+		if ( 25 > wp_count_terms( 'post_tag' ) ) {
+			$post_tags = [];
+			$tags      = get_terms(
+				'post_tag',
+				[
+					'hide_empty' => false,
+				]
+			);
+			foreach ( $tags as $tag ) {
+				$post_tags[ $tag->term_id ] = $tag->name;
+			}
+
+			$post_tags_field   = 'select';
+			$post_tags_options = $post_tags;
+		}
+
 		$params = [
 			[
 				'type'        => 'fusion_logics',
 				'heading'     => esc_html__( 'Rendering Logic', 'fusion-builder' ),
 				'param_name'  => 'render_logics',
-				'description' => __( 'Add conditional rendering logic for the element. The element will only be part of the post / page contents, if the set conditions are met. <strong>Note:</strong> Server cache can interfere with results.', 'fusion-builder' ),
+				'description' => __( 'Add conditional rendering logic for the element. The element will only be part of the post / page contents, if the set conditions are met. <strong>NOTE:</strong> Server cache can interfere with results.', 'fusion-builder' ),
 				'group'       => esc_attr__( 'Extras', 'fusion-builder' ),
 				'placeholder' => [
 					'id'          => 'placeholder',
@@ -140,6 +180,28 @@ class Fusion_Builder_Conditional_Render_Helper {
 							'contains'     => esc_attr__( 'Contains', 'fusion-builder' ),
 						],
 					],
+					[
+						'id'          => 'post_category',
+						'title'       => esc_html__( 'Post Category', 'fusion-builder' ),
+						'type'        => $post_categories_field,
+						'options'     => $post_categories_options,
+						'placeholder' => esc_attr__( 'Category Name, Slug or ID', 'fusion-builder' ),
+						'comparisons' => [
+							'equal'     => esc_attr__( 'Equal To', 'fusion-builder' ),
+							'not-equal' => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+						],
+					],
+					[
+						'id'          => 'post_tag',
+						'title'       => esc_html__( 'Post Tag', 'fusion-builder' ),
+						'type'        => $post_tags_field,
+						'options'     => $post_tags_options,
+						'placeholder' => esc_attr__( 'Tag Name, Slug or ID', 'fusion-builder' ),
+						'comparisons' => [
+							'equal'     => esc_attr__( 'Equal To', 'fusion-builder' ),
+							'not-equal' => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+						],
+					],
 				],
 			],
 		];
@@ -192,6 +254,46 @@ class Fusion_Builder_Conditional_Render_Helper {
 			return $params;
 		}
 
+		// Product categories.
+		$product_categories_field   = 'text';
+		$product_categories_options = '';
+
+		if ( 25 > wp_count_terms( 'product_cat' ) ) {
+			$product_categories = [];
+			$categories         = get_terms(
+				'product_cat',
+				[
+					'hide_empty' => false,
+				]
+			);
+			foreach ( $categories as $category ) {
+				$product_categories[ $category->term_id ] = $category->name;
+			}
+
+			$product_categories_field   = 'select';
+			$product_categories_options = $product_categories;
+		}
+
+		// Product tags.
+		$product_tags_field   = 'text';
+		$product_tags_options = '';
+
+		if ( 25 > wp_count_terms( 'product_tag' ) ) {
+			$product_tags = [];
+			$tags         = get_terms(
+				'product_tag',
+				[
+					'hide_empty' => false,
+				]
+			);
+			foreach ( $tags as $tag ) {
+				$product_tags[ $tag->term_id ] = $tag->name;
+			}
+
+			$product_tags_field   = 'select';
+			$product_tags_options = $product_tags;
+		}
+
 		$woo_options = [
 			[
 				'id'          => 'cart_status',
@@ -228,6 +330,99 @@ class Fusion_Builder_Conditional_Render_Helper {
 					'not-equal'    => esc_attr__( 'Not Equal To', 'fusion-builder' ),
 					'greater-than' => esc_attr__( 'Greater Than', 'fusion-builder' ),
 					'less-than'    => esc_attr__( 'Less Than', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'stock_status',
+				'title'       => esc_html__( 'Stock Status', 'fusion-builder' ),
+				'type'        => 'select',
+				'options'     => [
+					'in'  => esc_html__( 'In Stock', 'fusion-builder' ),
+					'out' => esc_html__( 'Out of Stock', 'fusion-builder' ),
+				],
+				'comparisons' => [
+					'equal'     => esc_attr__( 'Equal To', 'fusion-builder' ),
+					'not-equal' => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'product_type',
+				'title'       => esc_html__( 'Product Type', 'fusion-builder' ),
+				'type'        => 'select',
+				'options'     => [
+					'simple'   => esc_html__( 'Simple Product', 'fusion-builder' ),
+					'grouped'  => esc_html__( 'Grouped Product', 'fusion-builder' ),
+					'external' => esc_html__( 'External/Affiliate Product', 'fusion-builder' ),
+					'variable' => esc_html__( 'Variable Product', 'fusion-builder' ),
+				],
+				'comparisons' => [
+					'equal'     => esc_attr__( 'Equal To', 'fusion-builder' ),
+					'not-equal' => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'product_category',
+				'title'       => esc_html__( 'Product Category', 'fusion-builder' ),
+				'type'        => $product_categories_field,
+				'options'     => $product_categories_options,
+				'placeholder' => esc_html__( 'Category Name, Slug or ID', 'fusion-builder' ),
+				'comparisons' => [
+					'equal'     => esc_attr__( 'Equal To', 'fusion-builder' ),
+					'not-equal' => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'product_tag',
+				'title'       => esc_html__( 'Product Tag', 'fusion-builder' ),
+				'type'        => $product_tags_field,
+				'options'     => $product_tags_options,
+				'placeholder' => esc_html__( 'Tag Name, Slug or ID', 'fusion-builder' ),
+				'comparisons' => [
+					'equal'     => esc_attr__( 'Equal To', 'fusion-builder' ),
+					'not-equal' => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'related_products_count',
+				'title'       => esc_html__( 'Related Products', 'fusion-builder' ),
+				'type'        => 'text',
+				'comparisons' => [
+					'equal'        => esc_attr__( 'Equal To', 'fusion-builder' ),
+					'not-equal'    => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+					'greater-than' => esc_attr__( 'Greater Than', 'fusion-builder' ),
+					'less-than'    => esc_attr__( 'Less Than', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'up_sells_products_count',
+				'title'       => esc_html__( 'Up-Sells Products', 'fusion-builder' ),
+				'type'        => 'text',
+				'comparisons' => [
+					'equal'        => esc_attr__( 'Equal To', 'fusion-builder' ),
+					'not-equal'    => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+					'greater-than' => esc_attr__( 'Greater Than', 'fusion-builder' ),
+					'less-than'    => esc_attr__( 'Less Than', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'cross_sells_products_count',
+				'title'       => esc_html__( 'Cross-Sells Products', 'fusion-builder' ),
+				'type'        => 'text',
+				'comparisons' => [
+					'equal'        => esc_attr__( 'Equal To', 'fusion-builder' ),
+					'not-equal'    => esc_attr__( 'Not Equal To', 'fusion-builder' ),
+					'greater-than' => esc_attr__( 'Greater Than', 'fusion-builder' ),
+					'less-than'    => esc_attr__( 'Less Than', 'fusion-builder' ),
+				],
+			],
+			[
+				'id'          => 'product_variations',
+				'title'       => esc_html__( 'Product Variations', 'fusion-builder' ),
+				'type'        => 'text',
+				'placeholder' => esc_html__( 'Attribute Name eg. color or size.', 'fusion-builder' ),
+				'comparisons' => [
+					'equal'     => esc_attr__( 'Has', 'fusion-builder' ),
+					'not-equal' => esc_attr__( 'Has Not', 'fusion-builder' ),
 				],
 			],
 		];
@@ -415,6 +610,66 @@ class Fusion_Builder_Conditional_Render_Helper {
 
 				return $product->get_stock_quantity();
 
+			case 'stock_status':
+				$product = wc_get_product( get_the_ID() );
+
+				if ( false === $product ) {
+					return 0;
+				}
+
+				return $product->is_in_stock() ? 'in' : 'out';
+
+			case 'product_type':
+				$product = wc_get_product( get_the_ID() );
+
+				if ( false === $product ) {
+					return 0;
+				}
+
+				return $product->get_type();
+
+			case 'product_category':
+				return has_term( $value, 'product_cat' ) ? $value : null;
+			case 'product_tag':
+				return has_term( $value, 'product_tag' ) ? $value : null;
+			case 'related_products_count':
+				$product = wc_get_product( get_the_ID() );
+
+				if ( false === $product ) {
+					return 0;
+				}
+				$related_products = wc_get_related_products( get_the_ID(), intval( $value ) + 1 );
+				return count( $related_products );
+			case 'up_sells_products_count':
+				$product = wc_get_product( get_the_ID() );
+
+				if ( false === $product ) {
+					return 0;
+				}
+				return count( $product->get_upsell_ids() );
+			case 'cross_sells_products_count':
+				$product = wc_get_product( get_the_ID() );
+
+				if ( false === $product ) {
+					return 0;
+				}
+				return count( $product->get_cross_sell_ids() );
+			case 'product_variations':
+				$product = wc_get_product( get_the_ID() );
+
+				if ( false === $product ) {
+					return 0;
+				}
+				if ( ! $product->is_type( 'variable' ) ) {
+					return 0;
+				}
+
+				$atts = $product->get_variation_attributes();
+				return ! empty( $product->get_attributes() ) && is_array( $atts ) && array_key_exists( 'pa_' . strtolower( $value ), $atts ) ? $value : null;
+			case 'post_category':
+				return has_term( $value, 'category' ) ? $value : null;
+			case 'post_tag':
+				return has_term( $value, 'post_tag' ) ? $value : null;
 			case 'event_status':
 				$id = get_the_ID();
 

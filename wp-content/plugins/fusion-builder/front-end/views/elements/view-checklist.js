@@ -1,3 +1,4 @@
+/* global fusionSanitize */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function() {
@@ -17,7 +18,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			filterTemplateAtts: function( atts ) {
 				var attributes = {};
 
-				this.validateValues( atts.values );
+				this.validateValues( atts.values, atts.extras );
 
 				this.values = atts.values;
 
@@ -40,9 +41,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 *
 			 * @since 2.0
 			 * @param {Object} values - The values object.
+			 * @param {Object} extras - The extras object.
 			 * @return {void}
 			 */
-			validateValues: function( values ) {
+			validateValues: function( values, extras ) {
 				values.size = _.fusionValidateAttrValue( values.size, 'px' );
 
 				// Fallbacks for old size parameter and 'px' check+
@@ -53,10 +55,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				} else if ( 'large' === values.size ) {
 					values.size = '40px';
 				} else if ( -1 === values.size.indexOf( 'px' ) ) {
-					values.size = values.size + 'px';
+					values.size = fusionSanitize.convert_font_size_to_px( values.size, extras.body_font_size );
 				}
 
 				values.circle = ( 1 == values.circle ) ? 'yes' : values.circle;
+
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
 			},
 
 			/**
@@ -79,6 +86,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				this.line_height = this.font_size * 1.7;
 
 				checklistShortcode.style = 'font-size:' + this.font_size + 'px;line-height:' + this.line_height + 'px;';
+
+				if ( '' !== values.margin_top ) {
+					checklistShortcode.style += 'margin-top:' + values.margin_top + ';';
+				}
+
+				if ( '' !== values.margin_right ) {
+					checklistShortcode.style += 'margin-right:' + values.margin_right + ';';
+				}
+
+				if ( '' !== values.margin_bottom ) {
+					checklistShortcode.style += 'margin-bottom:' + values.margin_bottom + ';';
+				}
+
+				if ( '' !== values.margin_left ) {
+					checklistShortcode.style += 'margin-left:' + values.margin_left + ';';
+				}
 
 				if ( 'yes' === values.divider ) {
 					checklistShortcode[ 'class' ] += ' fusion-checklist-divider';

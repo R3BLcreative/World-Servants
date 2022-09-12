@@ -6,7 +6,7 @@
  */
 
 /**
- * Import Fusion elements/templates
+ * Import Avada elements/templates
  */
 function fusion_builder_importer() {
 
@@ -28,23 +28,27 @@ function fusion_builder_importer() {
 				include $wp_importer;
 			}
 
-			if ( ! class_exists( 'WXR_Importer' ) ) { // If WP importer doesn't exist.
+			if ( ! class_exists( 'WP_Importer_Logger' ) ) { // If WP importer doesn't exist.
 				include FUSION_LIBRARY_PATH . '/inc/importer/class-logger.php';
-				include FUSION_LIBRARY_PATH . '/inc/importer/class-logger-html.php';
+			}
 
-				$wp_import = FUSION_LIBRARY_PATH . '/inc/importer/class-wxr-importer.php';
-				include $wp_import;
+			if ( ! class_exists( 'AWB_Importer_Logger' ) ) { // If WP importer doesn't exist.
+				include FUSION_LIBRARY_PATH . '/inc/importer/class-awb-importer-logger.php';
+			}
+
+			if ( ! class_exists( 'WXR_Importer' ) ) { // If WP importer doesn't exist.
+				include FUSION_LIBRARY_PATH . '/inc/importer/class-wxr-importer.php';
 			}
 
 			if ( ! class_exists( 'Fusion_WXR_Importer' ) ) {
 				include FUSION_LIBRARY_PATH . '/inc/importer/class-fusion-wxr-importer.php';
 			}
 
-			if ( class_exists( 'WP_Importer' ) && class_exists( 'WXR_Importer' ) && class_exists( 'Fusion_WXR_Importer' ) ) { // Check for main import class and wp import class.
+			if ( class_exists( 'AWB_Importer_Logger' ) && class_exists( 'WP_Importer' ) && class_exists( 'WXR_Importer' ) && class_exists( 'Fusion_WXR_Importer' ) ) { // Check for main import class and wp import class.
 
 				if ( isset( $file ) && ! empty( $file ) ) {
 
-					$logger = new WP_Importer_Logger_HTML();
+					$logger = new AWB_Importer_Logger();
 
 					// It's important to disable 'prefill_existing_posts'.
 					// In case GUID of importing post matches GUID of an existing post it won't be imported.
@@ -119,7 +123,7 @@ function add_fb_element_terms( $terms, $post_id, $data ) {
 
 
 /**
- * Export Fusion elements/templates
+ * Export Avada elements/templates
  */
 function fusion_export_xml() {
 

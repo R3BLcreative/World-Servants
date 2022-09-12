@@ -67,6 +67,10 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 				return apply_filters(
 					'fusion_fusionslider_default_parameter',
 					[
+						'margin_top'     => '',
+						'margin_right'   => '',
+						'margin_bottom'  => '',
+						'margin_left'    => '',
 						'hide_on_mobile' => fusion_builder_default_visibility( 'string' ),
 						'class'          => '',
 						'id'             => '',
@@ -91,6 +95,9 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 				$defaults = FusionBuilder::set_shortcode_defaults( self::get_element_defaults(), $args, 'fusion_fusionslider' );
 
 				extract( $defaults );
+
+				$defaults['margin_bottom'] = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_bottom'], 'px' );
+				$defaults['margin_top']    = FusionBuilder::validate_shortcode_attr_value( $defaults['margin_top'], 'px' );
 
 				self::$parent_args = $defaults;
 
@@ -324,9 +331,14 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 
 									if ( isset( $metadata['heading_bg'] ) && 'yes' === $metadata['heading_bg'] ) {
 										$heading_bg = 'background-color: rgba(0,0,0, 0.4);';
-										if ( isset( $metadata['heading_bg_color'] ) && '' !== $metadata['heading_bg_color'] ) {
-											$rgb        = fusion_hex2rgb( $metadata['heading_bg_color'] );
-											$heading_bg = 'background-color: rgba(' . $rgb[0] . ',' . $rgb[1] . ',' . $rgb[2] . ',0.4);';
+										if ( isset( $metadata['heading_bg_color'] ) && '' !== $metadata['heading_bg_color'] && class_exists( 'Fusion_Color' ) ) {
+											$heading_bg_color_object = Fusion_Color::new_color( $metadata['heading_bg_color'] );
+
+											if ( 1 === intval( $heading_bg_color_object->alpha ) ) {
+												$heading_bg_color_object = $heading_bg_color_object->get_new( 'alpha', 0.4 );
+											}
+
+											$heading_bg = 'background-color:' . $heading_bg_color_object->to_css_var_or_rgba();
 										}
 									}
 
@@ -337,17 +349,27 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 									if ( isset( $metadata['caption_bg'] ) && 'yes' === $metadata['caption_bg'] ) {
 										$caption_bg = 'background-color: rgba(0, 0, 0, 0.4);';
 
-										if ( isset( $metadata['caption_bg_color'] ) && '' !== $metadata['caption_bg_color'] ) {
-											$rgb        = fusion_hex2rgb( $metadata['caption_bg_color'] );
-											$caption_bg = 'background-color: rgba(' . $rgb[0] . ',' . $rgb[1] . ',' . $rgb[2] . ',0.4);';
+										if ( isset( $metadata['caption_bg_color'] ) && '' !== $metadata['caption_bg_color'] && class_exists( 'Fusion_Color' ) ) {
+											$caption_bg_color_object = Fusion_Color::new_color( $metadata['caption_bg_color'] );
+
+											if ( 1 === intval( $caption_bg_color_object->alpha ) ) {
+												$caption_bg_color_object = $caption_bg_color_object->get_new( 'alpha', 0.4 );
+											}
+
+											$caption_bg = 'background-color:' . $caption_bg_color_object->to_css_var_or_rgba();
 										}
 									}
 
 									$video_bg_color = '';
 
-									if ( isset( $metadata['video_bg_color'] ) && $metadata['video_bg_color'] ) {
-										$video_bg_color_hex = fusion_hex2rgb( $metadata['video_bg_color'] );
-										$video_bg_color     = 'background-color: rgba(' . $video_bg_color_hex[0] . ', ' . $video_bg_color_hex[1] . ', ' . $video_bg_color_hex[2] . ', 0.4);';
+									if ( isset( $metadata['video_bg_color'] ) && $metadata['video_bg_color'] && class_exists( 'Fusion_Color' ) ) {
+										$video_bg_color_object = Fusion_Color::new_color( $metadata['video_bg_color'] );
+
+										if ( 1 === intval( $video_bg_color_object->alpha ) ) {
+											$video_bg_color_object = $video_bg_color_object->get_new( 'alpha', 0.4 );
+										}
+
+										$video_bg_color = 'background-color:' . $video_bg_color_object->to_css_var_or_rgba();
 									}
 
 									$video = false;
@@ -512,6 +534,7 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 					self::$parent_args['hide_on_mobile'],
 					[
 						'class' => 'fusion-slider-container fusion-slider-sc-' . self::$parent_args['name'],
+						'style' => '',
 					]
 				);
 
@@ -538,11 +561,13 @@ if ( function_exists( 'fusion_is_element_enabled' ) && fusion_is_element_enabled
 					$attr['class'] .= ' ' . self::$parent_args['class'];
 				}
 
+				$attr['style'] .= Fusion_Builder_Margin_Helper::get_margins_style( self::$parent_args );
+
 				if ( self::$parent_args['id'] ) {
 					$attr['id'] = self::$parent_args['id'];
 				}
 
-				$attr['style'] = 'height:' . self::$slider_settings['slider_height'] . '; max-width:' . self::$slider_settings['slider_width'] . ';';
+				$attr['style'] .= 'height:' . self::$slider_settings['slider_height'] . '; max-width:' . self::$slider_settings['slider_width'] . ';';
 
 				return $attr;
 
@@ -700,6 +725,14 @@ function fusion_element_fusionslider() {
 							'function' => 'fusion_ajax',
 							'action'   => 'get_fusion_fusionslider',
 							'ajax'     => true,
+						],
+					],
+					'fusion_margin_placeholder' => [
+						'param_name' => 'margin',
+						'group'      => esc_attr__( 'General', 'fusion-core' ),
+						'value'      => [
+							'margin_top'    => '',
+							'margin_bottom' => '',
 						],
 					],
 					[

@@ -191,18 +191,19 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// Find and remove extra content.
 				if ( 'undefined' !== typeof this.model.attributes.extraAppend && 'undefined' !== typeof this.model.attributes.extraAppend.existing ) {
-					$existing = $parentEl.find( this.model.attributes.extraAppend.existing );
+					$existing = Array.isArray( this.model.attributes.extraAppend.existing ) ? $parentEl.find( this.model.attributes.extraAppend.existing.join( ', ' ) ) : $parentEl.find( this.model.attributes.extraAppend.existing );
+					const $existingTabContent = Array.isArray( this.model.attributes.extraAppend.existing ) ? $parentEl.find( this.model.attributes.extraAppend.existing[ 1 ] ) : $parentEl.find( this.model.attributes.extraAppend.existing );
 
 					// If tabs element and this tab is active, make another tab active.
 					if ( $existing.hasClass( 'active' ) && 'fusion_tab' === this.model.get( 'element_type' ) ) {
-						$sibling = $existing.siblings().first();
+						$sibling = $existingTabContent.siblings( '.tab-pane' ).first();
+
 						if ( $sibling.length ) {
 							$sibling.addClass( 'active in' );
 							targetId = $sibling.attr( 'id' );
 							$parentEl.find( '[href="#' + targetId + '"]' ).closest( '.fusion-builder-live-child-element' ).addClass( 'active' );
 						}
 					}
-
 					$existing.remove();
 
 				}

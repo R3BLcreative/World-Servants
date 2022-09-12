@@ -140,9 +140,17 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					// Check and exclude for dynamic data fields.
 					parentValue = self.$targetEl.find( '#' + setting ).closest( '[data-dynamic]' ).siblings().find( '#' + setting ).val();
 				} else {
-					parentValue = self.$targetEl.find( '#' + setting ).val();
+					const input = self.$targetEl.find( '#' + setting );
+					// Multi Select option.
+					if ( input.is( 'div' ) && input.is( '.fusion-form-multiple-select' ) ) {
+						parentValue = [];
+						input.find( '.fusion-select-options input.fusion-select-option:checked' ).each( function() {
+							parentValue.push( jQuery( this ).val() );
+						} );
+					} else {
+						parentValue = input.val();
+					}
 				}
-
 				if ( 'undefined' === typeof parentValue ) {
 					if ( 'TO' === self.type ) {
 						parentValue = FusionApp.settings[ setting ];
@@ -221,6 +229,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 								// Fix value names ( TO to PO )
 								parentValue = self.fixPoToValue( parentValue );
 							}
+						}
+
+						if ( 'EO' === self.type && 'undefined' !== typeof self.attributes[ setting ] && 'range' !== self.attributes[ setting ].type ) {
+
+							// Fix value names ( TO to EO )
+							parentValue = self.fixEoToValue( parentValue );
 						}
 
 						$passedArray.push( self.doesTestPass( parentValue, value, operator ) );
@@ -482,7 +496,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			if ( 'undefined' !== FusionApp.settings.dependencies_status && 0 === parseInt( FusionApp.settings.dependencies_status ) ) {
 				return true;
 			}
-
 			switch ( operation ) {
 			case '=':
 			case '==':
@@ -630,6 +643,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				} else if ( -1 !== parentValue.toString().indexOf( checkValue ) ) {
 					show = true;
 				}
+
 				break;
 
 			case 'doesnt_contain':
@@ -796,6 +810,29 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				break;
 
 			case 'show':
+			case '1':
+				value = 'yes';
+
+				break;
+			}
+
+			return value;
+		},
+
+		/**
+		 * Convert option values.
+		 *
+		 * @since 3.7.0
+		 * @return string
+		 */
+		fixEoToValue: function( value ) {
+			switch ( value ) {
+
+			case '0':
+				value = 'no';
+
+				break;
+
 			case '1':
 				value = 'yes';
 

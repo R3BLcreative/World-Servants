@@ -75,6 +75,9 @@ class Fusion_Builder_Gutenberg {
 				// Add Gutenberg edit link.
 				add_filter( 'page_row_actions', [ $this, 'add_edit_link' ], 10, 2 );
 				add_filter( 'post_row_actions', [ $this, 'add_edit_link' ], 10, 2 );
+
+				// Update edit link if required.
+				add_filter( 'get_edit_post_link', [ $this, 'update_edit_link' ], 10, 3 );
 			}
 		}
 
@@ -162,12 +165,16 @@ class Fusion_Builder_Gutenberg {
 			return;
 		}
 
+		$options       = get_option( 'fusion_builder_settings', [] );
+		$builder_type  = isset( $options['enable_builder_ui_by_default'] ) ? $options['enable_builder_ui_by_default'] : 'backend';
 		$edit          = 'post' !== $typenow ? 'post-new.php?post_type=' . $typenow : 'post-new.php';
 		$fb_url        = add_query_arg( 'fb-be-editor', '', $edit );
 		$gutenberg_url = add_query_arg( 'gutenberg-editor', '', $edit );
 		$live_editor   = apply_filters( 'fusion_load_live_editor', true );
+		$edit          = 'live' === $builder_type && $live_editor ? '#' : $edit;
+		$class         = 'live' === $builder_type && $live_editor ? ' awb-default-post-live' : '';
 
-		$page_title_action_template  = '<span id="fusion-split-page-title-action" class="fusion-split-page-title-action">';
+		$page_title_action_template  = '<span id="fusion-split-page-title-action" class="fusion-split-page-title-action ' . $class . '">';
 		$page_title_action_template .= '<a href="' . $edit . '">' . esc_html__( 'Add New', 'fusion-builder' ) . '</a>';
 		$page_title_action_template .= '<span class="expander" tabindex="0" role="button" aria-haspopup="true" aria-label="' . esc_html__( 'Toggle editor selection menu', 'fusion-builder' ) . '"></span>';
 		$page_title_action_template .= '<span class="dropdown">';
@@ -183,10 +190,14 @@ class Fusion_Builder_Gutenberg {
 		?>
 		<script type="text/javascript">
 			jQuery( document ).ready( function() {
-				jQuery( 'body' ).on ('click', '#fusion-builder-live-create-post',  function( e ) {
+				jQuery( 'body' ).on ('click', '#fusion-builder-live-create-post, .awb-default-post-live a[href="#"]',  function( e ) {
 					e.preventDefault();
 
-					jQuery( this ).addClass( 'sending' );
+					if ( jQuery( e.currentTarget ).is( '#fusion-builder-live-create-post' ) ) {
+						jQuery( this ).addClass( 'sending' );
+					} else {
+						jQuery( this ).closest( '.fusion-split-page-title-action' ).addClass( 'sending' );
+					}
 
 					jQuery.ajax( {
 						type: 'POST',
@@ -235,6 +246,7 @@ class Fusion_Builder_Gutenberg {
 				color: #0071a1;
 				cursor: pointer;
 				outline: 0;
+				box-shadow: none;
 			}
 			.fusion-split-page-title-action > a {
 				display: inline-block;
@@ -320,12 +332,56 @@ class Fusion_Builder_Gutenberg {
 				animation-iteration-count: infinite;
 				animation-name: rotate;
 				animation-timing-function: linear;
-
-
+			}
+			.fusion-split-page-title-action.sending span.expander:after {
+				opacity: 1;
+				left: auto;
+			}
+			.fusion-split-page-title-action.sending .expander:after {
+				content: '';
+				position: absolute;
+				top: 50%;
+				right: 9px;
+				margin-top: -4px;
+				width: 5px;
+				height: 5px;
+				border: 3px solid;
+				border-left-color: transparent;
+				border-radius: 50%;
+				opacity: 0;
+				transition-duration: 0.5s;
+				transition-property: opacity;
+				animation-duration: 1s;
+				animation-iteration-count: infinite;
+				animation-name: rotate;
+				animation-timing-function: linear;
 			}
 
 		</style>
 		<?php
+	}
+
+	/**
+	 * Updates edit link based on auto activation preferences.
+	 *
+	 * @since 3.8
+	 * @access public
+	 * @param  string $url      The edit URL.
+	 * @param  int    $id       The post ID.
+	 * @param  string $context  The context.
+	 *
+	 * @return string  Updated edit URL.
+	 */
+	public function update_edit_link( $url, $id, $context ) {
+		$options      = get_option( 'fusion_builder_settings', [] );
+		$builder_type = isset( $options['enable_builder_ui_by_default'] ) ? $options['enable_builder_ui_by_default'] : 'backend';
+		$live_editor  = apply_filters( 'fusion_load_live_editor', true );
+
+		if ( 'live' === $builder_type && $live_editor && 'display' === $context ) {
+			$url = add_query_arg( 'fb-edit', '1', get_permalink( $id ) );
+		}
+
+		return $url;
 	}
 
 	/**
@@ -344,6 +400,8 @@ class Fusion_Builder_Gutenberg {
 		}
 
 		$edit_url      = get_edit_post_link( $post->ID, 'raw' );
+		$options       = get_option( 'fusion_builder_settings', [] );
+		$builder_type  = isset( $options['enable_builder_ui_by_default'] ) ? $options['enable_builder_ui_by_default'] : 'backend';
 		$fb_live_url   = add_query_arg( 'fb-edit', '1', get_permalink( $post->ID ) );
 		$gutenberg_url = add_query_arg( 'gutenberg-editor', '', $edit_url );
 		$live_editor   = apply_filters( 'fusion_load_live_editor', true );
@@ -352,7 +410,8 @@ class Fusion_Builder_Gutenberg {
 		// Build the classic edit action. See also: WP_Posts_List_Table::handle_row_actions().
 		$title = _draft_or_post_title( $post->ID );
 
-		if ( $live_editor ) {
+		// If auto activation is set to backend builder.
+		if ( $live_editor && 'backend' === $builder_type ) {
 			$edit_action['fusion_builder_live'] = sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
 				esc_url( $fb_live_url ),
@@ -364,6 +423,22 @@ class Fusion_Builder_Gutenberg {
 					)
 				),
 				esc_html__( 'Avada Live', 'fusion-builder' )
+			);
+		}
+
+		// If auto activation is set to live builder.
+		if ( $edit_url && 'live' === $builder_type ) {
+			$edit_action['fusion_builder_backend'] = sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				esc_url( $edit_url ),
+				esc_attr(
+					sprintf(
+						/* translators: %s: post title */
+						__( 'Edit &#8220;%s&#8221; in Back-end Builder', 'fusion-builder' ),
+						$title
+					)
+				),
+				esc_html__( 'Back-end Builder', 'fusion-builder' )
 			);
 		}
 

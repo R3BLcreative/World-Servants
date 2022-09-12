@@ -18,8 +18,8 @@
 			</ul>
 			<# if ( 'yes' === show_nav ) { #>
 			<div class="fusion-carousel-nav">
-				<span class="fusion-nav-prev"></span>
-				<span class="fusion-nav-next"></span>
+				<button class="fusion-nav-prev" aria-label="Previous"></button>
+				<button class="fusion-nav-next" aria-label="Next"></button>
 			</div>
 			<# } #>
 		</div>

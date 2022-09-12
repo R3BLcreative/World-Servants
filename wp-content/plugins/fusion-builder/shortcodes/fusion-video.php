@@ -232,7 +232,7 @@ if ( fusion_is_element_enabled( 'fusion_video' ) ) {
 						$alpha = Fusion_Color::new_color( $this->args['overlay_color'] )->alpha;
 					}
 					if ( 1 === $alpha ) {
-						$this->args['overlay_color'] = fusion_library()->sanitize->get_rgba( $this->args['overlay_color'], '0.5' );
+						$this->args['overlay_color'] = Fusion_Color::new_color( $this->args['overlay_color'] )->get_new( 'alpha', '0.5' )->to_css_var_or_rgba();
 					}
 					$attr['class'] .= ' fusion-video-overlay';
 					$attr['style'] .= 'background-color:' . $this->args['overlay_color'] . ';';
@@ -377,18 +377,20 @@ function fusion_element_video() {
 				'help_url'   => 'https://theme-fusion.com/documentation/avada/elements/video-element/',
 				'params'     => [
 					[
-						'type'        => 'uploadfile',
-						'heading'     => esc_attr__( 'Video MP4 Upload', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add your MP4 video file. This format must be included to render your video with cross-browser compatibility.', 'fusion-builder' ),
-						'param_name'  => 'video',
-						'value'       => '',
+						'type'         => 'uploadfile',
+						'heading'      => esc_attr__( 'Video MP4 Upload', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add your MP4 video file. This format must be included to render your video with cross-browser compatibility.', 'fusion-builder' ),
+						'dynamic_data' => true,
+						'param_name'   => 'video',
+						'value'        => '',
 					],
 					[
-						'type'        => 'uploadfile',
-						'heading'     => esc_attr__( 'Video WebM Upload', 'fusion-builder' ),
-						'description' => esc_attr__( 'Add your WebM video file. This is optional, only MP4 is required to render your video with cross-browser compatibility.', 'fusion-builder' ),
-						'param_name'  => 'video_webm',
-						'value'       => '',
+						'type'         => 'uploadfile',
+						'heading'      => esc_attr__( 'Video WebM Upload', 'fusion-builder' ),
+						'description'  => esc_attr__( 'Add your WebM video file. This is optional, only MP4 is required to render your video with cross-browser compatibility.', 'fusion-builder' ),
+						'dynamic_data' => true,
+						'param_name'   => 'video_webm',
+						'value'        => '',
 					],
 
 					[

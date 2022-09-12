@@ -29,7 +29,7 @@ class AWB_Studio_Admin {
 		// Import Studio Media.
 		add_action( 'wp_ajax_awb_studio_admin_import_media', [ $this, 'ajax_import_media' ] );
 
-		add_action( 'admin_menu', [ $this, 'add_menu_page' ], 12 );
+		add_action( 'avada_add_admin_menu_pages', [ $this, 'add_menu_page' ], 15 );
 	}
 
 	/**
@@ -40,7 +40,7 @@ class AWB_Studio_Admin {
 	 * @return void
 	 */
 	public function add_menu_page() {
-		add_submenu_page( 'avada', esc_html__( 'Studio', 'fusion-builder' ), esc_html__( 'Studio', 'fusion-builder' ), 'switch_themes', 'avada-studio', [ $this, 'render_page' ], 3 );
+		add_submenu_page( 'avada', esc_html__( 'Studio', 'fusion-builder' ), esc_html__( 'Studio', 'fusion-builder' ), 'switch_themes', 'avada-studio', [ $this, 'render_page' ], 4 );
 	}
 
 	/**
@@ -67,7 +67,17 @@ class AWB_Studio_Admin {
 			false
 		);
 
+		// Studio preview.
+		wp_enqueue_script(
+			'fusion-admin-notices',
+			trailingslashit( Fusion_Scripts::$js_folder_url ) . 'general/awb-studio-preview-admin.js',
+			[ 'jquery' ],
+			FUSION_BUILDER_VERSION,
+			false
+		);
+
 		wp_localize_script( 'avada-studio', 'fusionBuilderText', fusion_app_textdomain_strings() );
+
 		wp_localize_script( 'avada-studio', 'awbStudioData', (array) $data );
 
 		?>
@@ -78,12 +88,16 @@ class AWB_Studio_Admin {
 
 				<p><?php esc_html_e( 'Here you can preview all Avada Studio content, and save any of the content blocks directly to your local Library.', 'fusion-builder' ); ?></p>
 
-				<div class="avada-db-card-notice">
-					<i class="fusiona-info-circle"></i>
-					<p class="avada-db-card-notice-heading">
-						<?php esc_html_e( 'Avada Studio updates daily. However, you can manually sync by clicking on the button.', 'fusion-builder' ); ?>
+				<div class="avada-db-card-notice-button">
+					<div class="avada-db-card-notice">
+						<i class="fusiona-info-circle"></i>
+						<p class="avada-db-card-notice-heading">
+							<?php esc_html_e( 'Avada Studio content syncs daily. However, you can manually sync by clicking on the button.', 'fusion-builder' ); ?>
+						</p>
+					</div>
+					<div class="avada-db-card-notice notice-button">
 						<span class="awb-studio-sync-button"><a href="#" class="button awb-studio-sync" title="<?php esc_attr_e( 'Sync Avada Studio', 'fusion-builder' ); ?>"><span><?php esc_html_e( 'Sync Avada Studio', 'fusion-builder' ); ?></span></a><span>
-					</p>
+					</div>
 				</div>
 			</section>
 
@@ -133,6 +147,10 @@ class AWB_Studio_Admin {
 						<i class="fusiona-post-cards-element"></i>
 						<span><?php esc_html_e( 'Post Cards', 'fusion-builder' ); ?></span>
 					</li>
+					<li data-type="awb_off_canvas">
+						<i class="fusiona-off-canvas"></i>
+						<span><?php esc_html_e( 'Off Canvas', 'fusion-builder' ); ?></span>
+					</li>
 				</ul>
 			</section>
 
@@ -157,7 +175,7 @@ class AWB_Studio_Admin {
 						<section class="previews">
 						<?php if ( isset( $data['fusion_template'] ) && is_array( $data['fusion_template'] ) ) : ?>
 							<?php foreach ( $data['fusion_template'] as $template ) : ?>
-								<article data-type="fusion_template" data-id="<?php echo esc_attr( $template['ID'] ); ?>">
+								<article data-type="fusion_template" data-id="<?php echo esc_attr( $template['ID'] ); ?>" data-url="<?php echo esc_attr( $template['url'] ); ?>">
 									<?php if ( $template['thumbnail'] ) : ?>
 									<div class="preview lazy-load">
 										<img src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27<?php echo esc_attr( $template['thumbnail']['width'] ); ?>%27%20height%3D%27<?php echo esc_attr( $template['thumbnail']['height'] ); ?>%27%20viewBox%3D%270%200%20<?php echo esc_attr( $template['thumbnail']['width'] ); ?>%20<?php echo esc_attr( $template['thumbnail']['height'] ); ?>%27%3E%3Crect%20width%3D%27<?php echo esc_attr( $template['thumbnail']['width'] ); ?>%27%20height%3D%273<?php echo esc_attr( $template['thumbnail']['height'] ); ?>%27%20fill-opacity%3D%220%22%2F%3E%3C%2Fsvg%3E" alt="" width="<?php echo esc_attr( $template['thumbnail']['width'] ); ?>" height="<?php echo esc_attr( $template['thumbnail']['height'] ); ?>" data-src="<?php echo esc_attr( $template['thumbnail']['url'] ); ?>" data-alt="<?php echo esc_attr( $template['post_title'] ); ?>"/>
@@ -166,8 +184,7 @@ class AWB_Studio_Admin {
 									<div class="bar">
 										<span class="fusion_module_title"><span class="awb-preview-title-text"><?php echo esc_html( $template['post_title'] ); ?></span></span>
 										<span class="awb-studio-actions">
-											<a href="#" class="awb-preview" data-url="<?php echo esc_attr( $template['url'] ); ?>"><i class="fusiona-search"></i></a>
-											<a href="#" class="awb-save" data-id="<?php echo esc_attr( $template['ID'] ); ?>"><i class="fusiona-drive"></i></a>
+											<a href="#" class="awb-save" data-id="<?php echo esc_attr( $template['ID'] ); ?>"><i class="fusiona-plus"></i></a>
 										</span>
 									</div>
 								</article>
@@ -181,9 +198,9 @@ class AWB_Studio_Admin {
 			<div class="awb-studio-modal">
 				<div class="post-modal-bg"></div>
 				<div class="post-preview">
-					<button class="fusion-studio-preview-back fusiona-plus2"></button>
 					<div id="fusion-loader"><span class="fusion-builder-loader"></span></div>
 					<iframe class="awb-studio-preview-frame" frameborder="0" scrolling="auto" allowfullscreen=""></iframe>
+					<?php AWB_Studio::studio_import_options_template( 'studio-admin' ); ?>
 				</div>
 			</div>
 
@@ -277,7 +294,17 @@ class AWB_Studio_Admin {
 			die();
 		}
 
-		$post_details = AWB_Studio_Import()->import_post( $data_id, $data_type, false );
+		// Set import options from $_REQUEST global array.
+		AWB_Studio_Import()->set_import_options_from_request();
+
+		$post_details = AWB_Studio_Import()->import_post(
+			[
+				'post_id'   => $data_id,
+				'post_type' => $data_type,
+			],
+			[],
+			false
+		);
 
 		echo wp_json_encode( $post_details );
 		die();
@@ -296,12 +323,16 @@ class AWB_Studio_Admin {
 		if ( 'false' === $post_data['was_imported'] ) {
 			$post_id   = absint( $post_data['post_id'] );
 			$media_key = sanitize_text_field( wp_unslash( $_POST['data']['mediaImportKey'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotValidated
+			$overwrite = isset( $post_data['mapping'] ) ? $post_data['mapping'] : [];
 
 			// We need it for post_content.
 			$post = get_post( $post_id );
 
+			// Set import options from $_REQUEST global array.
+			AWB_Studio_Import()->set_import_options_from_request();
+
 			// Import assets.
-			AWB_Studio_Import()->import_post_media( $post_id, $post->post_content, [ $media_key => $post_data['avada_media'][ $media_key ] ] );
+			AWB_Studio_Import()->import_post_media( $post_id, $post->post_content, [ $media_key => $post_data['avada_media'][ $media_key ] ], $overwrite );
 		}
 
 		echo wp_json_encode( $post_data );

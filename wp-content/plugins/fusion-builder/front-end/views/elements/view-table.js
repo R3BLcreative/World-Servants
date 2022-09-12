@@ -58,6 +58,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					values.element_content = values.element_content.replace( /<div .*?">/g, '<div ' + _.fusionGetAttributes( tableElementAtts ) + '>' );
 				}
 
+				// Validate values.
+				this.validateValues( atts.values );
+
 				// Fix user input error where the amount of cols in element params is larger than actual table markup.
 				if ( ! this.renderedYet ) {
 					tableDOM = jQuery.parseHTML( values.element_content.trim() );
@@ -102,6 +105,20 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			},
 
 			/**
+			 * Modify the values.
+			 *
+			 * @since 3.8
+			 * @param {Object} values - The values object.
+			 * @return {void}
+			 */
+			validateValues: function( values ) {
+				values.margin_bottom = _.fusionValidateAttrValue( values.margin_bottom, 'px' );
+				values.margin_left   = _.fusionValidateAttrValue( values.margin_left, 'px' );
+				values.margin_right  = _.fusionValidateAttrValue( values.margin_right, 'px' );
+				values.margin_top    = _.fusionValidateAttrValue( values.margin_top, 'px' );
+			},
+
+			/**
 			 * Builds attributes.
 			 *
 			 * @since 2.0
@@ -120,10 +137,27 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					}
 
 					attr = _.fusionVisibilityAtts( values.hide_on_mobile, {
-						class: 'table-' + values.fusion_table_type
+						class: 'table-' + values.fusion_table_type,
+						style: ''
 					} );
 
 					attr = _.fusionAnimations( values, attr );
+
+					if ( '' !== values.margin_top ) {
+						attr.style += 'margin-top:' + values.margin_top + ';';
+					}
+
+					if ( '' !== values.margin_right ) {
+						attr.style += 'margin-right:' + values.margin_right + ';';
+					}
+
+					if ( '' !== values.margin_bottom ) {
+						attr.style += 'margin-bottom:' + values.margin_bottom + ';';
+					}
+
+					if ( '' !== values.margin_left ) {
+						attr.style += 'margin-left:' + values.margin_left + ';';
+					}
 
 					if ( '' !== values.class ) {
 						attr.class += ' ' + values.class;

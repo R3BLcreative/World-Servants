@@ -195,7 +195,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			buildAttr: function( values ) {
 				var styles,
-					titleSize = 'two',
+					titleSize = 'div',
 					attr      = _.fusionVisibilityAtts( values.hide_on_mobile, {
 						class: 'fusion-title title fusion-title-cid' + this.model.get( 'cid' ),
 						style: ''
@@ -229,7 +229,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					attr[ 'class' ] += ' fusion-loop-' + values.loop_animation;
 				}
 
-				if ( '' !== values.rotation_effect ) {
+				if ( 'rotating' === values.title_type && '' !== values.rotation_effect ) {
 					attr[ 'class' ] += ' fusion-title-' + values.rotation_effect;
 				}
 
@@ -337,7 +337,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					headingAttr.style += 'letter-spacing:' + values.letter_spacing + ';';
 				}
 
-				if ( 'undefined' !== typeof values.text_transform && '' !== values.text_transform && 'none' !== values.text_transform ) {
+				if ( 'undefined' !== typeof values.text_transform && '' !== values.text_transform ) {
 					headingAttr.style += 'text-transform:' + values.text_transform + ';';
 				}
 

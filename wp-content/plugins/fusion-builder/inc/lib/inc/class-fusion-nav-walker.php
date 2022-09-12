@@ -645,10 +645,13 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 					}
 					if ( 'disabled' === $this->menu_megamenu_title ) {
 						$link_class .= ' fusion-megamenu-title-disabled';
-					}
 
-					$link         = '<a class="' . $link_class . '" href="' . $item->url . '"' . $target . '>';
-					$link_closing = '</a>';
+						$link         = '<a class="' . $link_class . '" href="' . $item->url . '"' . $target . '><span>';
+						$link_closing = '</span></a>';                      
+					} else {
+						$link         = '<a class="' . $link_class . '" href="' . $item->url . '"' . $target . '>';
+						$link_closing = '</a>';
+					}
 
 					if ( $this->menu_megamenu_widgetarea && is_active_sidebar( $this->menu_megamenu_widgetarea ) ) {
 						$this->total_num_of_widgets--;
@@ -704,6 +707,12 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 				'class'  => [],
 			];
 
+			// Add off canvas menu item.
+			if ( isset( $fusion_meta['special_link'] ) && 'awb-off-canvas-menu-trigger' === $fusion_meta['special_link'] && class_exists( 'AWB_Off_Canvas_Front_End' ) && ! empty( $fusion_meta['off_canvas_id'] ) && class_exists( 'AWB_Off_Canvas' ) && false !== AWB_Off_Canvas::is_enabled() ) {
+				AWB_Off_Canvas_Front_End::add_off_canvas_to_stack( $fusion_meta['off_canvas_id'] );
+				$atts['href']    = '#awb-oc__' . $fusion_meta['off_canvas_id'];
+				$atts['class'][] = 'awb-oc-menu-item-link';
+			}
 			if ( 'v7' === $header_layout && '0' === $item->menu_item_parent ) {
 				$atts['class'][] = 'fusion-top-level-link';
 			}
@@ -801,6 +810,9 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 			} elseif ( 0 !== $depth && 'enabled' === $this->menu_megamenu_status ) {
 				$icon = '<span class="fusion-megamenu-bullet"></span>';
 			}
+			if ( isset( $fusion_meta['special_link'] ) && 'awb-off-canvas-menu-trigger' === $fusion_meta['special_link'] && class_exists( 'AWB_Off_Canvas_Front_End' ) && ! empty( $fusion_meta['off_canvas_id'] ) && class_exists( 'AWB_Off_Canvas' ) && false !== AWB_Off_Canvas::is_enabled() ) {
+				$icon .= '' !== $icon ? '<span class="fusion-megamenu-icon awb-oc-close-icon"></span>' : '';
+			}
 
 			$classes = '';
 			// Check if we have a menu button.
@@ -871,7 +883,7 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 					$item_output .= 'hover' === $expand_method ? '<span class="fusion-open-nav-submenu"></span>' : '';
 					$item_output .= '</a>' . $args->after;
 					/* Translators: The menu item title. */
-					$item_output .= '<button type="button" aria-label="' . sprintf( __( 'Open submenu of %s', 'fusion-builder' ), esc_html( $item->title ) ) . '" aria-expanded="false" class="fusion-open-nav-submenu fusion-open-nav-submenu-on-click" onclick="fusionNavClickExpandSubmenuBtn(this);"></button>';
+					$item_output .= '<button type="button" aria-label="' . esc_attr( sprintf( __( 'Open submenu of %s', 'fusion-builder' ), $item->title ) ) . '" aria-expanded="false" class="fusion-open-nav-submenu fusion-open-nav-submenu-on-click" onclick="fusionNavClickExpandSubmenuBtn(this);"></button>';
 				} else {
 					$item_output .= ' <span class="fusion-caret"><i class="fusion-dropdown-indicator" aria-hidden="true"></i></span>';
 					$item_output .= '</a>' . $args->after;
@@ -883,7 +895,11 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 			if ( isset( $fusion_meta['special_link'] ) && 'fusion-woo-cart' === $fusion_meta['special_link'] && class_exists( 'WooCommerce' ) ) {
 
 				// Construct menu item title.
-				$woo_item_title     = '<span class="menu-text">' . esc_html( $item->title ) . '</span>';
+				$woo_item_title = '<span class="menu-text">' . esc_html( $item->title );
+				if ( $item->description ) {
+					$woo_item_title .= '<span class="fusion-menu-description">' . esc_html( $item->description ) . '</span>';
+				}
+				$woo_item_title    .= '</span>';
 				$woo_item_icon      = '';
 				$show_counter       = ( isset( $fusion_meta['show_woo_cart_counter'] ) && 'yes' === $fusion_meta['show_woo_cart_counter'] ) ? true : false;
 				$show_empty_counter = ( ! isset( $fusion_meta['show_empty_woo_cart_counter'] ) || 'yes' === $fusion_meta['show_empty_woo_cart_counter'] ) ? true : false;
@@ -971,8 +987,13 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 			if ( isset( $fusion_meta['special_link'] ) && 'fusion-woo-my-account' === $fusion_meta['special_link'] && class_exists( 'WooCommerce' ) ) {
 
 				// Construct menu item title.
-				$woo_item_title = '<span class="menu-text">' . esc_html( $item->title ) . '</span>';
-				$woo_item_icon  = '';
+				$woo_item_title = '<span class="menu-text">' . esc_html( $item->title );
+				if ( $item->description ) {
+					$woo_item_title .= '<span class="fusion-menu-description">' . esc_html( $item->description ) . '</span>';
+				}
+				$woo_item_title .= '</span>';
+
+				$woo_item_icon = '';
 
 				if ( '' !== $fusion_meta['icon'] ) {
 					$woo_item_icon = '<span class="fusion-megamenu-icon"><i class="glyphicon ' . fusion_font_awesome_name_handler( $this->menu_megamenu_icon ) . '" aria-hidden="true"></i></span>';
@@ -984,11 +1005,21 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 					}
 				}
 
+				$menu_id = '';
+				if ( $args->menu_id ) {
+					$menu_id = $args->menu_id;
+				} elseif ( is_string( $args->menu ) ) {
+					$menu_id = uniqid( $args->menu . '-' );
+				} elseif ( isset( $args->menu->slug ) ) {
+					$menu_id = uniqid( $args->menu->slug . '-' );
+				}
+
 				$woo_args = [
 					'menu_item_content'    => $woo_item_title,
 					'link_classes'         => $atts['class'],
 					'after_content_inside' => '',
 					'after_content'        => '',
+					'menu_id'              => $menu_id,
 				];
 
 				if ( 'parent' === $menu_display_dropdown_indicator || 'parent_child' === $menu_display_dropdown_indicator ) {
@@ -1031,7 +1062,11 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 
 						$item_output = '<a class="fusion-main-menu-icon' . $icon_only_class . '" href="#" aria-label="' . $item_title_esc . '" data-title="' . $item_title_esc . '" title="' . $item_title_esc . '">';
 						if ( 'icononly' !== $this->menu_title_only ) {
-							$item_output .= '<span class="menu-title">' . $item->title . '</span>';
+							$item_output .= '<span class="menu-title">' . $item->title;
+							if ( $item->description ) {
+								$item_output .= '<span class="fusion-menu-description">' . esc_html( $item->description ) . '</span>';
+							}
+							$item_output .= '</span>';
 						}
 
 						if ( ! empty( $this->menu_megamenu_icon ) ) {
@@ -1040,7 +1075,7 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 
 						$item_output .= '</a>';
 						$item_output .= '<button type="button" aria-label="' . esc_attr__( 'Expand Search', 'fusion-builder' ) . '" aria-expanded="false" class="fusion-open-nav-submenu fusion-open-nav-submenu-on-click" onclick="fusionNavClickExpandSubmenuBtn(this);"></button>';
-						$item_output .= '<ul class="sub-menu fusion-menu-searchform-dropdown"><li>' . get_search_form( false ) . '<li></ul>';
+						$item_output .= '<ul class="sub-menu fusion-menu-searchform-dropdown"><li>' . get_search_form( false ) . '</li></ul>';
 
 						break;
 
@@ -1074,8 +1109,12 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 				$sliding_bar_label = esc_attr__( 'Toggle Sliding Bar', 'fusion-builder' );
 
 				// Construct menu item title.
-				$slidingbar_title = '<span class="menu-text">' . esc_html( $item->title ) . '</span>';
-				$slidingbar_icon  = '';
+				$slidingbar_title = '<span class="menu-text">' . esc_html( $item->title );
+				if ( $item->description ) {
+					$slidingbar_title .= '<span class="fusion-menu-description">' . esc_html( $item->description ) . '</span>';
+				}
+				$slidingbar_title .= '</span>';
+				$slidingbar_icon   = '';
 
 				if ( '' !== $fusion_meta['icon'] ) {
 					$slidingbar_icon = '<span class="fusion-megamenu-icon"><i class="glyphicon ' . fusion_font_awesome_name_handler( $this->menu_megamenu_icon ) . '" aria-hidden="true"></i></span>';
@@ -1089,7 +1128,7 @@ class Fusion_Nav_Walker extends Walker_Nav_Menu {
 
 				$atts['title']      = $sliding_bar_label;
 				$atts['href']       = '#';
-				$atts['class']     .= ' fusion-main-menu-icon fusion-icon-sliding-bar';
+				$atts['class']     .= ' fusion-main-menu-icon awb-icon-sliding-bar';
 				$atts['aria-label'] = $sliding_bar_label;
 				$atts['data-title'] = $sliding_bar_label;
 				unset( $atts['target'] );

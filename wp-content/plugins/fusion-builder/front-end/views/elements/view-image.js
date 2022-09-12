@@ -1,8 +1,7 @@
-/* global fusionAllElements, FusionApp, FusionPageBuilderApp */
+/* global fusionAllElements, FusionApp, FusionPageBuilderApp, builderConfig */
 var FusionPageBuilder = FusionPageBuilder || {};
 
 ( function() {
-
 	jQuery( document ).ready( function() {
 
 		// Image Frame Element View.
@@ -74,10 +73,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 					this.buildElementContent( atts );
 
+
 					atts.liftupClasses = this.buildLiftupClasses( atts );
 					atts.liftupStyles  = this.buildLiftupStyles( atts );
-					atts.marginStyles  = this.buildMarginStyles( atts );
 					atts.captionHtml   = this.generateCaption( atts );
+
+					//styles
+					atts.maskStyles        = this.buildMaskStyles( atts );
+					atts.aspectRatioStyles = this.buildAspectRatioStyles( atts );
+					atts.marginStyles      = this.buildMarginStyles( atts );
 
 					// Add min height sticky.
 					atts.stickyStyles = '' !== atts.values.sticky_max_width ? '<style>.fusion-sticky-container.fusion-sticky-transition .imageframe-cid' + this.model.get( 'cid' ) + '{ max-width:' + _.fusionGetValueWithUnit( atts.values.sticky_max_width ) + ' !important; }</style>' : false;
@@ -105,6 +109,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				// If caption style used then disable style type.
 				if ( -1 === jQuery.inArray( values.caption_style, [ 'off', 'above', 'below' ] ) ) {
+					values.style_type = 'none';
+				}
+
+				// If mask used disable style type.
+				if ( values.mask ) {
 					values.style_type = 'none';
 				}
 
@@ -137,6 +146,10 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				alignMedium = values.align_medium && 'none' !== values.align_medium ? values.align_medium : false,
 				alignSmall  = values.align_small && 'none' !== values.align_small ? values.align_small : false;
 
+				if ( this.isFlex ) {
+					attr = _.fusionVisibilityAtts( values.hide_on_mobile, attr );
+				}
+
 				if ( alignLarge ) {
 					attr.style += 'text-align:' + alignLarge + ';';
 				}
@@ -166,17 +179,19 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			buildAttr: function( values ) {
 
 				// Main wrapper attributes
-				var attr = _.fusionVisibilityAtts( values.hide_on_mobile, {
+				var attr = {
 						class: 'fusion-imageframe',
 						style: ''
-					} ),
+					},
 					imgStyles,
 					styleColorVal = values.stylecolor ? values.stylecolor : '',
-					styleColor    = ( 0 === styleColorVal.indexOf( '#' ) ) ? jQuery.Color( styleColorVal ).alpha( 0.3 ).toRgbaString() : jQuery.Color( styleColorVal ).toRgbaString(),
+					styleColor    = ( 0 === styleColorVal.indexOf( '#' ) ) ? jQuery.AWB_Color( styleColorVal ).alpha( 0.3 ).toVarOrRgbaString() : jQuery.AWB_Color( styleColorVal ).toVarOrRgbaString(),
 					blur          = values.blur,
 					blurRadius    = ( parseInt( blur, 10 ) + 4 ) + 'px';
 
 				if (  ! this.isFlex ) {
+					attr = _.fusionVisibilityAtts( values.hide_on_mobile, attr );
+
 					attr[ 'class' ] += ' fusion-imageframe-align-' + values.align;
 				}
 
@@ -188,15 +203,18 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				imgStyles   = '';
 
-				if ( '' != values.bordersize && '0' != values.bordersize && '0px' !== values.bordersize ) {
-					imgStyles += 'border:' + values.bordersize + ' solid ' + values.bordercolor + ';';
-				}
+				// Border style only if not using mask.
+				if ( '' === values.mask ) {
+					if ( '' != values.bordersize && '0' != values.bordersize && '0px' !== values.bordersize ) {
+						imgStyles += 'border:' + values.bordersize + ' solid ' + values.bordercolor + ';';
+					}
 
-				if ( '0' != values.borderradius && '0px' !== values.borderradius ) {
-					imgStyles += '-webkit-border-radius:' + values.borderradius + ';-moz-border-radius:' + values.borderradius + ';border-radius:' + values.borderradius + ';';
+					if ( '0' != values.borderradius && '0px' !== values.borderradius ) {
+						imgStyles += '-webkit-border-radius:' + values.borderradius + ';-moz-border-radius:' + values.borderradius + ';border-radius:' + values.borderradius + ';';
 
-					if ( '50%' === values.borderradius || 100 < parseFloat( values.borderradius ) ) {
-						imgStyles += '-webkit-mask-image: -webkit-radial-gradient(circle, white, black);';
+						if ( '50%' === values.borderradius || 100 < parseFloat( values.borderradius ) ) {
+							imgStyles += '-webkit-mask-image: -webkit-radial-gradient(circle, white, black);';
+						}
 					}
 				}
 
@@ -212,8 +230,19 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				attr[ 'class' ] += ' imageframe-' + values.style + ' imageframe-cid' + this.model.get( 'cid' );
 
+				if ( values.z_index ) {
+					attr.style += 'z-index:' + values.z_index + ';';
+				}
+
 				if ( 'bottomshadow' === values.style ) {
 					attr[ 'class' ] += ' element-bottomshadow';
+				}
+
+				if ( '' !== values.mask ) {
+					attr[ 'class' ] += ' has-mask';
+				}
+				if ( '' !== values.aspect_ratio ) {
+					attr[ 'class' ] += ' has-aspect-ratio';
 				}
 
 				if ( 'liftup' !== values.hover_type && -1 !== jQuery.inArray( values.caption_style, [ 'off', 'above', 'below' ] ) ) {
@@ -228,8 +257,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					attr[ 'class' ] += ' hover-type-' + values.hover_type;
 				}
 
-				if ( '' !== values.max_width ) {
-					attr.style += 'max-width:' + values.max_width + '';
+				if ( '' !== values.max_width && '' === values.aspect_ratio ) {
+					attr.style += 'max-width:' + _.fusionGetValueWithUnit( values.max_width ) + '';
 				}
 
 				// Caption style.
@@ -308,6 +337,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 				// eslint-disable-next-line no-useless-escape
 				src = values.element_content.match( /(src=["\'](.*?)["\'])/ );
+
 				if ( src && 1 < src.length ) {
 					src = src[ 2 ];
 				} else if ( -1 === values.element_content.indexOf( '<img' ) && '' !== values.element_content ) {
@@ -328,6 +358,36 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					contentAttr.alt = values.alt;
 				}
 
+				if ( '' !== values.aspect_ratio ) {
+					contentAttr[ 'class' ] = 'img-with-aspect-ratio';
+				}
+
+				let imageIdSize, imageId, imageSize;
+				if ( 'undefined' !== typeof values.image_id && '' !== values.image_id ) {
+					const self = this;
+					if ( -1 !== values.image_id.indexOf( '|' ) ) {
+						imageIdSize = values.image_id.split( '|' );
+						imageId     = imageIdSize[ 0 ];
+						imageSize   = imageIdSize[ 1 ];
+					} else {
+						imageId = values.image_id;
+					}
+
+					const media = wp.media.attachment( imageId );
+					if ( _.isUndefined( media.get( 'title' ) ) ) {
+						media.fetch().then( function() {
+							self.reRender();
+							self._refreshJs();
+						} );
+					} else if ( imageSize && ! _.isUndefined( media.attributes.sizes ) ) {
+						contentAttr.width  = media.attributes.sizes[ imageSize ].width;
+						contentAttr.height = media.attributes.sizes[ imageSize ].height;
+					} else {
+						contentAttr.width  = media.attributes.width;
+						contentAttr.height = media.attributes.height;
+					}
+				}
+
 				return contentAttr;
 			},
 
@@ -342,7 +402,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				var borderRadius = '';
 
 				if ( values.borderradius && '' !== values.borderradius && 0 !== values.borderradius && '0' !== values.borderradius && '0px' !== values.borderradius ) {
-					borderRadius += '-webkit-border-radius:{' + values.borderradius + '};-moz-border-radius:{' + values.borderradius + '};border-radius:{' + values.borderradius + '};';
+					borderRadius += '-webkit-border-radius:' + values.borderradius + ';-moz-border-radius:' + values.borderradius + ';border-radius:' + values.borderradius + ';';
 				}
 
 				return borderRadius;
@@ -357,7 +417,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 			 */
 			buildImgStyles: function( atts ) {
 				var imgStyles = '';
-				if ( '' !== atts.borderRadius ) {
+				if ( atts.borderRadius ) {
 					imgStyles = ' style="' + atts.borderRadius + '"';
 				}
 
@@ -435,6 +495,9 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( 'liftup' === atts.values.hover_type || ( 'bottomshadow' === atts.values.style_type && ( 'none' === atts.values.hover_type || 'zoomin' === atts.values.hover_type || 'zoomout' === atts.values.hover_type ) ) ) {
 					if ( 'liftup' === atts.values.hover_type ) {
 						liftupClasses = 'imageframe-liftup';
+						if ( '' !== atts.values.aspect_ratio ) {
+							liftupClasses += ' liftup-with-aspect-ratio';
+						}
 						if ( ! this.isFlex ) {
 							if ( 'left' === atts.values.align ) {
 								liftupClasses += ' fusion-imageframe-liftup-left';
@@ -446,6 +509,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 						if ( atts.borderRadius ) {
 							liftupClasses += ' imageframe-cid' + cid;
 						}
+
+						if ( '' !== atts.values.hover_type && '' !== atts.values.mask ) {
+							liftupClasses += ' awb-image-frame hover-with-mask';
+						}
+
 					} else {
 						liftupClasses += 'fusion-image-frame-bottomshadow image-frame-shadow-cid' + cid;
 					}
@@ -454,6 +522,125 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 
 				return liftupClasses;
+			},
+
+			/**
+			 * Builds mask styles.
+			 *
+			 * @since 7.6
+			 * @param {Object} atts - The atts object.
+			 * @return {string}
+			 */
+			buildMaskStyles: function( atts ) {
+				var maskStyles = '',
+					cid = this.model.get( 'cid' );
+
+
+				if ( atts.values.mask ) {
+					const maskUrl = 'custom' === atts.values.mask ? atts.values.custom_mask
+									: `${builderConfig.fusion_builder_plugin_dir + '/assets/images/masks/'}${atts.values.mask}.svg`;
+
+					let maskStyle      = '',
+						hoverMaskStyle = '';
+
+					if ( atts.values.mask_size ) {
+						const maskSize = atts.values.mask_size;
+						if ( 'fit' === maskSize ) {
+							maskStyle += '-webkit-mask-size: contain;';
+							maskStyle += 'mask-size: contain;';
+
+							if ( 'liftup' ===  atts.values.hover_type ) {
+								hoverMaskStyle += 'background-size: contain;';
+							}
+						}
+						if ( 'fill' === maskSize ) {
+							maskStyle += '-webkit-mask-size: cover;';
+							maskStyle += 'mask-size: cover;';
+
+							if ( 'liftup' === atts.values.hover_type ) {
+								hoverMaskStyle += 'background-size: cover;';
+							}
+						}
+						if ( 'custom' === maskSize ) {
+							maskStyle += '-webkit-mask-size: ' + atts.values.mask_custom_size + ';';
+							maskStyle += 'mask-size: ' + atts.values.mask_custom_size + ';';
+
+							if ( 'liftup' === atts.values.hover_type ) {
+								hoverMaskStyle += 'background-size: ' + atts.values.mask_custom_size + ';';
+							}
+						}
+					}
+
+					if ( atts.values.mask_position ) {
+						const maskPosition = 'custom' !== atts.values.mask_position ? atts.values.mask_position.replace( '-', ' ' ) : atts.values.mask_custom_position;
+							maskStyle += '-webkit-mask-position: ' + maskPosition + ';';
+							maskStyle += 'mask-position: ' + maskPosition + ';';
+
+							if ( 'liftup' === atts.values.hover_type ) {
+								hoverMaskStyle += 'background-position: ' + maskPosition + ';';
+							}
+					}
+
+					if ( atts.values.mask_repeat ) {
+							maskStyle += '-webkit-mask-repeat: ' + atts.values.mask_repeat + ';';
+							maskStyle += 'mask-repeat: ' + atts.values.mask_repeat + ';';
+
+							if ( 'liftup' === atts.values.hover_type ) {
+								hoverMaskStyle += 'background-repeat: ' + atts.values.mask_repeat + ';';
+							}
+					}
+					maskStyles += maskUrl ? `.fusion-imageframe.imageframe-cid${cid} img {
+						-webkit-mask-image: url(${maskUrl});
+						mask-image: url(${maskUrl});
+						${maskStyle}
+					}` : '';
+
+					maskStyles += maskUrl && 'liftup' ===  atts.values.hover_type ? `.imageframe-liftup.imageframe-cid${cid}:before {
+						background-image: url(${maskUrl});
+						${hoverMaskStyle}
+					}` : '';
+				}
+
+				return maskStyles;
+			},
+
+			/**
+			 * Builds aspect ratio styles.
+			 *
+			 * @since 3.6
+			 * @param {Object} atts - The atts object.
+			 * @return {string}
+			 */
+			buildAspectRatioStyles: function() {
+				var selectors, aspectRatio, width, height;
+
+				if ( '' ===  this.values.aspect_ratio ) {
+					return '';
+				}
+
+				this.dynamic_css = {};
+				this.baseSelector = '.fusion-imageframe.imageframe-cid' +  this.model.get( 'cid' );
+				selectors = [ this.baseSelector + ' img' ];
+
+				// Calc Ratio
+				if ( 'custom' ===  this.values.aspect_ratio && '' !==  this.values.custom_aspect_ratio ) {
+					this.addCssProperty( selectors, 'aspect-ratio', `100 / ${this.values.custom_aspect_ratio}` );
+				} else {
+					aspectRatio = this.values.aspect_ratio.split( '-' );
+					width 		= aspectRatio[ 0 ] || '';
+					height 		= aspectRatio[ 1 ] || '';
+
+					this.addCssProperty( selectors, 'aspect-ratio', `${width} / ${height}` );
+				}
+
+				//Ratio Position
+				if ( '' !==  this.values.aspect_ratio_position ) {
+					this.addCssProperty( selectors, 'object-position', this.values.aspect_ratio_position );
+				}
+
+				const css = this.parseCSS();
+
+				return css;
 			},
 
 			/**
@@ -472,12 +659,12 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					liftupStyles += '.imageframe-liftup.imageframe-cid' + cid + ':before{' + atts.borderRadius + '}';
 				}
 
-				if ( '' !== atts.values.max_width ) {
-					liftupStyles += '.imageframe-cid' + cid + '{max-width:' + atts.values.max_width + '}';
+				if ( '' !== atts.values.max_width && '' === atts.values.aspect_ratio ) {
+					liftupStyles += '.imageframe-cid' + cid + '{max-width:' + _.fusionGetValueWithUnit( atts.values.max_width ) + '}';
 				}
 
 				if ( 'liftup' === atts.values.hover_type || ( 'bottomshadow' === atts.values.style_type && ( 'none' === atts.values.hover_type || 'zoomin' === atts.values.hover_type || 'zoomout' === atts.values.hover_type ) ) ) {
-					styleColor = ( 0 === atts.values.stylecolor.indexOf( '#' ) ) ? jQuery.Color( atts.values.stylecolor ).alpha( 0.4 ).toRgbaString() : jQuery.Color( atts.values.stylecolor ).toRgbaString();
+					styleColor = ( 0 === atts.values.stylecolor.indexOf( '#' ) ) ? jQuery.AWB_Color( atts.values.stylecolor ).alpha( 0.4 ).toVarOrRgbaString() : jQuery.AWB_Color( atts.values.stylecolor ).toVarOrRgbaString();
 
 					if ( 'liftup' === atts.values.hover_type ) {
 						if ( 'bottomshadow' === atts.values.style_type ) {
@@ -546,9 +733,6 @@ var FusionPageBuilder = FusionPageBuilder || {};
 
 				responsiveStyles += this.buildCaptionStyles( atts );
 
-				if ( '' !== responsiveStyles ) {
-					responsiveStyles = '<style>' + responsiveStyles + '</style>';
-				}
 
 				return responsiveStyles;
 			},
@@ -594,7 +778,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				}
 				// title transform.
 				if ( ! this.isDefault( 'caption_title_transform' ) ) {
-					this.addCssProperty( selectors, 'text-transform', atts.values.caption_title_transform );
+					this.addCssProperty( selectors, 'text-transform', atts.values.caption_title_transform, true );
+				}
+				// Line height.
+				if ( ! this.isDefault( 'caption_title_line_height' ) ) {
+					this.addCssProperty( selectors, 'line-height', atts.values.caption_title_line_height, true );
+				}
+				// Letter spacing.
+				if ( ! this.isDefault( 'caption_title_letter_spacing' ) ) {
+					this.addCssProperty( selectors, 'letter-spacing', _.fusionGetValueWithUnit( atts.values.caption_title_letter_spacing ), true );
 				}
 
 				selectors = [ this.baseSelector + ' .awb-imageframe-caption-container .awb-imageframe-caption-text' ];
@@ -617,6 +809,15 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( ! this.isDefault( 'caption_text_transform' ) ) {
 					this.addCssProperty( selectors, 'text-transform', atts.values.caption_text_transform );
 				}
+				// Line height.
+				if ( ! this.isDefault( 'caption_text_line_height' ) ) {
+					this.addCssProperty( selectors, 'line-height', atts.values.caption_text_line_height );
+				}
+				// Letter spacing.
+				if ( ! this.isDefault( 'caption_text_letter_spacing' ) ) {
+					this.addCssProperty( selectors, 'letter-spacing', _.fusionGetValueWithUnit( atts.values.caption_text_letter_spacing ) );
+				}
+
 
 				// Border color.
 				if ( 'resa' === atts.values.caption_style && ! this.isDefault( 'caption_border_color' ) ) {
@@ -643,6 +844,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				if ( -1 !== jQuery.inArray( atts.values.caption_style, [ 'schantel', 'dany' ] ) && ! this.isDefault( 'caption_background_color' ) ) {
 					selectors = [ this.baseSelector + ' .awb-imageframe-caption-container .awb-imageframe-caption-text' ];
 					this.addCssProperty( selectors, 'background', atts.values.caption_background_color );
+				}
+				// If no caption bg color then set bg same as overlay color.
+				if ( 'dany' === atts.values.caption_style && this.isDefault( 'caption_background_color' ) ) {
+					selectors = [ this.baseSelector + ' .awb-imageframe-caption-container .awb-imageframe-caption-text' ];
+					this.addCssProperty( selectors, 'background', atts.values.caption_overlay_color );
 				}
 
 				// Caption margin.
@@ -930,8 +1136,8 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					'style': ''
 				};
 
-				if ( '' !== values.max_width && -1 !== jQuery.inArray( values.caption_style, [ 'above', 'below' ] ) ) {
-					attr.style += 'max-width:' + values.max_width + ';';
+				if ( '' !== values.max_width && -1 !== jQuery.inArray( values.caption_style, [ 'above', 'below' ] ) && '' === values.aspect_ratio ) {
+					attr.style += 'max-width:' + _.fusionGetValueWithUnit( values.max_width ) + ';';
 				}
 
 				return attr;

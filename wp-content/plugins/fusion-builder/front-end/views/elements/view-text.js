@@ -156,7 +156,7 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					textAttributes.style += 'letter-spacing:' + values.letter_spacing + ';';
 				}
 
-				if ( 'undefined' !== typeof values.text_transform && '' !== values.text_transform && 'none' !== values.text_transform ) {
+				if ( 'undefined' !== typeof values.text_transform && '' !== values.text_transform ) {
 					textAttributes.style += 'text-transform:' + values.text_transform + ';';
 				}
 

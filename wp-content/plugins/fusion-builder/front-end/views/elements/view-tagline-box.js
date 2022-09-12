@@ -116,6 +116,11 @@ var FusionPageBuilder = FusionPageBuilder || {};
 				} catch ( error ) {
 					console.log( error ); // jshint ignore:line
 				}
+
+				values.padding_bottom = _.fusionValidateAttrValue( values.padding_bottom, 'px' );
+				values.padding_left   = _.fusionValidateAttrValue( values.padding_left, 'px' );
+				values.padding_right  = _.fusionValidateAttrValue( values.padding_right, 'px' );
+				values.padding_top    = _.fusionValidateAttrValue( values.padding_top, 'px' );
 			},
 
 			/**
@@ -185,6 +190,22 @@ var FusionPageBuilder = FusionPageBuilder || {};
 					attrReadingBox.style += 'border-' + values.highlightposition + '-color:' + this.extras.primary_color + ';';
 				}
 				attrReadingBox.style += 'border-style:solid;';
+
+				if ( '' !== values.padding_top ) {
+					attrReadingBox.style += 'padding-top:' + values.padding_top + ';';
+				}
+
+				if ( '' !== values.padding_right ) {
+					attrReadingBox.style += 'padding-right:' + values.padding_right + ';';
+				}
+
+				if ( '' !== values.padding_bottom ) {
+					attrReadingBox.style += 'padding-bottom:' + values.padding_bottom + ';';
+				}
+
+				if ( '' !== values.padding_left ) {
+					attrReadingBox.style += 'padding-left:' + values.padding_left + ';';
+				}
 
 				return attrReadingBox;
 			},
