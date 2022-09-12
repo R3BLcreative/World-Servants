@@ -1,0 +1,37 @@
+.trips-none {
+	text-align: center;
+	font-weight: 600;
+	font-size: 18px;
+	background-color: #eee;
+	padding: 15px;
+}
+
+.fusion-button {
+	&.trip-btn {
+		margin: 10px 5px;
+		color: white;
+		border-radius:  25px;
+		white-space: nowrap;
+	}
+
+	&.trip-blk {
+		display: block;
+	}
+
+	&.button-1.trip-btn {
+		background-color: $orange-yellow;
+
+		&:hover {
+			background-color: $orange;
+		}
+	}
+
+	&.button-2.trip-btn {
+		background-color: $navy;
+
+		&:hover {
+			background-color: $grey-blue;
+		}
+	}
+}
+

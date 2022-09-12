@@ -1,0 +1,2 @@
+var h=document.getElementById("sticky-header"),stuck=!1,stickPoint=getDistance();function getDistance(){return h.offsetTop}window.onscroll=function(t){var s=getDistance()-window.pageYOffset,e=window.pageYOffset;s<=0&&!stuck?(h.style.position="fixed",h.style.top="0px",stuck=!0,h.classList.add("sticky")):stuck&&e<=stickPoint&&(h.style.position="static",h.classList.remove("sticky"),stuck=!1)};
+//# sourceMappingURL=sticky-header-min.js.map

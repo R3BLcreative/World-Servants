@@ -1,0 +1,26 @@
+.trips-list-wrapper {
+	background-color: rgba( 255, 255, 255, 0.8);
+	padding: 25px;
+
+	.trip-record {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 12px 0;
+		border-bottom: $navy solid 1px;
+
+		&:first-child {
+			border-top: $navy solid 1px;
+		}
+
+		.trip-dates {
+			font-weight: 800;
+			color: $navy;
+		}
+
+		.trip-cost {
+			color: $orange;
+			font-weight: 800;
+		}
+	}
+}

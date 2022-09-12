@@ -1,0 +1,35 @@
+@media only screen and (min-width: $desktop) {
+	.hide-desktop {
+		display: none;
+		visibility: hidden;
+	}
+}
+
+@media only screen and (min-width: calc(#{$phone-land} + 1px)) and (max-width: $tablet) {
+	.hide-tablet {
+		display: none;
+		visibility: hidden;
+	}
+}
+
+@media only screen and (min-width: calc(#{$phone-port} + 1px)) and (max-width: $phone-land) {
+	.hide-phone-land {
+		display: none;
+		visibility: hidden;
+	}
+}
+
+@media only screen and (max-width: $phone-port) {
+	.hide-phone-port {
+		display: none;
+		visibility: hidden;
+	}
+}
+
+
+@media only screen and (max-width: $phone-land) {
+	.hide-phone {
+		display: none;
+		visibility: hidden;
+	}
+}

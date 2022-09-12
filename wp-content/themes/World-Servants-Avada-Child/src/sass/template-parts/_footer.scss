@@ -1,0 +1,17 @@
+footer {
+	color: $off-white;
+	i {
+		color: $off-white !important;
+	}
+	a {
+		color: $yellow;
+
+		&:hover {
+			color: $off-white;
+		}
+	}
+	.fusion-social-networks {
+		padding: 0;
+		text-align: left;
+	}
+}

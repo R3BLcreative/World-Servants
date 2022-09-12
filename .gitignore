@@ -1,0 +1,11 @@
+.DS_Store
+_wpeprivate
+.wpe-devkit
+**/node_modules
+wp-config.php
+/wp-content/*
+/wp-content/*/
+/wp-content/themes/wonderland/assets/images
+!/wp-content/themes/
+!/wp-content/plugins/
+!/wp-content/maintenance.php

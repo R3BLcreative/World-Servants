@@ -1,0 +1,32 @@
+/*! HELPERS */
+@import 'helpers/vars';
+@import 'helpers/acf-maps';
+@import 'helpers/helpers';
+
+/*! TEMPLATE PARTS */
+@import 'template-parts/header';
+@import 'template-parts/trips';
+@import 'template-parts/trips-table';
+@import 'template-parts/trips-list';
+@import 'template-parts/footer';
+
+/*! PAGES */
+@import 'pages/connect';
+
+.community-title {
+	text-transform: uppercase;
+}
+
+.fusion-button {
+	&.button-1, &.button-2, &.button-3 {
+		&:hover {
+			.fusion-button-icon-divider {
+				border-left-color: $orange;
+
+				i {
+					color: $orange;
+				}
+			}
+		}
+	}
+}
